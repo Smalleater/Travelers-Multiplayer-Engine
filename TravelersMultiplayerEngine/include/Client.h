@@ -1,13 +1,13 @@
 #pragma once
 
-#include <Windows.h>
-#include <WinSock2.h>
-#include <WS2tcpip.h>
-#include <iphlpapi.h>
-#include <stdio.h>
+namespace tme
+{
+	class Client
+	{
+	public:
+		static bool start(const char* ipAdress, const char* port);
 
-#pragma comment(lib, "Ws2_32.lib")
+	private:
 
-
-
-
+	};
+}

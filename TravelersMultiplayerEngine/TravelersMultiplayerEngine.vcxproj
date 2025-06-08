@@ -132,12 +132,13 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClInclude Include="include\Client.h" />
+    <ClInclude Include="include\Utils.h" />
     <ClInclude Include="include\WinsockInitializer.h" />
-    <ClInclude Include="include\TravelersMultiplayerEngine.h" />
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="src\Client.cpp" />
+    <ClCompile Include="src\Utils.cpp" />
     <ClCompile Include="src\WinsockInitializer.cpp" />
-    <ClCompile Include="src\TravelersMultiplayerEngine.cpp" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
