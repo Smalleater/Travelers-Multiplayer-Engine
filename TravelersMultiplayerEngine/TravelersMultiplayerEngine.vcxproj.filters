@@ -24,6 +24,9 @@
     <ClInclude Include="include\Utils.h">
       <Filter>Fichiers d%27en-tête</Filter>
     </ClInclude>
+    <ClInclude Include="include\Server.h">
+      <Filter>Fichiers d%27en-tête</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="src\WinsockInitializer.cpp">
@@ -33,6 +36,9 @@
       <Filter>Fichiers sources</Filter>
     </ClCompile>
     <ClCompile Include="src\Utils.cpp">
+      <Filter>Fichiers sources</Filter>
+    </ClCompile>
+    <ClCompile Include="src\Server.cpp">
       <Filter>Fichiers sources</Filter>
     </ClCompile>
   </ItemGroup>

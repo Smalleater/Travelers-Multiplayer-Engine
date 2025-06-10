@@ -132,11 +132,13 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClInclude Include="include\Client.h" />
+    <ClInclude Include="include\Server.h" />
     <ClInclude Include="include\Utils.h" />
     <ClInclude Include="include\WinsockInitializer.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="src\Client.cpp" />
+    <ClCompile Include="src\Server.cpp" />
     <ClCompile Include="src\Utils.cpp" />
     <ClCompile Include="src\WinsockInitializer.cpp" />
   </ItemGroup>

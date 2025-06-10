@@ -1,6 +1,20 @@
 #include <iostream>
 
+#include "Server.h"
+
 int main()
 {
-	std::cout << "Hello World" << std::endl;
+	if (tme::Server::start("2004"))
+	{
+		std::cout << "Server start succeful" << std::endl;
+	}
+	else
+	{
+		std::cout << "Server start failed" << std::endl;
+	}
+
+	while (true)
+	{
+
+	}
 }
