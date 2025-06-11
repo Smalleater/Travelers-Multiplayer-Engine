@@ -7,14 +7,14 @@ namespace tme
 	class WinsockInitializer
 	{
 	public:
-		static bool initialize();
-		static void cleanup();
-		static bool isInitialized();
+		static bool start();
+		static void close();
+		static bool isStarted();
 
 		static const WSADATA& getWSAData();
 
 	private:
-		static bool m_initialized;
+		static bool m_started;
 		static WSADATA m_wsaData;
 	};
 }

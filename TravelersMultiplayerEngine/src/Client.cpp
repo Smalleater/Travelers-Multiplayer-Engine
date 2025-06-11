@@ -29,12 +29,12 @@ namespace tme
 			return false;
 		}
 
-		if (WinsockInitializer::isInitialized())
+		if (WinsockInitializer::isStarted())
 		{
 			return false;
 		}
 
-		if (!WinsockInitializer::initialize())
+		if (!WinsockInitializer::start())
 		{
 			return false;
 		}
@@ -53,7 +53,7 @@ namespace tme
 		iResult = getaddrinfo(ipAdress, port, &hints, &result);
 		if (iResult != 0)
 		{
-			WinsockInitializer::cleanup();
+			WinsockInitializer::close();
 			return false;
 		}
 
@@ -65,7 +65,7 @@ namespace tme
 		if (connectSocket == INVALID_SOCKET)
 		{
 			freeaddrinfo(result);
-			WinsockInitializer::cleanup();
+			WinsockInitializer::close();
 			return false;
 		}
 

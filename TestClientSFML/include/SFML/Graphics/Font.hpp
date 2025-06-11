@@ -397,7 +397,7 @@ private:
     /// \brief Free all the internal resources
     ///
     ////////////////////////////////////////////////////////////
-    void cleanup();
+    void close();
 
     ////////////////////////////////////////////////////////////
     /// \brief Find or create the glyphs page corresponding to the given character size

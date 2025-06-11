@@ -324,7 +324,7 @@ private:
     /// \return `true` on successful initialization, `false` on failure
     ///
     ////////////////////////////////////////////////////////////
-    [[nodiscard]] bool initialize(InputSoundFile& file);
+    [[nodiscard]] bool start(InputSoundFile& file);
 
     ////////////////////////////////////////////////////////////
     /// \brief Update the internal buffer with the cached audio samples

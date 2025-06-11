@@ -2,13 +2,13 @@
 
 namespace tme
 {
-	bool WinsockInitializer::m_initialized = false;
+	bool WinsockInitializer::m_started = false;
 	WSADATA WinsockInitializer::m_wsaData;
 
 
-	bool WinsockInitializer::initialize()
+	bool WinsockInitializer::start()
 	{
-		if (!m_initialized)
+		if (!m_started)
 		{
 			int result = WSAStartup(MAKEWORD(2, 2), &m_wsaData);
 			if (result != 0)
@@ -16,24 +16,24 @@ namespace tme
 				return false;
 			}
 
-			m_initialized = true;
+			m_started = true;
 		}
 
 		return true;
 	}
 
-	void WinsockInitializer::cleanup()
+	void WinsockInitializer::close()
 	{
-		if (m_initialized)
+		if (m_started)
 		{
 			WSACleanup();
-			m_initialized = false;
+			m_started = false;
 		}
 	}
 
-	bool WinsockInitializer::isInitialized()
+	bool WinsockInitializer::isStarted()
 	{
-		return m_initialized;
+		return m_started;
 	}
 
 	const WSADATA& WinsockInitializer::getWSAData()

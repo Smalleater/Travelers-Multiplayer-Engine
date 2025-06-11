@@ -24,18 +24,17 @@ namespace tme
 			return false;
 		}
 
-		if (WinsockInitializer::isInitialized())
+		if (WinsockInitializer::isStarted())
 		{
 			return false;
 		}
 
-		if (!WinsockInitializer::initialize())
+		if (!WinsockInitializer::start())
 		{
 			return false;
 		}
 
 		addrinfo* result = NULL;
-		addrinfo* ptr = NULL;
 		addrinfo hints;
 
 		ZeroMemory(&hints, sizeof(hints));
@@ -44,10 +43,12 @@ namespace tme
 		hints.ai_protocol = IPPROTO_TCP;
 		hints.ai_flags = AI_PASSIVE;
 
-		int iResult = getaddrinfo(NULL, port, &hints, &result);
+		int iResult;
+
+		iResult = getaddrinfo(NULL, port, &hints, &result);
 		if (iResult != 0)
 		{
-			WinsockInitializer::cleanup();
+			WinsockInitializer::close();
 			return false;
 		}
 
@@ -57,9 +58,19 @@ namespace tme
 		if (listenSocket == INVALID_SOCKET)
 		{
 			freeaddrinfo(result);
-			WinsockInitializer::cleanup();
+			WinsockInitializer::close();
 			return false;
 		}
+
+		iResult = bind(listenSocket, result->ai_addr, (int)result->ai_addrlen);
+		if (iResult == SOCKET_ERROR)
+		{
+			freeaddrinfo(result);
+			WinsockInitializer::close();
+			return false;
+		}
+
+		freeaddrinfo(result);
 
 		return true;
 	}
