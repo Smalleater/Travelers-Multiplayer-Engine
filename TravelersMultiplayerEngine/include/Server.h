@@ -23,6 +23,7 @@ namespace tme
 		static bool start(const char* port);
 
 	private:
+		static const char* m_port;
 		static addrinfo* m_result;
 		static addrinfo m_hints;
 	};

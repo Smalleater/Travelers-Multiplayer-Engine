@@ -2,7 +2,8 @@
 
 namespace tme
 {
-	addrinfo* Server::m_result;
+	const char* Server::m_port = nullptr;
+	addrinfo* Server::m_result = nullptr;
 	addrinfo Server::m_hints;
 
 	bool Server::start(const char* port)
@@ -22,8 +23,7 @@ namespace tme
 			return false;
 		}
 
-		m_result = NULL;
-		m_hints;
+		m_port = port;
 
 		ZeroMemory(&m_hints, sizeof(m_hints));
 		m_hints.ai_family = AF_INET;
@@ -33,7 +33,7 @@ namespace tme
 
 		int iResult;
 
-		iResult = getaddrinfo(NULL, port, &m_hints, &m_result);
+		iResult = getaddrinfo(NULL, m_port, &m_hints, &m_result);
 		if (iResult != 0)
 		{
 			WinsockInitializer::close();
