@@ -1,22 +1,10 @@
 #include "Server.h"
 
-#ifndef WIN32_LEAN_AND_MEAN
-#define WIN32_LEAN_AND_MEAN
-#endif
-
-#include <windows.h>
-#include <winsock2.h>
-#include <ws2tcpip.h>
-#include <iphlpapi.h>
-#include <stdio.h>
-
-#include "Utils.h"
-#include "WinsockInitializer.h"
-
-#pragma comment(lib, "Ws2_32.lib")
-
 namespace tme
 {
+	addrinfo* Server::m_result;
+	addrinfo Server::m_hints;
+
 	bool Server::start(const char* port)
 	{
 		if (!Utils::isValidPort(port))
@@ -34,18 +22,18 @@ namespace tme
 			return false;
 		}
 
-		addrinfo* result = NULL;
-		addrinfo hints;
+		m_result = NULL;
+		m_hints;
 
-		ZeroMemory(&hints, sizeof(hints));
-		hints.ai_family = AF_INET;
-		hints.ai_socktype = SOCK_STREAM;
-		hints.ai_protocol = IPPROTO_TCP;
-		hints.ai_flags = AI_PASSIVE;
+		ZeroMemory(&m_hints, sizeof(m_hints));
+		m_hints.ai_family = AF_INET;
+		m_hints.ai_socktype = SOCK_STREAM;
+		m_hints.ai_protocol = IPPROTO_TCP;
+		m_hints.ai_flags = AI_PASSIVE;
 
 		int iResult;
 
-		iResult = getaddrinfo(NULL, port, &hints, &result);
+		iResult = getaddrinfo(NULL, port, &m_hints, &m_result);
 		if (iResult != 0)
 		{
 			WinsockInitializer::close();
@@ -54,23 +42,23 @@ namespace tme
 
 		SOCKET listenSocket = INVALID_SOCKET;
 
-		listenSocket = socket(result->ai_family, result->ai_socktype, result->ai_protocol);
+		listenSocket = socket(m_result->ai_family, m_result->ai_socktype, m_result->ai_protocol);
 		if (listenSocket == INVALID_SOCKET)
 		{
-			freeaddrinfo(result);
+			freeaddrinfo(m_result);
 			WinsockInitializer::close();
 			return false;
 		}
 
-		iResult = bind(listenSocket, result->ai_addr, (int)result->ai_addrlen);
+		iResult = bind(listenSocket, m_result->ai_addr, (int)m_result->ai_addrlen);
 		if (iResult == SOCKET_ERROR)
 		{
-			freeaddrinfo(result);
+			freeaddrinfo(m_result);
 			WinsockInitializer::close();
 			return false;
 		}
 
-		freeaddrinfo(result);
+		freeaddrinfo(m_result);
 
 		return true;
 	}
