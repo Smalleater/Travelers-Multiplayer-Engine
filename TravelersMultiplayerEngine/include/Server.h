@@ -23,8 +23,12 @@ namespace tme
 		static bool start(const char* port);
 
 	private:
+		static bool createSocket();
+		static bool bindSocket();
+
 		static const char* m_port;
 		static addrinfo* m_result;
 		static addrinfo m_hints;
+		static SOCKET m_listenSocket;
 	};
 }

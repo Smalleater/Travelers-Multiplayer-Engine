@@ -5,6 +5,7 @@ namespace tme
 	const char* Server::m_port = nullptr;
 	addrinfo* Server::m_result = nullptr;
 	addrinfo Server::m_hints;
+	SOCKET Server::m_listenSocket = INVALID_SOCKET;
 
 	bool Server::start(const char* port)
 	{
@@ -25,6 +26,21 @@ namespace tme
 
 		m_port = port;
 
+		if (!createSocket())
+		{
+			return false;
+		}
+
+		if (!bindSocket())
+		{
+			return false;
+		}
+
+		return true;
+	}
+
+	bool Server::createSocket()
+	{
 		ZeroMemory(&m_hints, sizeof(m_hints));
 		m_hints.ai_family = AF_INET;
 		m_hints.ai_socktype = SOCK_STREAM;
@@ -40,17 +56,22 @@ namespace tme
 			return false;
 		}
 
-		SOCKET listenSocket = INVALID_SOCKET;
-
-		listenSocket = socket(m_result->ai_family, m_result->ai_socktype, m_result->ai_protocol);
-		if (listenSocket == INVALID_SOCKET)
+		m_listenSocket = socket(m_result->ai_family, m_result->ai_socktype, m_result->ai_protocol);
+		if (m_listenSocket == INVALID_SOCKET)
 		{
 			freeaddrinfo(m_result);
 			WinsockInitializer::close();
 			return false;
 		}
 
-		iResult = bind(listenSocket, m_result->ai_addr, (int)m_result->ai_addrlen);
+		return true;
+	}
+
+	bool Server::bindSocket()
+	{
+		int iResult;
+
+		iResult = bind(m_listenSocket, m_result->ai_addr, (int)m_result->ai_addrlen);
 		if (iResult == SOCKET_ERROR)
 		{
 			freeaddrinfo(m_result);
