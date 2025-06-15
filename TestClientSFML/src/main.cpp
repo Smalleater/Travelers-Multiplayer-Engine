@@ -1,6 +1,6 @@
 #include <SFML/Graphics.hpp>
 
-#include "Client.h"
+#include "TME/Client.h"
 #include <iostream>
 
 int main()
@@ -23,7 +23,9 @@ int main()
         while (const std::optional event = window.pollEvent())
         {
             if (event->is<sf::Event::Closed>())
+            {
                 window.close();
+            }
         }
 
         window.clear();

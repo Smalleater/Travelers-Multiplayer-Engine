@@ -131,13 +131,15 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
-    <ClInclude Include="include\Client.h" />
-    <ClInclude Include="include\Server.h" />
-    <ClInclude Include="include\Utils.h" />
-    <ClInclude Include="include\WinsockInitializer.h" />
+    <ClInclude Include="include\TME\Client.h" />
+    <ClInclude Include="include\TME\Logger.h" />
+    <ClInclude Include="include\TME\Server.h" />
+    <ClInclude Include="include\TME\Utils.h" />
+    <ClInclude Include="include\TME\WinsockInitializer.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="src\Client.cpp" />
+    <ClCompile Include="src\Logger.cpp" />
     <ClCompile Include="src\Server.cpp" />
     <ClCompile Include="src\Utils.cpp" />
     <ClCompile Include="src\WinsockInitializer.cpp" />

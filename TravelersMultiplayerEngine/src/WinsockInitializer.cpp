@@ -1,4 +1,4 @@
-#include "WinsockInitializer.h"
+#include "TME/WinsockInitializer.h"
 
 namespace tme
 {
@@ -34,10 +34,5 @@ namespace tme
 	bool WinsockInitializer::isStarted()
 	{
 		return m_started;
-	}
-
-	const WSADATA& WinsockInitializer::getWSAData()
-	{
-		return m_wsaData;
 	}
 }

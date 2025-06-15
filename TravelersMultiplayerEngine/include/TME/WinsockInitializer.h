@@ -11,8 +11,6 @@ namespace tme
 		static void close();
 		static bool isStarted();
 
-		static const WSADATA& getWSAData();
-
 	private:
 		static bool m_started;
 		static WSADATA m_wsaData;

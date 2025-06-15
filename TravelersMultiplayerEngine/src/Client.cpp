@@ -1,4 +1,4 @@
-#include "Client.h"
+#include "TME/Client.h"
 
 #ifndef WIN32_LEAN_AND_MEAN
 #define WIN32_LEAN_AND_MEAN
@@ -8,10 +8,9 @@
 #include <winsock2.h>
 #include <ws2tcpip.h>
 #include <iphlpapi.h>
-#include <stdio.h>
 
-#include "Utils.h"
-#include "WinsockInitializer.h"
+#include "TME/Utils.h"
+#include "TME/WinsockInitializer.h"
 
 #pragma comment(lib, "Ws2_32.lib")
 

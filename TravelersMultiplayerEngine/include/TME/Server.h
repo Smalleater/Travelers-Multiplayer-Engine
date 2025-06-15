@@ -8,10 +8,6 @@
 #include <winsock2.h>
 #include <ws2tcpip.h>
 #include <iphlpapi.h>
-#include <stdio.h>
-
-#include "Utils.h"
-#include "WinsockInitializer.h"
 
 #pragma comment(lib, "Ws2_32.lib")
 

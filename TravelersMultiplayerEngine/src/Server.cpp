@@ -1,4 +1,7 @@
-#include "Server.h"
+#include "TME/Server.h"
+
+#include "TME/Utils.h"
+#include "TME/WinsockInitializer.h"
 
 namespace tme
 {
