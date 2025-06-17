@@ -1,6 +1,8 @@
 ﻿  Client.cpp
   Logger.cpp
   Server.cpp
+  ServiceLocator.cpp
+  ThreadManager.cpp
   Utils.cpp
   WinsockInitializer.cpp
   Génération de code en cours...

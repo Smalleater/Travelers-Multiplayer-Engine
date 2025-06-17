@@ -132,8 +132,11 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClInclude Include="include\TME\Client.h" />
+    <ClInclude Include="include\TME\IThreadManager.h" />
     <ClInclude Include="include\TME\Logger.h" />
     <ClInclude Include="include\TME\Server.h" />
+    <ClInclude Include="include\TME\ServiceLocator.h" />
+    <ClInclude Include="include\TME\ThreadManager.h" />
     <ClInclude Include="include\TME\Utils.h" />
     <ClInclude Include="include\TME\WinsockInitializer.h" />
   </ItemGroup>
@@ -141,6 +144,8 @@
     <ClCompile Include="src\Client.cpp" />
     <ClCompile Include="src\Logger.cpp" />
     <ClCompile Include="src\Server.cpp" />
+    <ClCompile Include="src\ServiceLocator.cpp" />
+    <ClCompile Include="src\ThreadManager.cpp" />
     <ClCompile Include="src\Utils.cpp" />
     <ClCompile Include="src\WinsockInitializer.cpp" />
   </ItemGroup>
