@@ -132,6 +132,7 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClInclude Include="include\TME\Client.h" />
+    <ClInclude Include="include\TME\ILogger.h" />
     <ClInclude Include="include\TME\IThreadManager.h" />
     <ClInclude Include="include\TME\Logger.h" />
     <ClInclude Include="include\TME\Server.h" />

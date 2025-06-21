@@ -1,38 +1,25 @@
 #pragma once
 
-#include <windows.h>
-#include <cstring>
+#include <vector>
+#include <memory>
+
+#include "ILogger.h"
 
 namespace tme
 {
-	constexpr int LOGGER_MSG_SIZE = 512;
-	constexpr int LOGGER_QUEUE_SIZE = 1024;
-
-	class Logger
+	class Logger : public ILogger
 	{
 	public:
+		Logger() {};
+		~Logger() {};
+
+		void addLogger(std::shared_ptr<ILogger> logger);
+
+		void logInfo(const char* msg) override;
+		void logWarning(const char* msg) override;
+		void logError(const char* msg) override;
 
 	private:
-		struct LogMessage
-		{
-			char m_data[LOGGER_MSG_SIZE];
-			size_t lenght = 0;
-
-			void set(const char* msg);
-		};
-
-		static HANDLE m_file;
-		static HANDLE m_event;
-		static HANDLE m_thread;
-		static bool m_running;
-		static bool consoleEnable;
-
-		static CRITICAL_SECTION m_csQueue;
-		static LogMessage m_messageQueue[LOGGER_QUEUE_SIZE];
-		static size_t m_head;
-		static size_t m_tail;
-
-		static size_t increment(size_t idx);
-		static DWORD WINAPI threadFunc(LPVOID);
+		std::vector<std::shared_ptr<ILogger>> m_loggers;
 	};
 }

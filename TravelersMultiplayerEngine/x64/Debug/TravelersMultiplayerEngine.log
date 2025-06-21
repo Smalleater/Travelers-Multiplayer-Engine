@@ -1,9 +1,2 @@
-﻿  Client.cpp
-  Logger.cpp
-  Server.cpp
-  ServiceLocator.cpp
-  ThreadManager.cpp
-  Utils.cpp
-  WinsockInitializer.cpp
-  Génération de code en cours...
+﻿  ServiceLocator.cpp
   TravelersMultiplayerEngine.vcxproj -> C:\Users\Adrien\Desktop\GitHub\Travelers-Multiplayer-Engine\x64\Debug\TravelersMultiplayerEngine.lib
