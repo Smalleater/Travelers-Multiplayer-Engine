@@ -1,2 +1,3 @@
-﻿  ServiceLocator.cpp
+﻿  ConsoleLogger.cpp
+C:\Users\Adrien\Desktop\GitHub\Travelers-Multiplayer-Engine\TravelersMultiplayerEngine\src\ConsoleLogger.cpp(35,1): warning C4172: retour de l’adresse de la variable locale ou temporaire : buffer
   TravelersMultiplayerEngine.vcxproj -> C:\Users\Adrien\Desktop\GitHub\Travelers-Multiplayer-Engine\x64\Debug\TravelersMultiplayerEngine.lib

@@ -132,6 +132,9 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClInclude Include="include\TME\Client.h" />
+    <ClInclude Include="include\TME\ConsoleLogger.h" />
+    <ClInclude Include="include\TME\Engine.h" />
+    <ClInclude Include="include\TME\FileLogger.h" />
     <ClInclude Include="include\TME\ILogger.h" />
     <ClInclude Include="include\TME\IThreadManager.h" />
     <ClInclude Include="include\TME\Logger.h" />
@@ -143,6 +146,9 @@
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="src\Client.cpp" />
+    <ClCompile Include="src\ConsoleLogger.cpp" />
+    <ClCompile Include="src\Engine.cpp" />
+    <ClCompile Include="src\FileLogger.cpp" />
     <ClCompile Include="src\Logger.cpp" />
     <ClCompile Include="src\Server.cpp" />
     <ClCompile Include="src\ServiceLocator.cpp" />

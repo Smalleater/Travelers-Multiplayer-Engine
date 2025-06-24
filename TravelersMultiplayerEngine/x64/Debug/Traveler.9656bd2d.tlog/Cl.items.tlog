@@ -1,4 +1,7 @@
 C:\Users\Adrien\Desktop\GitHub\Travelers-Multiplayer-Engine\TravelersMultiplayerEngine\src\Client.cpp;C:\Users\Adrien\Desktop\GitHub\Travelers-Multiplayer-Engine\TravelersMultiplayerEngine\x64\Debug\Client.obj
+C:\Users\Adrien\Desktop\GitHub\Travelers-Multiplayer-Engine\TravelersMultiplayerEngine\src\ConsoleLogger.cpp;C:\Users\Adrien\Desktop\GitHub\Travelers-Multiplayer-Engine\TravelersMultiplayerEngine\x64\Debug\ConsoleLogger.obj
+C:\Users\Adrien\Desktop\GitHub\Travelers-Multiplayer-Engine\TravelersMultiplayerEngine\src\Engine.cpp;C:\Users\Adrien\Desktop\GitHub\Travelers-Multiplayer-Engine\TravelersMultiplayerEngine\x64\Debug\Engine.obj
+C:\Users\Adrien\Desktop\GitHub\Travelers-Multiplayer-Engine\TravelersMultiplayerEngine\src\FileLogger.cpp;C:\Users\Adrien\Desktop\GitHub\Travelers-Multiplayer-Engine\TravelersMultiplayerEngine\x64\Debug\FileLogger.obj
 C:\Users\Adrien\Desktop\GitHub\Travelers-Multiplayer-Engine\TravelersMultiplayerEngine\src\Logger.cpp;C:\Users\Adrien\Desktop\GitHub\Travelers-Multiplayer-Engine\TravelersMultiplayerEngine\x64\Debug\Logger.obj
 C:\Users\Adrien\Desktop\GitHub\Travelers-Multiplayer-Engine\TravelersMultiplayerEngine\src\Server.cpp;C:\Users\Adrien\Desktop\GitHub\Travelers-Multiplayer-Engine\TravelersMultiplayerEngine\x64\Debug\Server.obj
 C:\Users\Adrien\Desktop\GitHub\Travelers-Multiplayer-Engine\TravelersMultiplayerEngine\src\ServiceLocator.cpp;C:\Users\Adrien\Desktop\GitHub\Travelers-Multiplayer-Engine\TravelersMultiplayerEngine\x64\Debug\ServiceLocator.obj
