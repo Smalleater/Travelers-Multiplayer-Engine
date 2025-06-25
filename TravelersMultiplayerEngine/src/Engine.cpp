@@ -3,6 +3,7 @@
 #include "TME/ServiceLocator.h"
 #include "TME/Logger.h"
 #include "TME/ConsoleLogger.h"
+#include "TME/FileLogger.h"
 
 namespace tme
 {
@@ -13,6 +14,9 @@ namespace tme
 
 		std::shared_ptr<ConsoleLogger> consoleLogger = std::make_shared<ConsoleLogger>();
 		logger->addLogger(consoleLogger);
+
+		std::shared_ptr<FileLogger> fileLogger = std::make_shared<FileLogger>();
+		logger->addLogger(fileLogger);
 
 		return true;
 	}

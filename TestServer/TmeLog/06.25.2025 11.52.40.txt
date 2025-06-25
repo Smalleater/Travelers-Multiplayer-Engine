@@ -1,0 +1,3 @@
+06.25.2025 11.52.40 [Info] Hello world from logger 01
+06.25.2025 11.52.40 [Warning] Hello world from logger 02
+06.25.2025 11.52.40 [Error] Hello world from logger 03

@@ -8,20 +8,20 @@ namespace tme
 {
 	void ConsoleLogger::logInfo(const char* msg)
 	{
-		std::string strMsg = static_cast<std::string>(GetSystemTime()) + " [Info] " + msg;
-		std::cout << strMsg << std::endl;
+		std::string strMsg = static_cast<std::string>(GetSystemTime()) + " [Info] " + msg + "\n";
+		std::cout << strMsg;
 	}
 
 	void ConsoleLogger::logWarning(const char* msg)
 	{
-		std::string strMsg = static_cast<std::string>(GetSystemTime()) + " [Warning] " + msg;
-		std::cout << strMsg << std::endl;
+		std::string strMsg = static_cast<std::string>(GetSystemTime()) + " [Warning] " + msg + "\n";
+		std::cout << strMsg;
 	}
 
 	void ConsoleLogger::logError(const char* msg)
 	{
-		std::string strMsg = static_cast<std::string>(GetSystemTime()) + " [Error] " + msg;
-		std::cout << strMsg << std::endl;
+		std::string strMsg = static_cast<std::string>(GetSystemTime()) + " [Error] " + msg + "\n";
+		std::cout << strMsg;
 	}
 
 	const char* ConsoleLogger::GetSystemTime()

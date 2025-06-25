@@ -24,18 +24,18 @@ int main()
 
 	tme::ServiceLocator::threadManager().addJob([]
 		{
-			std::cout << "1 -> Hello World from a thread\n";
+			tme::ServiceLocator::logger().logInfo("Hello world from logger 01");
 		});
 
 	tme::ServiceLocator::threadManager().addJob([]
 		{
-			std::cout << "2 -> Hello World from a thread\n";
+			tme::ServiceLocator::logger().logWarning("Hello world from logger 02");
 		});
 
-
-	tme::ServiceLocator::logger().logInfo("Hello world from logger 01");
-	tme::ServiceLocator::logger().logWarning("Hello world from logger 02");
-	tme::ServiceLocator::logger().logError("Hello world from logger 03");
+	tme::ServiceLocator::threadManager().addJob([]
+		{
+			tme::ServiceLocator::logger().logError("Hello world from logger 03");
+		});
 
 	std::this_thread::sleep_for(std::chrono::seconds(1));
 
