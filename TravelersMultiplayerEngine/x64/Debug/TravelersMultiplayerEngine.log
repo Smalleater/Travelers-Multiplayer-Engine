@@ -1,4 +1,7 @@
-﻿  FileLogger.cpp
+﻿  Engine.cpp
+  FileLogger.cpp
+  Logger.cpp
+  Génération de code en cours...
 C:\Users\Adrien\Desktop\GitHub\Travelers-Multiplayer-Engine\TravelersMultiplayerEngine\src\FileLogger.cpp(94,1): warning C4172: retour de l’adresse de la variable locale ou temporaire : buffer
 C:\Users\Adrien\Desktop\GitHub\Travelers-Multiplayer-Engine\TravelersMultiplayerEngine\src\FileLogger.cpp(105,1): warning C4172: retour de l’adresse de la variable locale ou temporaire : buffer
   TravelersMultiplayerEngine.vcxproj -> C:\Users\Adrien\Desktop\GitHub\Travelers-Multiplayer-Engine\x64\Debug\TravelersMultiplayerEngine.lib

@@ -27,7 +27,7 @@
     <ClInclude Include="include\TME\Server.h">
       <Filter>Fichiers d%27en-tête</Filter>
     </ClInclude>
-    <ClInclude Include="include\TME\IThreadManager.h">
+    <ClInclude Include="include\TME\Interface\IThreadManager.h">
       <Filter>Fichiers d%27en-tête</Filter>
     </ClInclude>
     <ClInclude Include="include\TME\ThreadManager.h">
@@ -36,7 +36,7 @@
     <ClInclude Include="include\TME\ServiceLocator.h">
       <Filter>Fichiers d%27en-tête</Filter>
     </ClInclude>
-    <ClInclude Include="include\TME\ILogger.h">
+    <ClInclude Include="include\TME\Interface\ILogger.h">
       <Filter>Fichiers d%27en-tête</Filter>
     </ClInclude>
     <ClInclude Include="include\TME\Logger.h">

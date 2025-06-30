@@ -135,8 +135,8 @@
     <ClInclude Include="include\TME\ConsoleLogger.h" />
     <ClInclude Include="include\TME\Engine.h" />
     <ClInclude Include="include\TME\FileLogger.h" />
-    <ClInclude Include="include\TME\ILogger.h" />
-    <ClInclude Include="include\TME\IThreadManager.h" />
+    <ClInclude Include="include\TME\Interface\ILogger.h" />
+    <ClInclude Include="include\TME\Interface\IThreadManager.h" />
     <ClInclude Include="include\TME\Logger.h" />
     <ClInclude Include="include\TME\Server.h" />
     <ClInclude Include="include\TME\ServiceLocator.h" />

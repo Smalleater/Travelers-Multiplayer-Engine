@@ -2,8 +2,8 @@
 
 #include <memory>
 
-#include "IThreadManager.h"
-#include "ILogger.h"
+#include "Interface/IThreadManager.h"
+#include "Interface/ILogger.h"
 
 namespace tme
 {

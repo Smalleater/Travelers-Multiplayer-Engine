@@ -7,7 +7,7 @@
 #include <queue>
 #include <atomic>
 
-#include "IThreadManager.h"
+#include "Interface/IThreadManager.h"
 
 namespace tme
 {
