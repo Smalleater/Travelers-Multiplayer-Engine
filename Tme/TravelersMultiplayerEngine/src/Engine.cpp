@@ -4,6 +4,7 @@
 #include "TME/Logger.h"
 #include "TME/ConsoleLogger.h"
 #include "TME/FileLogger.h"
+#include "TME/ThreadManager.h"
 
 namespace tme
 {
@@ -18,11 +19,18 @@ namespace tme
 		std::shared_ptr<FileLogger> fileLogger = std::make_shared<FileLogger>();
 		logger->addLogger(fileLogger);
 
+		std::shared_ptr<tme::ThreadManager> threadManager = std::make_shared<tme::ThreadManager>();
+		threadManager->start();
+		tme::ServiceLocator::provideThreadManager(threadManager);
+
 		return true;
 	}
 
 	bool Engine::stop()
 	{
+		tme::ServiceLocator::threadManager().stop();
+		tme::ServiceLocator::reset();
+
 		return true;
 	}
 }

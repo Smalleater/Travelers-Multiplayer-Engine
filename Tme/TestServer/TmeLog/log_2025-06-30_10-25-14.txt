@@ -1,0 +1,4 @@
+[2025-06-30 10:25:14] [Info] Server start succeful
+[2025-06-30 10:25:14] [Info] Hello world from logger 01
+[2025-06-30 10:25:14] [Warning] Hello world from logger 02
+[2025-06-30 10:25:14] [Error] Hello world from logger 03
