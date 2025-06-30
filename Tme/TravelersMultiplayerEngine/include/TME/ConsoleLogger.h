@@ -12,9 +12,9 @@ namespace tme
 		ConsoleLogger() {};
 		~ConsoleLogger() {};
 
-		void logInfo(const char* msg) override;
-		void logWarning(const char* msg) override;
-		void logError(const char* msg) override;
+		void logInfo(std::string msg) override;
+		void logWarning(std::string msg) override;
+		void logError(std::string msg) override;
 
 	private:
 		std::mutex m_mutex;

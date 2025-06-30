@@ -6,7 +6,7 @@
 
 namespace tme
 {
-	void ConsoleLogger::logInfo(const char* msg)
+	void ConsoleLogger::logInfo(std::string msg)
 	{
 		std::lock_guard<std::mutex> lock(m_mutex);
 
@@ -14,7 +14,7 @@ namespace tme
 		std::cout << strMsg;
 	}
 
-	void ConsoleLogger::logWarning(const char* msg)
+	void ConsoleLogger::logWarning(std::string msg)
 	{
 		std::lock_guard<std::mutex> lock(m_mutex);
 
@@ -22,7 +22,7 @@ namespace tme
 		std::cout << strMsg;
 	}
 
-	void ConsoleLogger::logError(const char* msg)
+	void ConsoleLogger::logError(std::string msg)
 	{
 		std::lock_guard<std::mutex> lock(m_mutex);
 

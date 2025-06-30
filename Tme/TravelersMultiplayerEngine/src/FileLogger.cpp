@@ -31,7 +31,7 @@ namespace tme
 		m_file.close();
 	}
 
-	void FileLogger::logInfo(const char* msg)
+	void FileLogger::logInfo(std::string msg)
 	{
 		std::lock_guard<std::mutex> lock(m_mutex);
 
@@ -42,7 +42,7 @@ namespace tme
 		}
 	}
 
-	void FileLogger::logWarning(const char* msg)
+	void FileLogger::logWarning(std::string msg)
 	{
 		std::lock_guard<std::mutex> lock(m_mutex);
 
@@ -53,7 +53,7 @@ namespace tme
 		}
 	}
 
-	void FileLogger::logError(const char* msg)
+	void FileLogger::logError(std::string msg)
 	{
 		std::lock_guard<std::mutex> lock(m_mutex);
 

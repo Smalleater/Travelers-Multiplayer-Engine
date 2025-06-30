@@ -8,14 +8,7 @@ int main()
 {
 	tme::Engine::start();
 
-	if (tme::Server::start("2004"))
-	{
-		tme::ServiceLocator::logger().logInfo("Server start succeful");
-	}
-	else
-	{
-		tme::ServiceLocator::logger().logError("Server start failed");
-	}
+	tme::Server::start("2004");
 
 	tme::Engine::stop();
 }

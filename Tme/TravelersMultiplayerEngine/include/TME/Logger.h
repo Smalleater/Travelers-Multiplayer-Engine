@@ -15,9 +15,9 @@ namespace tme
 
 		void addLogger(std::shared_ptr<ILogger> logger);
 
-		void logInfo(const char* msg) override;
-		void logWarning(const char* msg) override;
-		void logError(const char* msg) override;
+		void logInfo(std::string msg) override;
+		void logWarning(std::string msg) override;
+		void logError(std::string msg) override;
 
 	private:
 		std::vector<std::shared_ptr<ILogger>> m_loggers;

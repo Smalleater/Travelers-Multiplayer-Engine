@@ -1,15 +1,2 @@
-﻿  Client.cpp
-  ConsoleLogger.cpp
-  Engine.cpp
-  FileLogger.cpp
-  Logger.cpp
-  Server.cpp
-  ServiceLocator.cpp
-  ThreadManager.cpp
-  Utils.cpp
-  WinsockInitializer.cpp
-  Génération de code en cours...
-C:\Users\Adrien\Desktop\GitHub\Travelers-Multiplayer-Engine\Tme\TravelersMultiplayerEngine\src\FileLogger.cpp(94,1): warning C4172: retour de l’adresse de la variable locale ou temporaire : buffer
-C:\Users\Adrien\Desktop\GitHub\Travelers-Multiplayer-Engine\Tme\TravelersMultiplayerEngine\src\FileLogger.cpp(105,1): warning C4172: retour de l’adresse de la variable locale ou temporaire : buffer
-C:\Users\Adrien\Desktop\GitHub\Travelers-Multiplayer-Engine\Tme\TravelersMultiplayerEngine\src\ConsoleLogger.cpp(41,1): warning C4172: retour de l’adresse de la variable locale ou temporaire : buffer
+﻿  Server.cpp
   TravelersMultiplayerEngine.vcxproj -> C:\Users\Adrien\Desktop\GitHub\Travelers-Multiplayer-Engine\Tme\x64\Debug\TravelersMultiplayerEngine.lib

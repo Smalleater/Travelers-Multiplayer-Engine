@@ -26,5 +26,6 @@ namespace tme
 
 		static bool createSocket();
 		static bool bindSocket();
+		static bool listenSocket();
 	};
 }

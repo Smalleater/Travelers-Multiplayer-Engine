@@ -7,7 +7,7 @@ namespace tme
 		m_loggers.push_back(std::move(logger));
 	}
 
-	void Logger::logInfo(const char* msg)
+	void Logger::logInfo(std::string msg)
 	{
 		for (std::shared_ptr<ILogger> logger : m_loggers)
 		{
@@ -15,7 +15,7 @@ namespace tme
 		}
 	}
 
-	void Logger::logWarning(const char* msg)
+	void Logger::logWarning(std::string msg)
 	{
 		for (std::shared_ptr<ILogger> logger : m_loggers)
 		{
@@ -23,7 +23,7 @@ namespace tme
 		}
 	}
 
-	void Logger::logError(const char* msg)
+	void Logger::logError(std::string msg)
 	{
 		for (std::shared_ptr<ILogger> logger : m_loggers)
 		{

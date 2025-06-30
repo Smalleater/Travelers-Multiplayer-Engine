@@ -2,6 +2,7 @@
 
 #include "TME/Utils.h"
 #include "TME/WinsockInitializer.h"
+#include "TME/ServiceLocator.h"
 
 namespace tme
 {
@@ -14,16 +15,19 @@ namespace tme
 	{
 		if (!Utils::isValidPort(port))
 		{
+			ServiceLocator::logger().logError("The provided port is not valid");
 			return false;
 		}
 
 		if (WinsockInitializer::isStarted())
 		{
+			ServiceLocator::logger().logError("The server has already been started");
 			return false;
 		}
 
 		if (!WinsockInitializer::start())
 		{
+			ServiceLocator::logger().logError("An error occurred while initializing Winsock");
 			return false;
 		}
 
@@ -31,14 +35,24 @@ namespace tme
 
 		if (!createSocket())
 		{
+			ServiceLocator::logger().logError("An error occurred while creating the socket");
 			return false;
 		}
 
 		if (!bindSocket())
 		{
+			ServiceLocator::logger().logError("An error occurred while binding the socket");
 			return false;
 		}
 
+		if (!listenSocket())
+		{
+			ServiceLocator::logger().logError(static_cast<std::string>("Error occurred while the server was attempting to listen on the port ") + port);
+			return false;
+		}
+
+		ServiceLocator::logger().logInfo("Server has started successfully");
+		ServiceLocator::logger().logInfo(static_cast < std::string>("The server is currently listening on port ") + port);
 		return true;
 	}
 
@@ -83,6 +97,17 @@ namespace tme
 		}
 
 		freeaddrinfo(m_result);
+
+		return true;
+	}
+
+	bool Server::listenSocket()
+	{
+		if (listen(m_listenSocket, SOMAXCONN) == SOCKET_ERROR)
+		{
+			WinsockInitializer::close();
+			return false;
+		}
 
 		return true;
 	}

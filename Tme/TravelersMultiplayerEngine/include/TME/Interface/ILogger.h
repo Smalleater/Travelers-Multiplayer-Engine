@@ -1,5 +1,7 @@
 #pragma once
 
+#include <string>
+
 namespace tme
 {
 	class ILogger
@@ -7,8 +9,8 @@ namespace tme
 	public:
 		~ILogger() = default;
 
-		virtual void logInfo(const char* msg) = 0;
-		virtual void logWarning(const char* msg) = 0;
-		virtual void logError(const char* msg) = 0;
+		virtual void logInfo(std::string msg) = 0;
+		virtual void logWarning(std::string msg) = 0;
+		virtual void logError(std::string msg) = 0;
 	};
 }
