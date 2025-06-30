@@ -8,18 +8,24 @@ namespace tme
 {
 	void ConsoleLogger::logInfo(const char* msg)
 	{
+		std::lock_guard<std::mutex> lock(m_mutex);
+
 		std::string strMsg = static_cast<std::string>(GetSystemTime()) + " [Info] " + msg + "\n";
 		std::cout << strMsg;
 	}
 
 	void ConsoleLogger::logWarning(const char* msg)
 	{
+		std::lock_guard<std::mutex> lock(m_mutex);
+
 		std::string strMsg = static_cast<std::string>(GetSystemTime()) + " [Warning] " + msg + "\n";
 		std::cout << strMsg;
 	}
 
 	void ConsoleLogger::logError(const char* msg)
 	{
+		std::lock_guard<std::mutex> lock(m_mutex);
+
 		std::string strMsg = static_cast<std::string>(GetSystemTime()) + " [Error] " + msg + "\n";
 		std::cout << strMsg;
 	}
@@ -31,7 +37,7 @@ namespace tme
 		localtime_s(&local, &currentTime);
 
 		char buffer[100];
-		std::strftime(buffer, sizeof(buffer), "[%m/%d/%Y %H:%M:%S]", &local);
+		std::strftime(buffer, sizeof(buffer), "[%Y-%m-%d %H:%M:%S]", &local);
 		return buffer;
 	}
 }

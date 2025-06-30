@@ -1,5 +1,7 @@
 #pragma once
 
+#include <mutex>
+
 #include "ILogger.h"
 #include "fstream"
 
@@ -19,9 +21,11 @@ namespace tme
 
 	private:
 		std::ofstream m_file;
+		std::mutex m_mutex;
 
 		bool FolderExists(const char* path);
 		bool CreateFolder(const char* path);
+		const char* GetSystemTimeForFileName();
 		const char* GetSystemTime();
 	};
 }

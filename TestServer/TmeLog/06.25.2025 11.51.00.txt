@@ -1,3 +1,0 @@
-06.25.2025 11.51.00 [Info] Hello world from logger 01
-06.25.2025 11.51.00 [Warning] Hello world from logger 02
-06.25.2025 11.51.00 [Error] Hello world from logger 03

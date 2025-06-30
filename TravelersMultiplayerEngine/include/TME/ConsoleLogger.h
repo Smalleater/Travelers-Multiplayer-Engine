@@ -1,5 +1,7 @@
 #pragma once
 
+#include <mutex>
+
 #include "ILogger.h"
 
 namespace tme
@@ -15,6 +17,8 @@ namespace tme
 		void logError(const char* msg) override;
 
 	private:
+		std::mutex m_mutex;
+
 		const char* GetSystemTime();
 	};
 }
