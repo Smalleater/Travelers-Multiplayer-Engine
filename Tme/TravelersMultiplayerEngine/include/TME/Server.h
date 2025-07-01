@@ -18,13 +18,16 @@ namespace tme
 	{
 	public:
 		static bool start(const char* port);
+		static bool stop();
+
+		static bool isRunning();
 
 	private:
-		static const char* m_port;
+		static char* m_port;
 		static addrinfo* m_result;
 		static addrinfo m_hints;
 		static SOCKET m_listenSocket;
-
+		static bool m_isRunning;
 		static std::vector<SOCKET> m_clients;
 
 		static bool createSocket();

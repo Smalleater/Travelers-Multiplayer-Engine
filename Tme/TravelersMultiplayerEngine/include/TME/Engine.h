@@ -9,6 +9,6 @@ namespace tme
 		static bool stop();
 
 	private:
-
+		static bool m_isRunning;
 	};
 }

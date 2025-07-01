@@ -6,33 +6,38 @@
 
 namespace tme
 {
-	const char* Server::m_port = nullptr;
+	char* Server::m_port = nullptr;
 	addrinfo* Server::m_result = nullptr;
 	addrinfo Server::m_hints;
 	SOCKET Server::m_listenSocket = INVALID_SOCKET;
+	bool Server::m_isRunning = false;
 	std::vector<SOCKET> Server::m_clients;
 
 	bool Server::start(const char* port)
 	{
+		if (m_isRunning)
+		{
+			ServiceLocator::logger().logError("The server is already running");
+		}
+
 		if (!Utils::isValidPort(port))
 		{
 			ServiceLocator::logger().logError("The provided port is not valid");
 			return false;
 		}
 
-		if (WinsockInitializer::isStarted())
+		if (!WinsockInitializer::isStarted())
 		{
-			ServiceLocator::logger().logError("The server has already been started");
-			return false;
+			if (!WinsockInitializer::start())
+			{
+				ServiceLocator::logger().logError("An error occurred while initializing Winsock");
+				return false;
+			}
 		}
 
-		if (!WinsockInitializer::start())
-		{
-			ServiceLocator::logger().logError("An error occurred while initializing Winsock");
-			return false;
-		}
-
-		m_port = port;
+		size_t bufferSize = strlen(port) + 1;
+		m_port = new char[bufferSize];
+		strcpy_s(m_port, bufferSize, port);
 
 		if (!createSocket())
 		{
@@ -52,6 +57,8 @@ namespace tme
 			return false;
 		}
 
+		m_isRunning = true;
+
 		ServiceLocator::threadManager().addJob([]()
 			{
 				acceptLoop();
@@ -60,6 +67,35 @@ namespace tme
 		ServiceLocator::logger().logInfo("Server has started successfully");
 		ServiceLocator::logger().logInfo(static_cast <std::string>("The server is currently listening on port ") + port);
 		return true;
+	}
+
+	bool Server::stop()
+	{
+		m_isRunning = false;
+
+		for (SOCKET client : m_clients)
+		{
+			shutdown(client, SD_BOTH);
+			closesocket(client);
+		}
+		m_clients.clear();
+		ServiceLocator::logger().logInfo("All clients have been disconnected successfully");
+
+		delete m_port;
+		m_port = nullptr;
+
+		m_listenSocket = INVALID_SOCKET;
+
+		WinsockInitializer::close();
+
+		ServiceLocator::logger().logInfo("The server has been stopped successfully");
+
+		return true;
+	}
+
+	bool Server::isRunning()
+	{
+		return m_isRunning;
 	}
 
 	bool Server::createSocket()
@@ -98,11 +134,13 @@ namespace tme
 		if (iResult == SOCKET_ERROR)
 		{
 			freeaddrinfo(m_result);
+			m_result = nullptr;
 			WinsockInitializer::close();
 			return false;
 		}
 
 		freeaddrinfo(m_result);
+		m_result = nullptr;
 
 		return true;
 	}
@@ -120,14 +158,21 @@ namespace tme
 
 	void Server::acceptLoop()
 	{
-		SOCKET clientSocket;
+		u_long mode = 1;
+		ioctlsocket(m_listenSocket, FIONBIO, &mode);
 
-		while (true)
+		SOCKET clientSocket;
+		while (m_isRunning)
 		{
 			clientSocket = accept(m_listenSocket, NULL, NULL);
 			if (clientSocket == INVALID_SOCKET)
 			{
-				ServiceLocator::logger().logWarning(static_cast<std::string>("Accept failed: ") + std::to_string(WSAGetLastError()) + "\n");
+				int err = WSAGetLastError();
+				if (err != WSAEWOULDBLOCK)
+				{
+					ServiceLocator::logger().logWarning(static_cast<std::string>("Accept failed: ") + std::to_string(WSAGetLastError()) + "\n");
+				}
+				
 				continue;
 			}
 

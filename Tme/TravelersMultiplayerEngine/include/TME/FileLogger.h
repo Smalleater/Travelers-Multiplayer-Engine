@@ -7,7 +7,7 @@
 
 namespace tme
 {
-	constexpr auto LOG_FILE_PATH = "TmeLog";
+	constexpr auto LOG_FILE_PATH = "TmeLogs";
 
 	class FileLogger : public ILogger
 	{
