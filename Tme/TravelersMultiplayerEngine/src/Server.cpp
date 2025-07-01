@@ -10,6 +10,7 @@ namespace tme
 	addrinfo* Server::m_result = nullptr;
 	addrinfo Server::m_hints;
 	SOCKET Server::m_listenSocket = INVALID_SOCKET;
+	std::vector<SOCKET> Server::m_clients;
 
 	bool Server::start(const char* port)
 	{
@@ -51,8 +52,13 @@ namespace tme
 			return false;
 		}
 
+		ServiceLocator::threadManager().addJob([]()
+			{
+				acceptLoop();
+			});
+
 		ServiceLocator::logger().logInfo("Server has started successfully");
-		ServiceLocator::logger().logInfo(static_cast < std::string>("The server is currently listening on port ") + port);
+		ServiceLocator::logger().logInfo(static_cast <std::string>("The server is currently listening on port ") + port);
 		return true;
 	}
 
@@ -110,5 +116,23 @@ namespace tme
 		}
 
 		return true;
+	}
+
+	void Server::acceptLoop()
+	{
+		SOCKET clientSocket;
+
+		while (true)
+		{
+			clientSocket = accept(m_listenSocket, NULL, NULL);
+			if (clientSocket == INVALID_SOCKET)
+			{
+				ServiceLocator::logger().logWarning(static_cast<std::string>("Accept failed: ") + std::to_string(WSAGetLastError()) + "\n");
+				continue;
+			}
+
+			ServiceLocator::logger().logInfo(static_cast<std::string>("New client connected! Socket: ") + std::to_string(clientSocket) + "\n");
+			m_clients.push_back(clientSocket);
+		}
 	}
 }

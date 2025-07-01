@@ -1,0 +1,2 @@
+[2025-07-01 10:25:32] [Info] Server has started successfully
+[2025-07-01 10:25:32] [Info] The server is currently listening on port 2004
