@@ -6,7 +6,6 @@
 
 namespace tme
 {
-	char* Server::m_port = nullptr;
 	addrinfo* Server::m_result = nullptr;
 	addrinfo Server::m_hints;
 	SOCKET Server::m_listenSocket = INVALID_SOCKET;
@@ -35,11 +34,7 @@ namespace tme
 			}
 		}
 
-		size_t bufferSize = strlen(port) + 1;
-		m_port = new char[bufferSize];
-		strcpy_s(m_port, bufferSize, port);
-
-		if (!createSocket())
+		if (!createSocket(port))
 		{
 			ServiceLocator::logger().logError("An error occurred while creating the socket");
 			return false;
@@ -81,9 +76,6 @@ namespace tme
 		m_clients.clear();
 		ServiceLocator::logger().logInfo("All clients have been disconnected successfully");
 
-		delete m_port;
-		m_port = nullptr;
-
 		m_listenSocket = INVALID_SOCKET;
 
 		WinsockInitializer::close();
@@ -98,7 +90,7 @@ namespace tme
 		return m_isRunning;
 	}
 
-	bool Server::createSocket()
+	bool Server::createSocket(const char* port)
 	{
 		ZeroMemory(&m_hints, sizeof(m_hints));
 		m_hints.ai_family = AF_INET;
@@ -108,7 +100,7 @@ namespace tme
 
 		int iResult;
 
-		iResult = getaddrinfo(NULL, m_port, &m_hints, &m_result);
+		iResult = getaddrinfo(NULL, port, &m_hints, &m_result);
 		if (iResult != 0)
 		{
 			WinsockInitializer::close();
@@ -135,6 +127,8 @@ namespace tme
 		{
 			freeaddrinfo(m_result);
 			m_result = nullptr;
+			closesocket(m_listenSocket);
+			m_listenSocket = INVALID_SOCKET;
 			WinsockInitializer::close();
 			return false;
 		}
@@ -149,6 +143,8 @@ namespace tme
 	{
 		if (listen(m_listenSocket, SOMAXCONN) == SOCKET_ERROR)
 		{
+			closesocket(m_listenSocket);
+			m_listenSocket = INVALID_SOCKET;
 			WinsockInitializer::close();
 			return false;
 		}

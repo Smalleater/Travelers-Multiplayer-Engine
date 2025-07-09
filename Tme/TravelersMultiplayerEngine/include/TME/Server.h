@@ -23,14 +23,13 @@ namespace tme
 		static bool isRunning();
 
 	private:
-		static char* m_port;
 		static addrinfo* m_result;
 		static addrinfo m_hints;
 		static SOCKET m_listenSocket;
 		static bool m_isRunning;
 		static std::vector<SOCKET> m_clients;
 
-		static bool createSocket();
+		static bool createSocket(const char* port);
 		static bool bindSocket();
 		static bool listenSocket();
 

@@ -1,24 +1,23 @@
 #include "TME/Client.h"
 
-#ifndef WIN32_LEAN_AND_MEAN
-#define WIN32_LEAN_AND_MEAN
-#endif
-
-#include <windows.h>
-#include <winsock2.h>
-#include <ws2tcpip.h>
-#include <iphlpapi.h>
-
 #include "TME/Utils.h"
 #include "TME/WinsockInitializer.h"
 
-#pragma comment(lib, "Ws2_32.lib")
-
 namespace tme
 {
-	bool Client::start(const char* ipAdress, const char* port)
+	addrinfo* Client::m_result = nullptr;
+	addrinfo Client::m_hints;
+	SOCKET Client::m_connectSocket = INVALID_SOCKET;
+	bool Client::m_isRunning = false;
+
+	bool Client::connectTo(const char* ip, const char* port)
 	{
-		if (!Utils::isValidIPv4(ipAdress))
+		if (m_isRunning)
+		{
+			return false;
+		}
+
+		if (!Utils::isValidIPv4(ip))
 		{
 			return false;
 		}
@@ -38,32 +37,73 @@ namespace tme
 			return false;
 		}
 
-		addrinfo* result = NULL;
-		addrinfo* ptr = NULL;
-		addrinfo hints;
+		if (!createSocket(ip, port))
+		{
+			return false;
+		}
 
-		ZeroMemory(&hints, sizeof(hints));
-		hints.ai_family = AF_UNSPEC;
-		hints.ai_socktype = SOCK_STREAM;
-		hints.ai_protocol = IPPROTO_TCP;
+		if (!connectSocket())
+		{
+			return false;
+		}
 
-		int iResult;
+		return true;
+	}
 
-		iResult = getaddrinfo(ipAdress, port, &hints, &result);
-		if (iResult != 0)
+	bool Client::isRunning()
+	{
+		return m_isRunning;
+	}
+
+	bool Client::createSocket(const char* ip, const char* port)
+	{
+		ZeroMemory(&m_hints, sizeof(m_hints));
+		m_hints.ai_family = AF_UNSPEC;
+		m_hints.ai_socktype = SOCK_STREAM;
+		m_hints.ai_protocol = IPPROTO_TCP;
+
+		int result;
+
+		result = getaddrinfo(ip, port, &m_hints, &m_result);
+		if (result != 0)
 		{
 			WinsockInitializer::close();
 			return false;
 		}
 
-		SOCKET connectSocket = INVALID_SOCKET;
+		return true;
+	}
 
-		ptr = result;
+	bool Client::connectSocket()
+	{
+		int result;
 
-		connectSocket = socket(ptr->ai_family, ptr->ai_socktype, ptr->ai_protocol);
-		if (connectSocket == INVALID_SOCKET)
+		addrinfo* ptr = m_result;
+		while (ptr != nullptr)
 		{
-			freeaddrinfo(result);
+			m_connectSocket = socket(ptr->ai_family, ptr->ai_socktype, ptr->ai_protocol);
+			if (m_connectSocket == INVALID_SOCKET)
+			{
+				ptr = ptr->ai_next;
+				continue;
+			}
+
+			result = connect(m_connectSocket, ptr->ai_addr, (int)ptr->ai_addrlen);
+			if (result == SOCKET_ERROR)
+			{
+				closesocket(m_connectSocket);
+				ptr = ptr->ai_next;
+				continue;
+			}
+
+			break;
+		}
+
+		freeaddrinfo(m_result);
+		m_result = nullptr;
+
+		if (m_connectSocket == INVALID_SOCKET)
+		{
 			WinsockInitializer::close();
 			return false;
 		}

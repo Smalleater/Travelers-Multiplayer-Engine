@@ -10,15 +10,10 @@ int main()
 
 	tme::Server::start("2004");
 
-	Sleep(1);
+	while (true)
+	{
 
-	tme::Server::stop();
-
-	Sleep(1);
-
-	tme::Server::start("2004");
-
-	Sleep(1);
+	}
 
 	tme::Engine::stop();
 }

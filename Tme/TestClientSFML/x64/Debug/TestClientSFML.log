@@ -1,9 +1,9 @@
 ﻿  main.cpp
-C:\Users\Adrien\Desktop\GitHub\Travelers-Multiplayer-Engine\TestClientSFML\include\SFML\System\Exception.hpp(41,47): warning C4275: interface non dll class 'std::runtime_error' utilisée comme base d'une interface dll class 'sf::Exception'
+C:\Users\Adrien\Desktop\GitHub\Travelers-Multiplayer-Engine\Tme\TestClientSFML\include\SFML\System\Exception.hpp(41,47): warning C4275: interface non dll class 'std::runtime_error' utilisée comme base d'une interface dll class 'sf::Exception'
   (compiler le fichier source 'src/main.cpp')
       C:\Program Files\Microsoft Visual Studio\2022\Community\VC\Tools\MSVC\14.41.34120\include\stdexcept(100,19):
       voir la déclaration de 'std::runtime_error'
-      C:\Users\Adrien\Desktop\GitHub\Travelers-Multiplayer-Engine\TestClientSFML\include\SFML\System\Exception.hpp(41,23):
+      C:\Users\Adrien\Desktop\GitHub\Travelers-Multiplayer-Engine\Tme\TestClientSFML\include\SFML\System\Exception.hpp(41,23):
       voir la déclaration de 'sf::Exception'
   
-  TestClientSFML.vcxproj -> C:\Users\Adrien\Desktop\GitHub\Travelers-Multiplayer-Engine\x64\Debug\TestClientSFML.exe
+  TestClientSFML.vcxproj -> C:\Users\Adrien\Desktop\GitHub\Travelers-Multiplayer-Engine\Tme\x64\Debug\TestClientSFML.exe
