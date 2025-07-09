@@ -51,6 +51,9 @@
     <ClInclude Include="include\TME\Engine.h">
       <Filter>Fichiers d%27en-tête</Filter>
     </ClInclude>
+    <ClInclude Include="include\TME\TMEExport.h">
+      <Filter>Fichiers d%27en-tête</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="src\WinsockInitializer.cpp">

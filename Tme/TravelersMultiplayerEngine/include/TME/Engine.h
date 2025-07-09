@@ -1,8 +1,10 @@
 #pragma once
 
+#include "TMEExport.h"
+
 namespace tme
 {
-	class Engine
+	class TME_API Engine
 	{
 	public:
 		static bool start();
