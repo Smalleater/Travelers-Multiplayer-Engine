@@ -1,5 +1,7 @@
 #pragma once
 
+#include "TMEExport.h"
+
 #ifndef WIN32_LEAN_AND_MEAN
 #define WIN32_LEAN_AND_MEAN
 #endif
@@ -14,7 +16,7 @@
 
 namespace tme
 {
-	class Client
+	class TME_API Client
 	{
 	public:
 		static bool connectTo(const char* ip, const char* port);

@@ -1,5 +1,7 @@
 #pragma once
 
+#include "TMEExport.h"
+
 #ifndef WIN32_LEAN_AND_MEAN
 #define WIN32_LEAN_AND_MEAN
 #endif
@@ -14,7 +16,7 @@
 
 namespace tme
 {
-	class Server
+	class TME_API Server
 	{
 	public:
 		static bool start(const char* port);
