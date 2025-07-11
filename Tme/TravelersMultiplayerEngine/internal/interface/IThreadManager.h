@@ -9,8 +9,8 @@ namespace tme
 	public:
 		virtual ~IThreadManager() = default;
 
-		virtual void start() = 0;
-		virtual void stop() = 0;
-		virtual void addJob(std::function<void()> job) = 0;
+		virtual void Init() = 0;
+		virtual void Shutdown() = 0;
+		virtual void SubmitJob(std::function<void()> job) = 0;
 	};
 }

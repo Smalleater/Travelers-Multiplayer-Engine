@@ -1,4 +1,4 @@
-#include "TME/Old/FileLogger.h"
+#include "Loggers/FileLogger.h"
 
 #include <cstdlib>
 #include <iostream>
@@ -17,7 +17,7 @@ namespace tme
 			}
 		}
 
-		std::string logPath = static_cast<std::string>(LOG_FILE_PATH) + "/log_" + GetSystemTimeForFileName() + ".txt";
+		std::string logPath = std::string(LOG_FILE_PATH) + "/log_" + GetSystemTimeForFileName() + ".txt";
 		m_file = std::ofstream(logPath);
 		if (!m_file)
 		{
@@ -31,48 +31,48 @@ namespace tme
 		m_file.close();
 	}
 
-	void FileLogger::logInfo(std::string msg)
+	void FileLogger::Log(std::string msg)
 	{
 		std::lock_guard<std::mutex> lock(m_mutex);
 
 		if (m_file)
 		{
-			std::string strMsg = static_cast<std::string>(GetSystemTime()) + " [Info] " + msg + "\n";
+			std::string strMsg = GetSystemTime() + " [Info] " + msg + "\n";
 			m_file << strMsg;
 		}
 	}
 
-	void FileLogger::logWarning(std::string msg)
+	void FileLogger::LogWarning(std::string msg)
 	{
 		std::lock_guard<std::mutex> lock(m_mutex);
 
 		if (m_file)
 		{
-			std::string strMsg = static_cast<std::string>(GetSystemTime()) + " [Warning] " + msg + "\n";
+			std::string strMsg = GetSystemTime() + " [Warning] " + msg + "\n";
 			m_file << strMsg;
 		}
 	}
 
-	void FileLogger::logError(std::string msg)
+	void FileLogger::LogError(std::string msg)
 	{
 		std::lock_guard<std::mutex> lock(m_mutex);
 
 		if (m_file)
 		{
-			std::string strMsg = static_cast<std::string>(GetSystemTime()) + " [Error] " + msg + "\n";
+			std::string strMsg = GetSystemTime() + " [Error] " + msg + "\n";
 			m_file << strMsg;
 		}
 	}
 
-	bool FileLogger::FolderExists(const char* path)
+	bool FileLogger::FolderExists(std::string path)
 	{
 		struct stat info;
-		return stat(path, &info) == 0 && (info.st_mode & S_IFDIR);
+		return stat(path.c_str(), &info) == 0 && (info.st_mode & S_IFDIR);
 	}
 
-	bool FileLogger::CreateFolder(const char* path)
+	bool FileLogger::CreateFolder(std::string path)
 	{
-		std::string command = static_cast<std::string>("mkdir ") + path;
+		std::string command = "mkdir " + path;
 
 		int result = system(command.c_str());
 		if (result != 0)
@@ -83,7 +83,7 @@ namespace tme
 		return true;
 	}
 
-	const char* FileLogger::GetSystemTimeForFileName()
+	std::string FileLogger::GetSystemTimeForFileName()
 	{
 		std::time_t currentTime = std::time(nullptr);
 		std::tm local;
@@ -91,10 +91,10 @@ namespace tme
 
 		char buffer[100];
 		std::strftime(buffer, sizeof(buffer), "%Y-%m-%d_%H-%M-%S", &local);
-		return buffer;
+		return std::string(buffer);
 	}
 
-	const char* FileLogger::GetSystemTime()
+	std::string FileLogger::GetSystemTime()
 	{
 		std::time_t currentTime = std::time(nullptr);
 		std::tm local;
@@ -102,6 +102,6 @@ namespace tme
 
 		char buffer[100];
 		std::strftime(buffer, sizeof(buffer), "[%Y-%m-%d %H:%M:%S]", &local);
-		return buffer;
+		return std::string(buffer);
 	}
 }

@@ -1,19 +1,23 @@
 #include <iostream>
+#include <Windows.h>
 
-#include "TME/Engine.h"
-#include "TME/Server.h"
-#include "TME/ServiceLocator.h"
+#include "TME/NetworkEngine.h"
 
 int main()
 {
-	tme::Engine::start();
+	tme::NetworkError result;
 
-	tme::Server::start("2004");
-
-	while (true)
+	result = tme::NetworkEngine::Init();
+	if (result != tme::NetworkError::Succes)
 	{
-
+		std::cout << "Tme network engine init failur\n";
 	}
 
-	tme::Engine::stop();
+	Sleep(1);
+
+	result = tme::NetworkEngine::Shutdown();
+	if (result != tme::NetworkError::Succes)
+	{
+		std::cout << "Tme network engine shutdown failur\n";
+	}
 }

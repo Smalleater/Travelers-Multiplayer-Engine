@@ -42,19 +42,16 @@
     <ClInclude Include="internal\Logger.h">
       <Filter>Fichiers d%27en-tête</Filter>
     </ClInclude>
-    <ClInclude Include="internal\FileLogger.h">
+    <ClInclude Include="internal\loggers\FileLogger.h">
       <Filter>Fichiers d%27en-tête</Filter>
     </ClInclude>
-    <ClInclude Include="internal\ConsoleLogger.h">
-      <Filter>Fichiers d%27en-tête</Filter>
-    </ClInclude>
-    <ClInclude Include="include\TME\Old\Engine.h">
+    <ClInclude Include="internal\loggers\ConsoleLogger.h">
       <Filter>Fichiers d%27en-tête</Filter>
     </ClInclude>
     <ClInclude Include="include\TME\TMEExport.h">
       <Filter>Fichiers d%27en-tête</Filter>
     </ClInclude>
-    <ClInclude Include="include\TME\WinsockManager.h">
+    <ClInclude Include="internal\WinsockManager.h">
       <Filter>Fichiers d%27en-tête</Filter>
     </ClInclude>
     <ClInclude Include="include\TME\ISocket.h">
@@ -72,13 +69,13 @@
     <ClInclude Include="include\TME\EventHandler.h">
       <Filter>Fichiers d%27en-tête</Filter>
     </ClInclude>
-    <ClInclude Include="include\TME\Buffer.h">
+    <ClInclude Include="internal\Buffer.h">
       <Filter>Fichiers d%27en-tête</Filter>
     </ClInclude>
     <ClInclude Include="include\TME\ErrorCodes.h">
       <Filter>Fichiers d%27en-tête</Filter>
     </ClInclude>
-    <ClInclude Include="include\TME\Config.h">
+    <ClInclude Include="internal\Config.h">
       <Filter>Fichiers d%27en-tête</Filter>
     </ClInclude>
     <ClInclude Include="include\TME\NetworkEngine.h">
@@ -107,13 +104,10 @@
     <ClCompile Include="src\Logger.cpp">
       <Filter>Fichiers sources</Filter>
     </ClCompile>
-    <ClCompile Include="src\FileLogger.cpp">
+    <ClCompile Include="src\loggers\FileLogger.cpp">
       <Filter>Fichiers sources</Filter>
     </ClCompile>
-    <ClCompile Include="src\ConsoleLogger.cpp">
-      <Filter>Fichiers sources</Filter>
-    </ClCompile>
-    <ClCompile Include="src\Old\Engine.cpp">
+    <ClCompile Include="src\loggers\ConsoleLogger.cpp">
       <Filter>Fichiers sources</Filter>
     </ClCompile>
     <ClCompile Include="src\TcpSocket.cpp">

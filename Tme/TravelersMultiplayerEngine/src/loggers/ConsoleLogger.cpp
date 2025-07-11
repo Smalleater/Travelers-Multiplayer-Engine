@@ -1,4 +1,4 @@
-#include "TME/Old/ConsoleLogger.h"
+#include "Loggers/ConsoleLogger.h"
 
 #include <iostream>
 #include <ctime>
@@ -6,7 +6,7 @@
 
 namespace tme
 {
-	void ConsoleLogger::logInfo(std::string msg)
+	void ConsoleLogger::Log(std::string msg)
 	{
 		std::lock_guard<std::mutex> lock(m_mutex);
 
@@ -14,23 +14,23 @@ namespace tme
 		std::cout << strMsg;
 	}
 
-	void ConsoleLogger::logWarning(std::string msg)
+	void ConsoleLogger::LogWarning(std::string msg)
 	{
 		std::lock_guard<std::mutex> lock(m_mutex);
 
-		std::string strMsg = static_cast<std::string>(GetSystemTime()) + " [Warning] " + msg + "\n";
+		std::string strMsg = GetSystemTime() + " [Warning] " + msg + "\n";
 		std::cout << strMsg;
 	}
 
-	void ConsoleLogger::logError(std::string msg)
+	void ConsoleLogger::LogError(std::string msg)
 	{
 		std::lock_guard<std::mutex> lock(m_mutex);
 
-		std::string strMsg = static_cast<std::string>(GetSystemTime()) + " [Error] " + msg + "\n";
+		std::string strMsg = GetSystemTime() + " [Error] " + msg + "\n";
 		std::cout << strMsg;
 	}
 
-	const char* ConsoleLogger::GetSystemTime()
+	std::string ConsoleLogger::GetSystemTime()
 	{
 		std::time_t currentTime = std::time(nullptr);
 		std::tm local;
@@ -38,6 +38,6 @@ namespace tme
 
 		char buffer[100];
 		std::strftime(buffer, sizeof(buffer), "[%Y-%m-%d %H:%M:%S]", &local);
-		return buffer;
+		return std::string(buffer);
 	}
 }

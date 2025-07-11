@@ -143,17 +143,16 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
-    <ClInclude Include="include\TME\Buffer.h" />
-    <ClInclude Include="include\TME\Config.h" />
+    <ClInclude Include="internal\Buffer.h" />
+    <ClInclude Include="internal\Config.h" />
     <ClInclude Include="include\TME\ErrorCodes.h" />
     <ClInclude Include="include\TME\EventHandler.h" />
     <ClInclude Include="include\TME\ISocket.h" />
     <ClInclude Include="include\TME\NetworkEngine.h" />
     <ClInclude Include="include\TME\NetworkManager.h" />
     <ClInclude Include="include\TME\Old\Client.h" />
-    <ClInclude Include="internal\ConsoleLogger.h" />
-    <ClInclude Include="include\TME\Old\Engine.h" />
-    <ClInclude Include="internal\FileLogger.h" />
+    <ClInclude Include="internal\loggers\ConsoleLogger.h" />
+    <ClInclude Include="internal\loggers\FileLogger.h" />
     <ClInclude Include="internal\interface\ILogger.h" />
     <ClInclude Include="internal\interface\IThreadManager.h" />
     <ClInclude Include="internal\Logger.h" />
@@ -165,7 +164,7 @@
     <ClInclude Include="include\TME\Old\Utils.h" />
     <ClInclude Include="include\TME\Old\WinsockInitializer.h" />
     <ClInclude Include="include\TME\UdpSocket.h" />
-    <ClInclude Include="include\TME\WinsockManager.h" />
+    <ClInclude Include="internal\WinsockManager.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="src\Buffer.cpp" />
@@ -173,9 +172,8 @@
     <ClCompile Include="src\NetworkEngine.cpp" />
     <ClCompile Include="src\NetworkManager.cpp" />
     <ClCompile Include="src\Old\Client.cpp" />
-    <ClCompile Include="src\ConsoleLogger.cpp" />
-    <ClCompile Include="src\Old\Engine.cpp" />
-    <ClCompile Include="src\FileLogger.cpp" />
+    <ClCompile Include="src\loggers\ConsoleLogger.cpp" />
+    <ClCompile Include="src\loggers\FileLogger.cpp" />
     <ClCompile Include="src\Logger.cpp" />
     <ClCompile Include="src\Old\Server.cpp" />
     <ClCompile Include="src\ServiceLocator.cpp" />

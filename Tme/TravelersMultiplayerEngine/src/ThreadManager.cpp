@@ -10,10 +10,10 @@ namespace tme
 
 	ThreadManager::~ThreadManager()
 	{
-		stop();
+		Shutdown();
 	}
 
-	void ThreadManager::start()
+	void ThreadManager::Init()
 	{
 		m_isRunning = true;
 
@@ -49,7 +49,7 @@ namespace tme
 		}
 	}
 
-	void ThreadManager::stop()
+	void ThreadManager::Shutdown()
 	{
 		{
 			std::lock_guard<std::mutex> lock(m_queueMutex);
@@ -69,7 +69,7 @@ namespace tme
 		m_workers.clear();
 	}
 
-	void ThreadManager::addJob(std::function<void()> job)
+	void ThreadManager::SubmitJob(std::function<void()> job)
 	{
 		{
 			std::lock_guard<std::mutex> lock(m_queueMutex);

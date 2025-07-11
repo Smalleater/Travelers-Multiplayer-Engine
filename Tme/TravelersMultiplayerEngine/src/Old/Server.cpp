@@ -17,12 +17,12 @@ namespace tme
 	{
 		if (m_isRunning)
 		{
-			ServiceLocator::logger().logError("The server is already running");
+			ServiceLocator::logger().LogError("The server is already running");
 		}
 
 		if (!Utils::isValidPort(port))
 		{
-			ServiceLocator::logger().logError("The provided port is not valid");
+			ServiceLocator::logger().LogError("The provided port is not valid");
 			return false;
 		}
 
@@ -30,38 +30,38 @@ namespace tme
 		{
 			if (!WinsockInitializer::start())
 			{
-				ServiceLocator::logger().logError("An error occurred while initializing Winsock");
+				ServiceLocator::logger().LogError("An error occurred while initializing Winsock");
 				return false;
 			}
 		}
 
 		if (!createSocket(port))
 		{
-			ServiceLocator::logger().logError("An error occurred while creating the socket");
+			ServiceLocator::logger().LogError("An error occurred while creating the socket");
 			return false;
 		}
 
 		if (!bindSocket())
 		{
-			ServiceLocator::logger().logError("An error occurred while binding the socket");
+			ServiceLocator::logger().LogError("An error occurred while binding the socket");
 			return false;
 		}
 
 		if (!listenSocket())
 		{
-			ServiceLocator::logger().logError(static_cast<std::string>("Error occurred while the server was attempting to listen on the port ") + port);
+			ServiceLocator::logger().LogError(static_cast<std::string>("Error occurred while the server was attempting to listen on the port ") + port);
 			return false;
 		}
 
 		m_isRunning = true;
 
-		ServiceLocator::threadManager().addJob([]()
+		ServiceLocator::threadManager().SubmitJob([]()
 			{
 				acceptLoop();
 			});
 
-		ServiceLocator::logger().logInfo("Server has started successfully");
-		ServiceLocator::logger().logInfo(static_cast <std::string>("The server is currently listening on port ") + port);
+		ServiceLocator::logger().Log("Server has started successfully");
+		ServiceLocator::logger().Log(static_cast <std::string>("The server is currently listening on port ") + port);
 		return true;
 	}
 
@@ -75,13 +75,13 @@ namespace tme
 			closesocket(client);
 		}
 		m_clients.clear();
-		ServiceLocator::logger().logInfo("All clients have been disconnected successfully");
+		ServiceLocator::logger().Log("All clients have been disconnected successfully");
 
 		m_listenSocket = INVALID_SOCKET;
 
 		WinsockInitializer::close();
 
-		ServiceLocator::logger().logInfo("The server has been stopped successfully");
+		ServiceLocator::logger().Log("The server has been stopped successfully");
 
 		return true;
 	}
@@ -167,13 +167,13 @@ namespace tme
 				int err = WSAGetLastError();
 				if (err != WSAEWOULDBLOCK)
 				{
-					ServiceLocator::logger().logWarning(static_cast<std::string>("Accept failed: ") + std::to_string(WSAGetLastError()) + "\n");
+					ServiceLocator::logger().LogWarning(static_cast<std::string>("Accept failed: ") + std::to_string(WSAGetLastError()) + "\n");
 				}
 				
 				continue;
 			}
 
-			ServiceLocator::logger().logInfo(static_cast<std::string>("New client connected! Socket: ") + std::to_string(clientSocket) + "\n");
+			ServiceLocator::logger().Log(static_cast<std::string>("New client connected! Socket: ") + std::to_string(clientSocket) + "\n");
 			m_clients.push_back(clientSocket);
 		}
 	}

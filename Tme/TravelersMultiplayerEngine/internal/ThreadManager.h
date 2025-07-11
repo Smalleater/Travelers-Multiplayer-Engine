@@ -17,9 +17,9 @@ namespace tme
 		explicit ThreadManager(size_t threadCount = std::thread::hardware_concurrency());
 		~ThreadManager();
 
-		void start() override;
-		void stop() override;
-		void addJob(std::function<void()> job) override;
+		void Init() override;
+		void Shutdown() override;
+		void SubmitJob(std::function<void()> job) override;
 
 	private:
 		std::vector<std::thread> m_workers;

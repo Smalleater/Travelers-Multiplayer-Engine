@@ -7,27 +7,27 @@ namespace tme
 		m_loggers.push_back(std::move(logger));
 	}
 
-	void Logger::logInfo(std::string msg)
+	void Logger::Log(std::string msg)
 	{
 		for (std::shared_ptr<ILogger> logger : m_loggers)
 		{
-			logger->logInfo(msg);
+			logger->Log(msg);
 		}
 	}
 
-	void Logger::logWarning(std::string msg)
+	void Logger::LogWarning(std::string msg)
 	{
 		for (std::shared_ptr<ILogger> logger : m_loggers)
 		{
-			logger->logWarning(msg);
+			logger->LogWarning(msg);
 		}
 	}
 
-	void Logger::logError(std::string msg)
+	void Logger::LogError(std::string msg)
 	{
 		for (std::shared_ptr<ILogger> logger : m_loggers)
 		{
-			logger->logError(msg);
+			logger->LogError(msg);
 		}
 	}
 }
