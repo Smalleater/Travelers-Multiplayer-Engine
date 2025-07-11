@@ -1,4 +1,4 @@
-#include "TME/ThreadManager.h"
+#include "ThreadManager.h"
 
 namespace tme
 {

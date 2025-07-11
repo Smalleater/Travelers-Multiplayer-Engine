@@ -118,7 +118,7 @@
       <SDLCheck>true</SDLCheck>
       <PreprocessorDefinitions>_DEBUG;_CONSOLE;TME_EXPORTS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
-      <AdditionalIncludeDirectories>$(SolutionDir)TravelersMultiplayerEngine\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(SolutionDir)TravelersMultiplayerEngine\include;$(SolutionDir)TravelersMultiplayerEngine\internal;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
       <SubSystem>Console</SubSystem>
@@ -143,31 +143,48 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
-    <ClInclude Include="include\TME\Client.h" />
-    <ClInclude Include="include\TME\ConsoleLogger.h" />
-    <ClInclude Include="include\TME\Engine.h" />
-    <ClInclude Include="include\TME\FileLogger.h" />
-    <ClInclude Include="include\TME\Interface\ILogger.h" />
-    <ClInclude Include="include\TME\Interface\IThreadManager.h" />
-    <ClInclude Include="include\TME\Logger.h" />
-    <ClInclude Include="include\TME\Server.h" />
-    <ClInclude Include="include\TME\ServiceLocator.h" />
-    <ClInclude Include="include\TME\ThreadManager.h" />
+    <ClInclude Include="include\TME\Buffer.h" />
+    <ClInclude Include="include\TME\Config.h" />
+    <ClInclude Include="include\TME\ErrorCodes.h" />
+    <ClInclude Include="include\TME\EventHandler.h" />
+    <ClInclude Include="include\TME\ISocket.h" />
+    <ClInclude Include="include\TME\NetworkEngine.h" />
+    <ClInclude Include="include\TME\NetworkManager.h" />
+    <ClInclude Include="include\TME\Old\Client.h" />
+    <ClInclude Include="internal\ConsoleLogger.h" />
+    <ClInclude Include="include\TME\Old\Engine.h" />
+    <ClInclude Include="internal\FileLogger.h" />
+    <ClInclude Include="internal\interface\ILogger.h" />
+    <ClInclude Include="internal\interface\IThreadManager.h" />
+    <ClInclude Include="internal\Logger.h" />
+    <ClInclude Include="include\TME\Old\Server.h" />
+    <ClInclude Include="internal\ServiceLocator.h" />
+    <ClInclude Include="internal\ThreadManager.h" />
+    <ClInclude Include="include\TME\TcpSocket.h" />
     <ClInclude Include="include\TME\TMEExport.h" />
-    <ClInclude Include="include\TME\Utils.h" />
-    <ClInclude Include="include\TME\WinsockInitializer.h" />
+    <ClInclude Include="include\TME\Old\Utils.h" />
+    <ClInclude Include="include\TME\Old\WinsockInitializer.h" />
+    <ClInclude Include="include\TME\UdpSocket.h" />
+    <ClInclude Include="include\TME\WinsockManager.h" />
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="src\Client.cpp" />
+    <ClCompile Include="src\Buffer.cpp" />
+    <ClCompile Include="src\EventHandler.cpp" />
+    <ClCompile Include="src\NetworkEngine.cpp" />
+    <ClCompile Include="src\NetworkManager.cpp" />
+    <ClCompile Include="src\Old\Client.cpp" />
     <ClCompile Include="src\ConsoleLogger.cpp" />
-    <ClCompile Include="src\Engine.cpp" />
+    <ClCompile Include="src\Old\Engine.cpp" />
     <ClCompile Include="src\FileLogger.cpp" />
     <ClCompile Include="src\Logger.cpp" />
-    <ClCompile Include="src\Server.cpp" />
+    <ClCompile Include="src\Old\Server.cpp" />
     <ClCompile Include="src\ServiceLocator.cpp" />
     <ClCompile Include="src\ThreadManager.cpp" />
-    <ClCompile Include="src\Utils.cpp" />
-    <ClCompile Include="src\WinsockInitializer.cpp" />
+    <ClCompile Include="src\Old\Utils.cpp" />
+    <ClCompile Include="src\Old\WinsockInitializer.cpp" />
+    <ClCompile Include="src\TcpSocket.cpp" />
+    <ClCompile Include="src\UdpSocket.cpp" />
+    <ClCompile Include="src\WinsockManager.cpp" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
