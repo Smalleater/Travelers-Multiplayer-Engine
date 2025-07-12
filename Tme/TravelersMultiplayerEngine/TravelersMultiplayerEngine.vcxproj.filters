@@ -81,6 +81,9 @@
     <ClInclude Include="include\TME\NetworkEngine.h">
       <Filter>Fichiers d%27en-tête</Filter>
     </ClInclude>
+    <ClInclude Include="internal\NetworkCommon.h">
+      <Filter>Fichiers d%27en-tête</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="src\Old\WinsockInitializer.cpp">

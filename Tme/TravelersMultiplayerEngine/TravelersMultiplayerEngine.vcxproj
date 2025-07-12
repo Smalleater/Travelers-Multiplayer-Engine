@@ -157,6 +157,7 @@
     <ClInclude Include="internal\interface\IThreadManager.h" />
     <ClInclude Include="internal\Logger.h" />
     <ClInclude Include="include\TME\Old\Server.h" />
+    <ClInclude Include="internal\NetworkCommon.h" />
     <ClInclude Include="internal\ServiceLocator.h" />
     <ClInclude Include="internal\ThreadManager.h" />
     <ClInclude Include="include\TME\TcpSocket.h" />
