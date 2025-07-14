@@ -1,24 +1,15 @@
-﻿  Buffer.cpp
-  EventHandler.cpp
+﻿  Logger.cpp
   NetworkEngine.cpp
-  NetworkManager.cpp
-  Client.cpp
-  ConsoleLogger.cpp
-  FileLogger.cpp
-  Logger.cpp
   Server.cpp
+  ServiceLocator.cpp
 C:\Users\Adrien\Desktop\GitHub\Travelers-Multiplayer-Engine\Tme\TravelersMultiplayerEngine\include\TME\Old\Server.h(32,30): warning C4251: « tme::Server::m_clients ’ : « std::vector<SOCKET,std::allocator<SOCKET>> » doit avoir dll-interface pour être utilisé par les clients de « tme::Server »
   (compiler le fichier source 'src/Old/Server.cpp')
       C:\Program Files\Microsoft Visual Studio\2022\Community\VC\Tools\MSVC\14.41.34120\include\vector(429,7):
       voir la déclaration de 'std::vector<SOCKET,std::allocator<SOCKET>>'
   
-  ServiceLocator.cpp
-  ThreadManager.cpp
-  Utils.cpp
-  WinsockInitializer.cpp
-  TcpSocket.cpp
-  UdpSocket.cpp
-  WinsockManager.cpp
+  ConsoleLogger.cpp
+  FileLogger.cpp
   Génération de code en cours...
+  LINK : C:\Users\Adrien\Desktop\GitHub\Travelers-Multiplayer-Engine\Tme\x64\Debug\tme.dll introuvable ou non généré par la dernière édition de liens incrémentielle ; édition de liens complète en cours
      Création de la bibliothèque C:\Users\Adrien\Desktop\GitHub\Travelers-Multiplayer-Engine\Tme\x64\Debug\tme.lib et de l'objet C:\Users\Adrien\Desktop\GitHub\Travelers-Multiplayer-Engine\Tme\x64\Debug\tme.exp
   TravelersMultiplayerEngine.vcxproj -> C:\Users\Adrien\Desktop\GitHub\Travelers-Multiplayer-Engine\Tme\x64\Debug\tme.dll
