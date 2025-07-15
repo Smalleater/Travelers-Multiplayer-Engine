@@ -3,7 +3,7 @@
 #include <Windows.h>
 
 #include "ServiceLocator.h"
-#include "Logger.h"
+#include "Loggers/CompositeLogger.h"
 #include "Loggers/ConsoleLogger.h"
 #include "Loggers/FileLogger.h"
 #include "ThreadManager.h"
@@ -14,17 +14,17 @@ namespace tme
 
 	NetworkError NetworkEngine::Init()
 	{
-		std::shared_ptr<Logger> logger = std::make_shared<Logger>();
-		ServiceLocator::provideLogger(logger);
+		std::shared_ptr<CompositeLogger> compositeLogger = std::make_shared<CompositeLogger>();
+		ServiceLocator::provideLogger(compositeLogger);
 
 		if (HasAnyConsoleOutput())
 		{
 			std::shared_ptr<ConsoleLogger> consoleLogger = std::make_shared<ConsoleLogger>();
-			logger->addLogger(consoleLogger);
+			compositeLogger->addLogger(consoleLogger);
 		}
 
 		std::shared_ptr<FileLogger> fileLogger = std::make_shared<FileLogger>();
-		logger->addLogger(fileLogger);
+		compositeLogger->addLogger(fileLogger);
 
 		ServiceLocator::logger().Log("Logger started successfully");
 

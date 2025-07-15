@@ -144,6 +144,7 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClInclude Include="internal\Buffer.h" />
+    <ClInclude Include="internal\loggers\CompositeLogger.h" />
     <ClInclude Include="internal\Config.h" />
     <ClInclude Include="include\TME\ErrorCodes.h" />
     <ClInclude Include="include\TME\EventHandler.h" />
@@ -155,7 +156,6 @@
     <ClInclude Include="internal\loggers\FileLogger.h" />
     <ClInclude Include="internal\interface\ILogger.h" />
     <ClInclude Include="internal\interface\IThreadManager.h" />
-    <ClInclude Include="internal\Logger.h" />
     <ClInclude Include="include\TME\Old\Server.h" />
     <ClInclude Include="internal\NetworkCommon.h" />
     <ClInclude Include="internal\ServiceLocator.h" />
@@ -169,13 +169,13 @@
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="src\Buffer.cpp" />
+    <ClCompile Include="src\loggers\CompositeLogger.cpp" />
     <ClCompile Include="src\EventHandler.cpp" />
     <ClCompile Include="src\NetworkEngine.cpp" />
     <ClCompile Include="src\NetworkManager.cpp" />
     <ClCompile Include="src\Old\Client.cpp" />
     <ClCompile Include="src\loggers\ConsoleLogger.cpp" />
     <ClCompile Include="src\loggers\FileLogger.cpp" />
-    <ClCompile Include="src\Logger.cpp" />
     <ClCompile Include="src\Old\Server.cpp" />
     <ClCompile Include="src\ServiceLocator.cpp" />
     <ClCompile Include="src\ThreadManager.cpp" />

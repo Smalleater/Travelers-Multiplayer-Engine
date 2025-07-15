@@ -39,9 +39,6 @@
     <ClInclude Include="internal\interface\ILogger.h">
       <Filter>Fichiers d%27en-tête</Filter>
     </ClInclude>
-    <ClInclude Include="internal\Logger.h">
-      <Filter>Fichiers d%27en-tête</Filter>
-    </ClInclude>
     <ClInclude Include="internal\loggers\FileLogger.h">
       <Filter>Fichiers d%27en-tête</Filter>
     </ClInclude>
@@ -84,6 +81,9 @@
     <ClInclude Include="internal\NetworkCommon.h">
       <Filter>Fichiers d%27en-tête</Filter>
     </ClInclude>
+    <ClInclude Include="internal\loggers\CompositeLogger.h">
+      <Filter>Fichiers d%27en-tête</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="src\Old\WinsockInitializer.cpp">
@@ -102,9 +102,6 @@
       <Filter>Fichiers sources</Filter>
     </ClCompile>
     <ClCompile Include="src\ServiceLocator.cpp">
-      <Filter>Fichiers sources</Filter>
-    </ClCompile>
-    <ClCompile Include="src\Logger.cpp">
       <Filter>Fichiers sources</Filter>
     </ClCompile>
     <ClCompile Include="src\loggers\FileLogger.cpp">
@@ -132,6 +129,9 @@
       <Filter>Fichiers sources</Filter>
     </ClCompile>
     <ClCompile Include="src\EventHandler.cpp">
+      <Filter>Fichiers sources</Filter>
+    </ClCompile>
+    <ClCompile Include="src\loggers\CompositeLogger.cpp">
       <Filter>Fichiers sources</Filter>
     </ClCompile>
   </ItemGroup>
