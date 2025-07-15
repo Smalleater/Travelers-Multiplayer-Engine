@@ -19,7 +19,16 @@ namespace tme
 	class FileLogger : public ILogger
 	{
 	public:
+		/// <summary>
+		/// Constructor for FileLogger
+		/// Ensures the log folder exists, and creates a uniquely named log file
+		/// </summary>
 		FileLogger();
+
+		/// <summary>
+		/// Destructor for FileLogger
+		/// Closes the log file safely
+		/// </summary>
 		~FileLogger();
 
 		/// <summary>

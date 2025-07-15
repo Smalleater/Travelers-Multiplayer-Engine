@@ -11,6 +11,9 @@ namespace tme
 	class ISocket
 	{
 	public:
+		/// <summary>
+		/// Virtual destructor to ensure proper cleanup of derived logger classes
+		/// </summary>
 		~ISocket() = default;
 
 		// Initialization and shutdown

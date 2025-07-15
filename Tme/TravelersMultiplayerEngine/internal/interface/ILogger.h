@@ -10,6 +10,9 @@ namespace tme
 	class ILogger
 	{
 	public:
+		/// <summary>
+		/// Virtual destructor ro ensure proper cleanup of derived logger classes
+		/// </summary>
 		~ILogger() = default;
 
 		/// <summary>

@@ -13,7 +13,16 @@ namespace tme
 	class ConsoleLogger : public ILogger 
 	{
 	public:
+		/// <summary>
+		/// Constructor for ConsoleLogger
+		/// Currently does nothing
+		/// </summary>
 		ConsoleLogger() {};
+
+		/// <summary>
+		/// Destructor for ConsoleLogger
+		/// Currently does nothing
+		/// </summary>
 		~ConsoleLogger() {};
 
 		/// <summary>
