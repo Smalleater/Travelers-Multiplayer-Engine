@@ -8,6 +8,6 @@ namespace tme
 	{
 	public:
 		static ErrorCodes Init();
-		//static ErrorCodes ShutDown();
+		static ErrorCodes ShutDown();
 	};
 }

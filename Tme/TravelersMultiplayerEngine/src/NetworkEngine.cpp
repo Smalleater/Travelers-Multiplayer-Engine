@@ -16,7 +16,7 @@ namespace tme
 		result = ServiceManager::Init();
 		if (result != ErrorCodes::Success)
 		{
-			ServiceLocator::logger().Log("Service initialization failed");
+			ServiceLocator::logger().LogError("Service initialization failed");
 			return result;
 		}
 
@@ -28,12 +28,16 @@ namespace tme
 
 	ErrorCodes NetworkEngine::Shutdown()
 	{
+		ErrorCodes result = ErrorCodes::Success;
+
+		if (ServiceManager::ShutDown() != ErrorCodes::Success)
+		{
+			result = ErrorCodes::PartialSuccess;
+		}
+
 		m_initialized = false;
 
-		ServiceLocator::threadManager().Shutdown();
-		ServiceLocator::reset();
-
-		return ErrorCodes::Success;
+		return result;
 	}
 
 	ErrorCodes NetworkEngine::EnsureInitialized()

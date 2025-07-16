@@ -37,6 +37,27 @@ namespace tme
 				ServiceLocator::logger().Log("ThreadManager started successfully");
 			});
 
+		ServiceLocator::logger().Log("All services have been started successfully");
 		return ErrorCodes::Success;
+	}
+
+	ErrorCodes ServiceManager::ShutDown()
+	{
+		ErrorCodes result = ErrorCodes::Success;
+
+		ServiceLocator::threadManager().Shutdown();
+
+		if (result == ErrorCodes::Success)
+		{
+			ServiceLocator::logger().Log("Shutdown of all services completed successfully");
+		}
+		else
+		{
+			ServiceLocator::logger().LogError("Shutdown of services completed with errors");
+		}
+
+		ServiceLocator::reset();
+
+		return result;
 	}
 }
