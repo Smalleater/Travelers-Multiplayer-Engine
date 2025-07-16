@@ -143,28 +143,26 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClInclude Include="include\TME\Utils.h" />
     <ClInclude Include="internal\Buffer.h" />
     <ClInclude Include="internal\loggers\CompositeLogger.h" />
     <ClInclude Include="internal\Config.h" />
     <ClInclude Include="include\TME\ErrorCodes.h" />
     <ClInclude Include="include\TME\EventHandler.h" />
-    <ClInclude Include="include\TME\ISocket.h" />
+    <ClInclude Include="internal\interface\ISocket.h" />
     <ClInclude Include="include\TME\NetworkEngine.h" />
-    <ClInclude Include="include\TME\NetworkManager.h" />
-    <ClInclude Include="include\TME\Old\Client.h" />
+    <ClInclude Include="internal\NetworkManager.h" />
     <ClInclude Include="internal\loggers\ConsoleLogger.h" />
     <ClInclude Include="internal\loggers\FileLogger.h" />
     <ClInclude Include="internal\interface\ILogger.h" />
     <ClInclude Include="internal\interface\IThreadManager.h" />
-    <ClInclude Include="include\TME\Old\Server.h" />
     <ClInclude Include="internal\NetworkCommon.h" />
     <ClInclude Include="internal\ServiceLocator.h" />
+    <ClInclude Include="internal\ServiceManager.h" />
     <ClInclude Include="internal\ThreadManager.h" />
-    <ClInclude Include="include\TME\TcpSocket.h" />
+    <ClInclude Include="internal\TcpSocket.h" />
     <ClInclude Include="include\TME\TMEExport.h" />
-    <ClInclude Include="include\TME\Old\Utils.h" />
-    <ClInclude Include="include\TME\Old\WinsockInitializer.h" />
-    <ClInclude Include="include\TME\UdpSocket.h" />
+    <ClInclude Include="internal\UdpSocket.h" />
     <ClInclude Include="internal\WinsockManager.h" />
   </ItemGroup>
   <ItemGroup>
@@ -173,16 +171,14 @@
     <ClCompile Include="src\EventHandler.cpp" />
     <ClCompile Include="src\NetworkEngine.cpp" />
     <ClCompile Include="src\NetworkManager.cpp" />
-    <ClCompile Include="src\Old\Client.cpp" />
     <ClCompile Include="src\loggers\ConsoleLogger.cpp" />
     <ClCompile Include="src\loggers\FileLogger.cpp" />
-    <ClCompile Include="src\Old\Server.cpp" />
     <ClCompile Include="src\ServiceLocator.cpp" />
+    <ClCompile Include="src\ServiceManager.cpp" />
     <ClCompile Include="src\ThreadManager.cpp" />
-    <ClCompile Include="src\Old\Utils.cpp" />
-    <ClCompile Include="src\Old\WinsockInitializer.cpp" />
     <ClCompile Include="src\TcpSocket.cpp" />
     <ClCompile Include="src\UdpSocket.cpp" />
+    <ClCompile Include="src\Utils.cpp" />
     <ClCompile Include="src\WinsockManager.cpp" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />

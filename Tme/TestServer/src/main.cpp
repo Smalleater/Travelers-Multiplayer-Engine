@@ -5,10 +5,10 @@
 
 int main()
 {
-	tme::NetworkError result;
+	tme::ErrorCodes result;
 
 	result = tme::NetworkEngine::Init();
-	if (result != tme::NetworkError::Succes)
+	if (result != tme::ErrorCodes::Succes)
 	{
 		std::cout << "Tme network engine init failur\n";
 	}
@@ -16,7 +16,7 @@ int main()
 	Sleep(1);
 
 	result = tme::NetworkEngine::Shutdown();
-	if (result != tme::NetworkError::Succes)
+	if (result != tme::ErrorCodes::Succes)
 	{
 		std::cout << "Tme network engine shutdown failur\n";
 	}

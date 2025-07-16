@@ -8,6 +8,9 @@
 
 namespace tme
 {
+	/// <summary>
+	/// Interface representing a generic network socket abstraction
+	/// </summary>
 	class ISocket
 	{
 	public:
@@ -16,23 +19,19 @@ namespace tme
 		/// </summary>
 		~ISocket() = default;
 
-		// Initialization and shutdown
-
 		/// <summary>
 		/// Initializes the socket and prepares it for use
 		/// Typically includes creating the socket and setting necessary options
 		/// </summary>
 		/// <returns>Success if successful, otherwise an error code indicating the failure reason</returns>
-		virtual NetworkError Init() = 0;
+		virtual ErrorCodes Init() = 0;
 
 		/// <summary>
 		/// Shuts down and closes the socket, releasing any allocated resources
 		/// Should be called when the socket is no longer needed
 		/// </summary>
 		/// <returns>Success if successful, otherwise an error code indicating the failure reason</returns>
-		virtual NetworkError Shutdown() = 0;
-
-		// Connection
+		virtual ErrorCodes Shutdown() = 0;
 
 		/// <summary>
 		/// Connects the socket to a remite address and port (for client sockets)
@@ -40,23 +39,21 @@ namespace tme
 		/// <param name="address">The IP adress or hostname of the remote server</param>
 		/// <param name="port">The port number to connect to</param>
 		/// <returns>Success if successful, otherwise an error code indicating the failure reason</returns>
-		virtual NetworkError Connect(const std::string& address, uint16_t port) = 0;
-		
-		// Listening
+		virtual ErrorCodes Connect(const std::string& address, uint16_t port) = 0;
 
 		/// <summary>
 		/// Binds the socket to a local port, preparing it to accept incoming connections
 		/// </summary>
 		/// <param name="port">The local port number to bind to</param>
 		/// <returns>Success if successful, otherwise an error code indicating the failure reason</returns>
-		virtual NetworkError Bind(uint16_t port) = 0;
+		virtual ErrorCodes Bind(uint16_t port) = 0;
 
 		/// <summary>
 		/// Start listening for incoming connection requests with a specified backlog
 		/// </summary>
 		/// <param name="backlog">Maximum number of pending connections allowed int the queue</param>
 		/// <returns>Success if successful, otherwise an error code indicating the failure reason</returns>
-		virtual NetworkError Listen(int backlog = SOMAXCONN) = 0;
+		virtual ErrorCodes Listen(int backlog = SOMAXCONN) = 0;
 
 		/// <summary>
 		/// Accepts an incoming connection request, returning a new socket instance
@@ -65,8 +62,6 @@ namespace tme
 		/// <returns>A unique_ptr to the accepted socket if successful, or nullptr on failure</returns>
 		virtual std::unique_ptr<ISocket> Accept() = 0;
 
-		// Sending and Receiving
-
 		/// <summary>
 		/// Sends data through the socket
 		/// </summary>
@@ -74,7 +69,7 @@ namespace tme
 		/// <param name="size">Number of bytes to send</param>
 		/// <param name="bytesSent">Output parameter receiving the actual number of bytes sent</param>
 		/// <returns>Success if successful, otherwise an error code indicating the failure reason</returns>
-		virtual NetworkError Send(const void* data, size_t size, int& bytesSent) = 0;
+		virtual ErrorCodes Send(const void* data, size_t size, int& bytesSent) = 0;
 
 		/// <summary>
 		/// Receives data from the socket
@@ -83,16 +78,14 @@ namespace tme
 		/// <param name="size">Maximum number of bytes to receive</param>
 		/// <param name="bytesReceived">Output parameter receiving the actual number of bytes received</param>
 		/// <returns>Success if successful, otherwise an error code indicating the failure reason</returns>
-		virtual NetworkError Receive(void* buffer, size_t size, int& bytesReceived) = 0;
-
-		// Options
+		virtual ErrorCodes Receive(void* buffer, size_t size, int& bytesReceived) = 0;
 
 		/// <summary>
 		/// Sets the blocking mode of the socket
 		/// </summary>
 		/// <param name="blocking">If true, socket operation will block until complete</param>
 		/// <returns>Success if successful, otherwise an error code indicating the failure reason</returns>
-		virtual NetworkError SetBlocking(bool blocking) = 0;
+		virtual ErrorCodes SetBlocking(bool blocking) = 0;
 
 		/// <summary>
 		/// Checks if the socket is currently connected

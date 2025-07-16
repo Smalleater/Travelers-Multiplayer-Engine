@@ -1,9 +1,11 @@
 #pragma once
 
+#include "TME/TMEExport.h"
+
 namespace tme
 {
-	enum class NetworkError
+	enum class TME_API ErrorCodes
 	{
-		Succes = 0,
+		Success = 0,
 	};
 }
