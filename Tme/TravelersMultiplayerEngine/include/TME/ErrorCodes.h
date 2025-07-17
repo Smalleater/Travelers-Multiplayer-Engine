@@ -7,6 +7,7 @@ namespace tme
 	enum class TME_API ErrorCodes
 	{
 		Success = 0,
-		PartialSuccess
+		PartialSuccess,
+		NetworkEngineNotInitialized,
 	};
 }
