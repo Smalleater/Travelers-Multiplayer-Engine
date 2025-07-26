@@ -18,7 +18,7 @@ The current goal is to provide an optimized engine that support all the basic ne
 
 ## ⚙️ Technologies
 
-- C++ 14
+- C++ 17
 - Winsock
 - Multi-threading
 - Minimal logging system
