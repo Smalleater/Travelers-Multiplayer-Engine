@@ -4,7 +4,7 @@
 #include <vector>
 #include <memory>
 
-#include "interface/ILogger.hpp"
+#include "interfaces/ILogger.hpp"
 
 namespace tme
 {
@@ -13,7 +13,7 @@ namespace tme
     {
     private:
         /// @brief The list of loggers to which message will be forwarded.
-        std::vector<std::shared_ptr<ILogger>> m_loggers;
+        std::vector<std::unique_ptr<ILogger>> m_loggers;
 
     public:
         /// @brief Constructor: default constructor.
@@ -24,7 +24,7 @@ namespace tme
 
         /// @brief Adds a logger to the composite logger.
         /// @param logger The logger to add.
-        void addLogger(std::shared_ptr<ILogger> logger);
+        void addLogger(std::unique_ptr<ILogger> logger);
 
         /// @brief Logs an informational message.
         /// @param message The message to log.

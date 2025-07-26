@@ -3,7 +3,7 @@
 
 #include <mutex>
 
-#include "interface/ILogger.hpp"
+#include "interfaces/ILogger.hpp"
 
 namespace tme
 {

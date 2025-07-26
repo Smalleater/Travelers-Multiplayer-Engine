@@ -21,7 +21,7 @@ namespace tme
         // If no ThreadManager has been registered, throw an exception
         if (!m_threadManager)
         {
-            throw std::runtime_error("ThreadManager not provided to ServiceLocator.");
+            throw std::runtime_error("ThreadManager not provided to ServiceLocator");
         }
 
         // Return a reference to the registered ThreadManager
@@ -41,7 +41,7 @@ namespace tme
         // If no Logger has been registered, throw an exception
         if (!m_logger)
         {
-            throw std::runtime_error("Logger not provided to ServiceLocator.");
+            throw std::runtime_error("Logger not provided to ServiceLocator");
         }
 
         // Return a reference to the registered Logger

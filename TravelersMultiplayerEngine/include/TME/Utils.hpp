@@ -15,6 +15,10 @@ namespace tme
     /// @param format The format string (as used in strftime).
     /// @return The formatted current system time.
     static std::string GetSystemTime(const char* format);
+
+    /// @brief Checks whether the current process has any console output (stdout or stderr).
+    /// @return True if output is attached to a terminal/console, false otherwise.
+    static bool HasAnyConsoleOutput();
     };
 }
 

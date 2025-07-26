@@ -3,8 +3,8 @@
 
 #include <memory>
 
-#include "interface/IThreadManager.hpp"
-#include "interface/ILogger.hpp"
+#include "interfaces/IThreadManager.hpp"
+#include "interfaces/ILogger.hpp"
 
 namespace tme
 {

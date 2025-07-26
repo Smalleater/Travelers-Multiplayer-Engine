@@ -5,7 +5,7 @@
 #include <mutex>
 #include <filesystem>
 
-#include "interface/ILogger.hpp"
+#include "interfaces/ILogger.hpp"
 
 namespace tme
 {

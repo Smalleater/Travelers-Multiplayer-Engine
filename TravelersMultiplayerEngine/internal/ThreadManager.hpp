@@ -7,7 +7,7 @@
 #include <condition_variable>
 #include <atomic>
 
-#include "interface/IThreadManager.hpp"
+#include "interfaces/IThreadManager.hpp"
  
 namespace tme
 {
