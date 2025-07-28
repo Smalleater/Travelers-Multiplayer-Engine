@@ -5,7 +5,7 @@
 
 namespace tme
 {
-    enum class TME_API ErrorCodes
+    enum class ErrorCodes
     {
         Success = 0,
         PartialSuccess,
