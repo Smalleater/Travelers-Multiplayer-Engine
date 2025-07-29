@@ -24,7 +24,7 @@ namespace tme
         /// This stops the thread manager, resets the service locator, and logs the shutdown status.
         ///
         /// @return ErrorCodes Returns ErrorCodes::Success if all services shut down cleanly,
-        /// or ErrorCodes::PartialSuccess if some services did not shut down completely.
+        /// or ErrorCodes::CompletedWithErrors if some services did not shut down completely.
         static ErrorCodes ShutDown();
     };
 }
