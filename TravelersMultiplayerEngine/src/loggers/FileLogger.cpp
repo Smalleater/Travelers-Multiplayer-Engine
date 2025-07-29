@@ -43,7 +43,7 @@ namespace tme
     FileLogger::FileLogger()
     {
         // Check if the log path exists, and create it needed
-        if (std::filesystem::is_directory(LOG_FILE_PATH))
+        if (!std::filesystem::is_directory(LOG_FILE_PATH))
         {
             if (!CreateFolder(LOG_FILE_PATH))
             {

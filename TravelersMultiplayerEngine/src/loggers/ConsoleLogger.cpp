@@ -12,7 +12,7 @@ namespace tme
         std::lock_guard<std::mutex> lock(m_mutex);
 
         // Build the log message with timestamp and type prefix
-        std::string logMessage = Utils::GetSystemTime("[%Y-%m-%d %H:%M:%S]") + " [TME] " + " [" + logType + "] " + message + "\n";
+        std::string logMessage = Utils::GetSystemTime("[%Y-%m-%d %H:%M:%S]") + " [TME]" + " [" + logType + "] " + message + "\n";
         std::cout << logMessage;
     }
 
