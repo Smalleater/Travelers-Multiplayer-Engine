@@ -36,5 +36,6 @@ int main()
         std::cout << "TME shutdown failur" << std::endl;
     }
 
-    system("pause");
+    std::cout << "Press Enter to exit..." << std::endl;
+    std::cin.get();
 }

@@ -13,9 +13,18 @@ target_include_directories(client PRIVATE "${TME_INCLUDE_DIR}")
 
 target_link_directories(client PRIVATE "${TME_LIB_DIR}")
 
-target_link_libraries(client PRIVATE "${TME_LIB_DIR}/libtme.dll.a")
+if (WIN32)
+    target_link_libraries(client PRIVATE "${TME_LIB_DIR}/libtme.dll.a")
 
-add_custom_command(TARGET client POST_BUILD
-    COMMAND ${CMAKE_COMMAND} -E copy_if_different
-    "${TME_LIB_DIR}/libtme.dll"
-    $<TARGET_FILE_DIR:client>)
+    add_custom_command(TARGET client POST_BUILD
+        COMMAND ${CMAKE_COMMAND} -E copy_if_different
+        "${TME_LIB_DIR}/libtme.dll"
+        $<TARGET_FILE_DIR:client>)
+else()
+    target_link_libraries(client PRIVATE tme)
+
+    add_custom_command(TARGET client POST_BUILD
+        COMMAND ${CMAKE_COMMAND} -E copy_if_different
+        "${TME_LIB_DIR}/libtme.so"
+        $<TARGET_FILE_DIR:client>)
+endif()
