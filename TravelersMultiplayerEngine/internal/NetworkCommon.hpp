@@ -1,0 +1,42 @@
+#ifndef TME_NETWORK_COMMON_HPP
+#define TME_NETWORK_COMMON_HPP
+
+namespace tme
+{
+    // Windows Sockets
+    #if defined(_WIN32) || defined(_WIN64)
+
+    #ifndef WIN32_LEAN_AND_MEAN
+    #define WIN32_LEAN_AND_MEAN
+    #endif
+
+    #include <Windows.h>
+    #include <WinSock2.h>
+    #include <WS2tcpip.h>
+    #include <iphlpapi.h>
+
+    #pragma comment(lib, "Ws2_32.lib")
+
+    using socket_t = SOCKET;
+    #define TME_CLOSE_SOCKET closesocket
+    #define TME_INVALID_SOCKET_FD INVALID_SOCKET
+
+    // POSIX Sockets
+    #else
+
+    #include <sys/types.h>
+    #include <sys/socket.h>
+    #include <netinet/in.h>
+    #include <arpa/inet.h>
+    #include <unistd.h>
+    #include <netdb.h>
+    #include <errno.h>
+
+    using socket_t = int;
+    #define TME_CLOSE_SOCKET close
+    #define TME_INVALID_SOCKET_FD -1
+
+    #endif
+}
+
+#endif
