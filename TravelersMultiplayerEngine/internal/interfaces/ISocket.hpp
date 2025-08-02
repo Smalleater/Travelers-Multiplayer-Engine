@@ -20,13 +20,11 @@ namespace tme
         /// @brief Virtual destructor for safe polymorphic use.
         virtual ~ISocket() = default;
 
-        /// @brief Initializes the socket.
-        /// @return ErrorCodes::Success on success, or an error code on failure.
-        virtual ErrorCodes Init() = 0;
-
         /// @brief Shuts down the socket and releases resources.
         /// @return ErrorCodes::Success on success, or an error code on failure.
         virtual ErrorCodes Shutdown() = 0;
+
+        virtual void CloseSocket() = 0;
 
         /// @brief Connects the socket to a remote address and port.
         /// @param address The remote IP address or hostname.

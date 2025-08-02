@@ -4,7 +4,7 @@
 namespace tme
 {
     // Windows Sockets
-    #if defined(_WIN32) || defined(_WIN64)
+    #ifdef _WIN32
 
     #ifndef WIN32_LEAN_AND_MEAN
     #define WIN32_LEAN_AND_MEAN
@@ -18,8 +18,8 @@ namespace tme
     #pragma comment(lib, "Ws2_32.lib")
 
     using socket_t = SOCKET;
-    #define TME_CLOSE_SOCKET closesocket
-    #define TME_INVALID_SOCKET_FD INVALID_SOCKET
+    #define CLOSE_SOCKET closesocket
+    #define INVALID_SOCKET_FD INVALID_SOCKET
 
     // POSIX Sockets
     #else
@@ -33,8 +33,8 @@ namespace tme
     #include <errno.h>
 
     using socket_t = int;
-    #define TME_CLOSE_SOCKET close
-    #define TME_INVALID_SOCKET_FD -1
+    #define CLOSE_SOCKET close
+    #define INVALID_SOCKET_FD -1
 
     #endif
 }

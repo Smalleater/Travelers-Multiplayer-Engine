@@ -10,15 +10,17 @@ namespace tme
     class TcpSocket : public ISocket
     {
     private:
+        socket_t m_socket = INVALID_SOCKET_FD;
 
     public:
         TcpSocket() {};
         ~TcpSocket() {};
 
-        ErrorCodes Init() override;
         ErrorCodes Shutdown() override;
 
-        ErrorCodes Connect(const std::string& adress, uint16_t port) override;
+        void CloseSocket() override;
+
+        ErrorCodes Connect(const std::string& address, uint16_t port) override;
         ErrorCodes Bind(uint16_t port) override;
         ErrorCodes Listen(int backlog = SOMAXCONN) override;
         
