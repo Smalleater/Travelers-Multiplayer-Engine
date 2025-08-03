@@ -20,6 +20,7 @@ namespace tme
     using socket_t = SOCKET;
     #define CLOSE_SOCKET closesocket
     #define INVALID_SOCKET_FD INVALID_SOCKET
+    #define WOULD_BLOCK_ERROR WSAEWOULDBLOCK
 
     // POSIX Sockets
     #else
@@ -35,6 +36,7 @@ namespace tme
     using socket_t = int;
     #define CLOSE_SOCKET close
     #define INVALID_SOCKET_FD -1
+    #define WOULD_BLOCK_ERROR EWOULDBLOCK
 
     #endif
 }

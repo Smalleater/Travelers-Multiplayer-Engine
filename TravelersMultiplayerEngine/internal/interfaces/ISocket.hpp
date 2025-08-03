@@ -24,8 +24,6 @@ namespace tme
         /// @return ErrorCodes::Success on success, or an error code on failure.
         virtual ErrorCodes Shutdown() = 0;
 
-        virtual void CloseSocket() = 0;
-
         /// @brief Connects the socket to a remote address and port.
         /// @param address The remote IP address or hostname.
         /// @param port The remote port number. 

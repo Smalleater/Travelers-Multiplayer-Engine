@@ -12,13 +12,14 @@ namespace tme
     private:
         socket_t m_socket = INVALID_SOCKET_FD;
 
+        void CloseSocket();
+        int GetLastSocketError();
+
     public:
         TcpSocket() {};
         ~TcpSocket() {};
 
         ErrorCodes Shutdown() override;
-
-        void CloseSocket() override;
 
         ErrorCodes Connect(const std::string& address, uint16_t port) override;
         ErrorCodes Bind(uint16_t port) override;

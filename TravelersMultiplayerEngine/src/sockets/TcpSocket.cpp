@@ -1,5 +1,7 @@
 #include "sockets/TcpSocket.hpp"
 
+#include "ServiceLocator.hpp"
+
 namespace tme
 {
     void TcpSocket::CloseSocket()
@@ -11,6 +13,15 @@ namespace tme
         #endif
 
         m_socket = INVALID_SOCKET_FD;
+    }
+
+    int TcpSocket::GetLastSocketError()
+    {
+        #ifdef _WIN32
+            return WSAGetLastError();
+        #else
+            return errno;
+        #endif
     }
 
     ErrorCodes TcpSocket::Connect(const std::string& address, uint16_t port)
@@ -98,9 +109,7 @@ namespace tme
 
     ErrorCodes TcpSocket::Listen(int backlog = SOMAXCONN)
     {
-        int iResult;
-
-        iResult = listen(m_socket, backlog);
+        int iResult = listen(m_socket, backlog);
         if ( iResult < 0)
         {
             CloseSocket();
@@ -108,5 +117,25 @@ namespace tme
         }
 
         return ErrorCodes::Success;
+    }
+
+    std::unique_ptr<ISocket> TcpSocket::Accept()
+    {
+        socket_t clientSocket = accept(m_socket, NULL, NULL);
+        if (clientSocket == INVALID_SOCKET_FD)
+        {
+            int error = GetLastSocketError();
+            if (error == WOULD_BLOCK_ERROR)
+            {
+                ServiceLocator::Logger().LogWarning(std::string("Accept failed: ") + std::to_string(error) + "\n");
+            }
+
+            return nullptr;
+        }
+
+        std::unique_ptr<TcpSocket> client = std::make_unique<TcpSocket>();
+        client->m_socket = clientSocket;
+
+        return client;
     }
 }
