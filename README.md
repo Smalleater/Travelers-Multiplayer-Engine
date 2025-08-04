@@ -4,9 +4,12 @@
 
 ## Overview
 
-**TME (Travelers Multiplayer Engine)** is a C++ network engine based on Winsock, designed to simplify multiplayer game development.
+**TME (Travelers Multiplayer Engine)** is a cross-platform C++ network engine designed to simplify multiplayer game development.
+It supports both Windows (via Winsock) and POSIX-compliant systems (via BSD sockets).
 
-The current goal is to provide an optimized engine that support all the basic networking operations you might need -- such as creating a server, connectiong a client, sending pakets, and more -- while keeping things simple and lightweight.
+The current goal is to provide an optimized, lightweight, and easy-to-use engine capable of handling all basic networking operations — such as creating servers, connecting clients, sending packets, and more.
+
+The ultimate goal is to develop TME into a fully featured network engine specifically tailored for multiplayer needs.
 
 ---
 
@@ -19,7 +22,8 @@ The current goal is to provide an optimized engine that support all the basic ne
 ## ⚙️ Technologies
 
 - C++ 17
-- Winsock
+- Windows
+- Posix (linux, macos, etc)
 - Multi-threading
 - Minimal logging system
 
