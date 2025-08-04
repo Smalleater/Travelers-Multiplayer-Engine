@@ -22,8 +22,8 @@ The ultimate goal is to develop TME into a fully featured network engine specifi
 ## ⚙️ Technologies
 
 - C++ 17
-- Windows
-- Posix (linux, macos, etc)
+- Windows (via Winsock)
+- POSIX (Linux, macOS, etc. via BSD sockets)
 - Multi-threading
 - Minimal logging system
 
