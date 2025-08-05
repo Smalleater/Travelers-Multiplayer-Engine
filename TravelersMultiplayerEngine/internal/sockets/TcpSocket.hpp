@@ -12,7 +12,6 @@ namespace tme
     private:
         socket_t m_socket = INVALID_SOCKET_FD;
 
-        void CloseSocket();
         int GetLastSocketError();
 
     public:

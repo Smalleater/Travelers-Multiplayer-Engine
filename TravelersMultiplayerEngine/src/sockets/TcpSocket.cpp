@@ -1,20 +1,13 @@
 #include "sockets/TcpSocket.hpp"
 
+#include <limits>
+
 #include "ServiceLocator.hpp"
+
+#undef max
 
 namespace tme
 {
-    void TcpSocket::CloseSocket()
-    {
-        #ifdef _WIN32
-            closesocket(m_socket);
-         #else
-            close(m_socket);
-        #endif
-
-        m_socket = INVALID_SOCKET_FD;
-    }
-
     int TcpSocket::GetLastSocketError()
     {
         #ifdef _WIN32
@@ -57,7 +50,7 @@ namespace tme
                 return ErrorCodes::Success;
             }
 
-            CloseSocket();
+            CLOSE_SOCKET(m_socket);
         }
 
         freeaddrinfo(result);
@@ -99,7 +92,7 @@ namespace tme
                 return ErrorCodes::Success;
             }
 
-            CloseSocket();
+            CLOSE_SOCKET(m_socket);
         }
 
         freeaddrinfo(result);
@@ -107,12 +100,12 @@ namespace tme
         return ErrorCodes::Failure;
     }
 
-    ErrorCodes TcpSocket::Listen(int backlog = SOMAXCONN)
+    ErrorCodes TcpSocket::Listen(int backlog)
     {
         int iResult = listen(m_socket, backlog);
         if ( iResult < 0)
         {
-            CloseSocket();
+            CLOSE_SOCKET(m_socket);
             return ErrorCodes::Failure;
         }
 
@@ -127,7 +120,7 @@ namespace tme
             int error = GetLastSocketError();
             if (error == WOULD_BLOCK_ERROR)
             {
-                ServiceLocator::Logger().LogWarning(std::string("Accept failed: ") + std::to_string(error) + "\n");
+                ServiceLocator::Logger().LogWarning(std::string("Accept failed: error code = ") + std::to_string(error) + "\n");
             }
 
             return nullptr;
@@ -137,5 +130,66 @@ namespace tme
         client->m_socket = clientSocket;
 
         return client;
+    }
+
+    ErrorCodes TcpSocket::Send(const void* data, size_t size, int& bytesSent)
+    {
+        if (size > static_cast<size_t>(std::numeric_limits<int>::max()))
+        {
+            ServiceLocator::Logger().LogError("Send failed: size exceeds maximum allowed by system call\n");
+            bytesSent = 0;
+            return ErrorCodes::Failure;
+        }
+
+        int iResult = send(m_socket, static_cast<const char*>(data), static_cast<int>(size), 0);
+        if (iResult == 0)
+        {
+            ServiceLocator::Logger().LogWarning("Send failed: connection closed by peer\n");
+            bytesSent = 0;
+            return ErrorCodes::Failure;
+        }
+        else if (iResult < 0)
+        {
+            ServiceLocator::Logger().LogError(std::string("Send failed: error code = ") + std::to_string(GetLastSocketError()) + "\n");
+            bytesSent = 0;
+            return ErrorCodes::Failure;
+        }
+
+        bytesSent = iResult;
+        return ErrorCodes::Success;
+    }
+
+    ErrorCodes TcpSocket::Receive(void* buffer, size_t size, int& bytesReceived)
+    {
+        if (size > static_cast<size_t>(std::numeric_limits<int>::max()))
+        {
+            ServiceLocator::Logger().LogError("Receive failed: size exceeds maximum allowed by system call\n");
+            bytesReceived = 0;
+            return ErrorCodes::Failure;
+        }
+
+        int iResult = recv(m_socket, static_cast<char*>(buffer), static_cast<int>(size), 0);
+        if (iResult == 0)
+        {
+            ServiceLocator::Logger().LogWarning("Receive failed: connection closed by peer");
+            bytesReceived = 0;
+            return ErrorCodes::Failure;
+        }
+        else if (iResult < 0)
+        {
+            ServiceLocator::Logger().LogError(std::string("Receive failed: error code = ") + std::to_string(GetLastSocketError()) + "\n");
+            bytesReceived = 0;
+            return ErrorCodes::Failure;
+        }
+
+        bytesReceived = iResult;
+        return ErrorCodes::Success;
+    }
+
+    ErrorCodes TcpSocket::SetBlocking(bool blocking)
+    {
+        u_long mode = blocking;
+        ioctlsocket(m_socket, FIONBIO, &mode);
+        return ErrorCodes::Success;
     }
 }
