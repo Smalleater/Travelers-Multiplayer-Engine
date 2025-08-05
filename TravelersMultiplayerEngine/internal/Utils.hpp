@@ -17,6 +17,8 @@ namespace tme
     /// @brief Checks whether the current process has any console output (stdout or stderr).
     /// @return True if output is attached to a terminal/console, false otherwise.
     static bool HasAnyConsoleOutput();
+
+    static int GetLastSocketError();
     };
 }
 

@@ -64,4 +64,13 @@ namespace tme
             return isatty(fileno(stdout)) || isatty(fileno(stderr));
         #endif
     }
+
+    int Utils::GetLastSocketError()
+    {
+        #ifdef _WIN32
+            return WSAGetLastError();
+        #else
+            return errno;
+        #endif
+    }
 }

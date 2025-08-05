@@ -3,18 +3,41 @@
 #include <limits>
 
 #include "ServiceLocator.hpp"
+#include "Utils.hpp"
 
 #undef max
 
 namespace tme
 {
-    int TcpSocket::GetLastSocketError()
+    TcpSocket::~TcpSocket()
     {
+        if (m_socket != INVALID_SOCKET_FD)
+        {
+            Shutdown();
+            CLOSE_SOCKET(m_socket);
+        }
+    }
+
+    ErrorCodes TcpSocket::Shutdown()
+    {
+        if (m_socket == INVALID_SOCKET_FD)
+        {
+            return ErrorCodes::Failure;
+        }
+
+        int iResult;
         #ifdef _WIN32
-            return WSAGetLastError();
+            iResult = shutdown(m_socket, SD_BOTH);
         #else
-            return errno;
+            iResult = shutdown(m_socket, SHUT_RDWR);
         #endif
+
+        if (iResult != 0)
+        {
+            return ErrorCodes::Failure;
+        }
+
+        return ErrorCodes::Success;
     }
 
     ErrorCodes TcpSocket::Connect(const std::string& address, uint16_t port)
@@ -117,10 +140,11 @@ namespace tme
         socket_t clientSocket = accept(m_socket, NULL, NULL);
         if (clientSocket == INVALID_SOCKET_FD)
         {
-            int error = GetLastSocketError();
+            int error = Utils::GetLastSocketError();
             if (error == WOULD_BLOCK_ERROR)
             {
-                ServiceLocator::Logger().LogWarning(std::string("Accept failed: error code = ") + std::to_string(error) + "\n");
+                ServiceLocator::Logger().LogWarning(std::string("Accept failed: error code = ") 
+                    + std::to_string(error) + "\n");
             }
 
             return nullptr;
@@ -150,7 +174,8 @@ namespace tme
         }
         else if (iResult < 0)
         {
-            ServiceLocator::Logger().LogError(std::string("Send failed: error code = ") + std::to_string(GetLastSocketError()) + "\n");
+            ServiceLocator::Logger().LogError(std::string("Send failed: error code = ") 
+                + std::to_string(Utils::GetLastSocketError()) + "\n");
             bytesSent = 0;
             return ErrorCodes::Failure;
         }
@@ -177,7 +202,8 @@ namespace tme
         }
         else if (iResult < 0)
         {
-            ServiceLocator::Logger().LogError(std::string("Receive failed: error code = ") + std::to_string(GetLastSocketError()) + "\n");
+            ServiceLocator::Logger().LogError(std::string("Receive failed: error code = ") 
+                + std::to_string(Utils::GetLastSocketError()) + "\n");
             bytesReceived = 0;
             return ErrorCodes::Failure;
         }
@@ -188,8 +214,54 @@ namespace tme
 
     ErrorCodes TcpSocket::SetBlocking(bool blocking)
     {
-        u_long mode = blocking;
-        ioctlsocket(m_socket, FIONBIO, &mode);
+        #ifdef _WIN32
+            u_long mode = blocking ? 0 : 1;
+
+            int IResult = ioctlsocket(m_socket, FIONBIO, &mode);
+            if (IResult != 0)
+            {
+                ServiceLocator::Logger().LogError("SetBlocking failed: ioctlsocket error\n");
+                return ErrorCodes::Failure;
+            }
+        #else
+            int flags = fcntl(m_socket, F_GETFL, 0);
+            if (flags == -1)
+            {
+                ServiceLocator::Logger().LogError("SetBlocking failed: fcntl F_GETFL error\n");
+                return ErrorCodes::Failure;
+            }
+
+            if (blocking)
+            {
+                flags &= ~O_NONBLOCK;
+            }
+            else
+            {
+                flags |= O_NONBLOCK;
+            }
+
+            int iResult = fcntl(m_socket, F_SETFL, flags);
+            if (iResult == -1)
+            {
+                ServiceLocator::Logger().LogError("SetBlocking failed: fcntl F_SETFL error\n");
+                return ErrorCodes::Failure;
+            }
+        #endif
+
         return ErrorCodes::Success;
+    }
+
+    bool TcpSocket::IsConnected() const
+    {
+        sockaddr_storage addr;
+        socklen_t addrLen = sizeof(addr);
+
+        return m_socket != INVALID_SOCKET_FD 
+            && getpeername(m_socket, (sockaddr*)&addr, &addrLen) == 0;
+    }
+
+    socket_t TcpSocket::GetNativeSocket() const
+    {
+        return m_socket;
     }
 }

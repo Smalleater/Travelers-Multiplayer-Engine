@@ -12,11 +12,9 @@ namespace tme
     private:
         socket_t m_socket = INVALID_SOCKET_FD;
 
-        int GetLastSocketError();
-
     public:
         TcpSocket() {};
-        ~TcpSocket() {};
+        ~TcpSocket();
 
         ErrorCodes Shutdown() override;
 
