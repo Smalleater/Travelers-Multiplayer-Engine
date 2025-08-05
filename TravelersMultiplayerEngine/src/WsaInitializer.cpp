@@ -1,5 +1,7 @@
 #include "WsaInitializer.hpp"
 
+#ifdef _WIN32
+
 namespace tme
 {
     // Initializes Winsock (version 2.2)
@@ -20,3 +22,5 @@ namespace tme
         WSACleanup();
     }
 }
+
+#endif

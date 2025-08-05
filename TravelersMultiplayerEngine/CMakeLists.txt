@@ -2,6 +2,7 @@ cmake_minimum_required(VERSION 3.10)
 
 project(TravelersMultiplayerEngine VERSION 1.0)
 
+# Use C++17 standard
 set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_STANDARD_REQUIRED True)
 
@@ -19,6 +20,11 @@ target_include_directories(tme
 
 # Define export macro for DLL/SO symbol visibility
 target_compile_definitions(tme PRIVATE TME_EXPORTS)
+
+# Link with ws2_32 (Windows Sockets library) only on Windows
+if(WIN32)
+    target_link_libraries(tme PRIVATE ws2_32)
+endif()
 
 #Optional: install public headers for users
 install(DIRECTORY include/ DESTINATION include)

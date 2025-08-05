@@ -1,6 +1,8 @@
 #ifndef TME_WSA_INITIALIZER_HPP
 #define TME_WSA_INITIALIZER_HPP
 
+#ifdef _WIN32
+
 #include <WinSock2.h>
 
 #include "TME/ErrorCodes.hpp"
@@ -38,5 +40,7 @@ namespace tme
         ErrorCodes Init();
     };
 }
+
+#endif
 
 #endif
