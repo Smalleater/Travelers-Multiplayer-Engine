@@ -1,6 +1,6 @@
 cmake_minimum_required(VERSION 3.10)
 
-project(TravelersMultiplayerEngine VERSION 1.0)
+project(TravelersMultiplayerEngine VERSION 0.1)
 
 # Use C++17 standard
 set(CMAKE_CXX_STANDARD 17)
