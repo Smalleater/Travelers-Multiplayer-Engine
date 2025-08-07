@@ -76,24 +76,24 @@ namespace tme
     }
 
     // Start the engine as a server
-    ErrorCodes NetworkEngine::StartServer()
+    ErrorCodes NetworkEngine::StartServer(uint16_t port)
     {
         if (m_networkManager == nullptr)
         {
             return ErrorCodes::NetworkEngineNotInitialized;
         }
 
-        return static_cast<NetworkManager*>(m_networkManager)->StartServer();
+        return static_cast<NetworkManager*>(m_networkManager)->StartServer(port);
     }
 
     // Start the engine as a client
-    ErrorCodes NetworkEngine::StartClient()
+    ErrorCodes NetworkEngine::StartClient(const std::string& address, uint16_t port)
     {
         if (m_networkManager == nullptr)
         {
             return ErrorCodes::NetworkEngineNotInitialized;
         }
 
-        return static_cast<NetworkManager*>(m_networkManager)->StartClient();
+        return static_cast<NetworkManager*>(m_networkManager)->StartClient(address, port);
     }
 }

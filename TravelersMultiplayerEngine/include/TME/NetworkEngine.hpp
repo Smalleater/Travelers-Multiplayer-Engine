@@ -41,11 +41,11 @@ namespace tme
 
         /// @brief Starts the network engine in server mode.
         /// @return ErrorCodes Result of the server start operation.
-        static TME_API ErrorCodes StartServer();
+        static TME_API ErrorCodes StartServer(uint16_t port);
 
         /// @brief Starts the network engine in client mode.
         /// @return ErrorCodes Result of the client start operation.
-        static TME_API ErrorCodes StartClient();
+        static TME_API ErrorCodes StartClient(const std::string& address, uint16_t port);
     };    
 }
 

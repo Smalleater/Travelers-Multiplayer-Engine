@@ -1,20 +1,27 @@
 #ifndef TME_NETWORK_MANAGER_HPP
 #define TME_NETWORK_MANAGER_HPP
 
+#include <memory>
+
 #include "TME/ErrorCodes.hpp"
+
+#include "sockets/TcpSocket.hpp"
 
 namespace tme
 {
     class NetworkManager
     {
     private:
-        /* data */
+        std::unique_ptr<TcpSocket> m_serverTcpSocket;
+
+        std::unique_ptr<TcpSocket> m_clientTcpSocket;
+
     public:
         NetworkManager() {}
         ~NetworkManager() {}
 
-        ErrorCodes StartServer();
-        ErrorCodes StartClient();
+        ErrorCodes StartServer(uint16_t port);
+        ErrorCodes StartClient(const std::string& address, uint16_t port);
     };    
 }
 
