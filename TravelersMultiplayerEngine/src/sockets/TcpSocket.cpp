@@ -9,6 +9,7 @@
 
 namespace tme
 {
+    // Destructor: shuts down and closes the socket if it's valid
     TcpSocket::~TcpSocket()
     {
         if (m_socket != INVALID_SOCKET_FD)
@@ -18,6 +19,7 @@ namespace tme
         }
     }
 
+    // Gracefully shuts down the socket for both send and receive
     ErrorCodes TcpSocket::Shutdown()
     {
         if (m_socket == INVALID_SOCKET_FD)
@@ -40,6 +42,7 @@ namespace tme
         return ErrorCodes::Success;
     }
 
+    // Connects the socket to the specified address and port
     ErrorCodes TcpSocket::Connect(const std::string& address, uint16_t port)
     {
         addrinfo hints = {};
@@ -58,6 +61,7 @@ namespace tme
             return ErrorCodes::Failure;
         }
 
+        // Try each address until a connection succeeds
         for (addrinfo* rp = result; rp != nullptr; rp = rp->ai_next)
         {
             m_socket = socket(rp->ai_family, rp->ai_socktype, rp->ai_protocol);
@@ -81,6 +85,7 @@ namespace tme
         return ErrorCodes::Failure;
     }
 
+    // Binds the socket to the specified port for listening
     ErrorCodes TcpSocket::Bind(uint16_t port)
     {
         addrinfo hints = {};
@@ -100,6 +105,7 @@ namespace tme
             return ErrorCodes::Failure;
         }
 
+        // Try each address until binding succeeds
         for (addrinfo* rp = result; rp != nullptr; rp = rp->ai_next)
         {
             m_socket = socket(rp->ai_family, rp->ai_socktype, rp->ai_protocol);
@@ -123,6 +129,7 @@ namespace tme
         return ErrorCodes::Failure;
     }
 
+    // Puts the socket into listening mode with the specified backlog
     ErrorCodes TcpSocket::Listen(int backlog)
     {
         int iResult = listen(m_socket, backlog);
@@ -135,6 +142,7 @@ namespace tme
         return ErrorCodes::Success;
     }
 
+    // Accepts an incoming connection and returns a new TcpSocket for the client
     std::unique_ptr<ISocket> TcpSocket::Accept()
     {
         socket_t clientSocket = accept(m_socket, NULL, NULL);
@@ -156,6 +164,7 @@ namespace tme
         return client;
     }
 
+    // Sends data through the socket
     ErrorCodes TcpSocket::Send(const void* data, size_t size, int& bytesSent)
     {
         if (size > static_cast<size_t>(std::numeric_limits<int>::max()))
@@ -184,6 +193,7 @@ namespace tme
         return ErrorCodes::Success;
     }
 
+    // Receives data from the socket
     ErrorCodes TcpSocket::Receive(void* buffer, size_t size, int& bytesReceived)
     {
         if (size > static_cast<size_t>(std::numeric_limits<int>::max()))
@@ -212,6 +222,7 @@ namespace tme
         return ErrorCodes::Success;
     }
 
+    // Sets the socket to blocking or non-blocking mode
     ErrorCodes TcpSocket::SetBlocking(bool blocking)
     {
         #ifdef _WIN32
@@ -251,6 +262,7 @@ namespace tme
         return ErrorCodes::Success;
     }
 
+    // Checks if the socket is currently connected
     bool TcpSocket::IsConnected() const
     {
         sockaddr_storage addr;
@@ -260,6 +272,7 @@ namespace tme
             && getpeername(m_socket, (sockaddr*)&addr, &addrLen) == 0;
     }
 
+    // Returns the native socket handle
     socket_t TcpSocket::GetNativeSocket() const
     {
         return m_socket;
