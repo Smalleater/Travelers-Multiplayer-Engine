@@ -4,6 +4,16 @@
 
 namespace tme
 {
+    ErrorCodes NetworkManager::UpdateServer()
+    {
+        return ErrorCodes::Success;
+    }
+
+    ErrorCodes NetworkManager::UpdateClient()
+    {
+        return ErrorCodes::Success;
+    }
+
     ErrorCodes NetworkManager::StartServer(uint16_t port)
     {
         m_serverTcpSocket = std::make_unique<TcpSocket>();
@@ -38,6 +48,31 @@ namespace tme
         {
             ServiceLocator::Logger().LogError("Connect failed with code: " + std::to_string(static_cast<int>(ecResult)));
             return ecResult;
+        }
+
+        return ErrorCodes::Success;
+    }
+
+    ErrorCodes NetworkManager::Update()
+    {
+        ErrorCodes ecResult;
+
+        if (m_serverTcpSocket != nullptr)
+        {
+            ecResult = UpdateServer();
+            if (ecResult != ErrorCodes::Success)
+            {
+                return ecResult;
+            }
+        }
+
+        if (m_clientTcpSocket != nullptr)
+        {
+            ecResult = UpdateClient();
+            if (ecResult != ErrorCodes::Success)
+            {
+                return ecResult;
+            }
         }
 
         return ErrorCodes::Success;

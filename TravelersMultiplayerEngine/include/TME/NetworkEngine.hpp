@@ -46,6 +46,12 @@ namespace tme
         /// @brief Starts the network engine in client mode.
         /// @return ErrorCodes Result of the client start operation.
         static TME_API ErrorCodes StartClient(const std::string& address, uint16_t port);
+
+        static TME_API ErrorCodes SendToServerReliable(const std::vector<uint8_t>& data);
+        static TME_API ErrorCodes SendToServerUnreliable(const std::vector<uint8_t>& data);
+
+        static TME_API ErrorCodes SendToClientReliable(const std::vector<uint8_t>& data, uint32_t clientId);
+        static TME_API ErrorCodes SendToClientUnreliable(const std::vector<uint8_t>& data, uint32_t clientId);
     };    
 }
 
