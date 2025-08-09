@@ -24,7 +24,7 @@ namespace tme
             throw std::runtime_error("Service initialization failed");
         }
 
-        // Create the network manager instance
+        // Instantiate the network manager
         m_networkManager = new NetworkManager();
 
         m_initialized = true;
@@ -34,14 +34,25 @@ namespace tme
         return ErrorCodes::Success;
     }
 
-    // Shutdown all services and cleanup resources
+    // Updates the network manager
+    ErrorCodes NetworkEngine::Update()
+    {
+        if (m_networkManager == nullptr)
+        {
+            return ErrorCodes::NetworkEngineNotInitialized;
+        }
+        
+        return static_cast<NetworkManager*>(m_networkManager)->Update();
+    }
+
+    // Shut down all services and cleanup resources
     ErrorCodes NetworkEngine::ShutDown()
     {
         ErrorCodes result = ErrorCodes::Success;
 
         // Shutdown thread manager service
         ServiceLocator::ThreadManager().Shutdown();
-        ServiceLocator::Logger().LogInfo("ThreadManager Manager was shutdown successfully");
+        ServiceLocator::Logger().LogInfo("ThreadManager was shutdown successfully");
 
         // Delete network manager instance
         delete static_cast<NetworkManager*>(m_networkManager);
@@ -69,7 +80,7 @@ namespace tme
         return Init();
     }
 
-    // Return wether the engine is initialized
+    // Return whether the engine is initialized
     bool NetworkEngine::IsInitialized()
     {
         return m_initialized;

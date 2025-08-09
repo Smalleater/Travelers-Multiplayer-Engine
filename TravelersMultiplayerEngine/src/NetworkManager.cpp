@@ -6,6 +6,22 @@ namespace tme
 {
     ErrorCodes NetworkManager::UpdateServer()
     {
+        std::unique_ptr<ISocket> newClient = m_serverTcpSocket->Accept();
+        if (newClient)
+        {
+            std::unique_ptr<TcpSocket> tcpClient(dynamic_cast<TcpSocket*>(newClient.release()));
+            if (tcpClient)
+            {
+                uint32_t clientId = m_nextClientId++;
+                m_clients[clientId] = std::move(tcpClient);
+                ServiceLocator::Logger().LogInfo("New client connected, id = " + std::to_string(clientId));
+            }
+            else
+            {
+                ServiceLocator::Logger().LogError("Accept: failed to cast ISocket* to TcpSocket*");
+            }
+        }
+
         return ErrorCodes::Success;
     }
 
@@ -31,6 +47,13 @@ namespace tme
         if (ecResult != ErrorCodes::Success)
         {
             ServiceLocator::Logger().LogError("Listen failed with code: " + std::to_string(static_cast<int>(ecResult)));
+            return ecResult;
+        }
+
+        ecResult = m_serverTcpSocket->SetBlocking(false);
+        if (ecResult != ErrorCodes::Success)
+        {
+            ServiceLocator::Logger().LogError("SetBlocking failed with code: " + std::to_string(static_cast<int>(ecResult)));
             return ecResult;
         }
 
