@@ -12,6 +12,8 @@ namespace tme
 
         CompletedWithErrors,
         NetworkEngineNotInitialized,
+
+        GetaddrinfoFailure,
     };  
 }
 

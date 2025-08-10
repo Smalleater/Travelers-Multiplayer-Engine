@@ -58,7 +58,7 @@ namespace tme
         iResult = getaddrinfo(address.c_str(), portStr.c_str(), &hints, &result);
         if (iResult != 0 || result == nullptr)
         {
-            return ErrorCodes::Failure;
+            return ErrorCodes::GetaddrinfoFailure;
         }
 
         // Try each address until a connection succeeds
@@ -77,7 +77,11 @@ namespace tme
                 return ErrorCodes::Success;
             }
 
+            ServiceLocator::Logger().LogError("TcpSocket::Connect: connect failed with error: " 
+                + std::to_string(Utils::GetLastSocketError()));
+
             CLOSE_SOCKET(m_socket);
+            m_socket = INVALID_SOCKET_FD;
         }
 
         freeaddrinfo(result);
@@ -89,7 +93,7 @@ namespace tme
     ErrorCodes TcpSocket::Bind(uint16_t port)
     {
         addrinfo hints = {};
-        hints.ai_family = AF_UNSPEC;
+        hints.ai_family = AF_INET;
         hints.ai_socktype = SOCK_STREAM;
         hints.ai_protocol = IPPROTO_TCP;
         hints.ai_flags = AI_PASSIVE;
@@ -102,7 +106,7 @@ namespace tme
         iResult = getaddrinfo(NULL, portStr.c_str(), &hints, &result);
         if (iResult != 0 || result == nullptr)
         {
-            return ErrorCodes::Failure;
+            return ErrorCodes::GetaddrinfoFailure;
         }
 
         // Try each address until binding succeeds
@@ -120,8 +124,9 @@ namespace tme
                 freeaddrinfo(result);
                 return ErrorCodes::Success;
             }
-
+                
             CLOSE_SOCKET(m_socket);
+            m_socket = INVALID_SOCKET_FD;
         }
 
         freeaddrinfo(result);
@@ -149,10 +154,10 @@ namespace tme
         if (clientSocket == INVALID_SOCKET_FD)
         {
             int error = Utils::GetLastSocketError();
-            if (error == WOULD_BLOCK_ERROR)
+            if (error != WOULD_BLOCK_ERROR)
             {
                 ServiceLocator::Logger().LogWarning(std::string("Accept failed: error code = ") 
-                    + std::to_string(error) + "\n");
+                    + std::to_string(error));
             }
 
             return nullptr;
@@ -169,7 +174,7 @@ namespace tme
     {
         if (size > static_cast<size_t>(std::numeric_limits<int>::max()))
         {
-            ServiceLocator::Logger().LogError("Send failed: size exceeds maximum allowed by system call\n");
+            ServiceLocator::Logger().LogError("Send failed: size exceeds maximum allowed by system call");
             bytesSent = 0;
             return ErrorCodes::Failure;
         }
@@ -177,14 +182,14 @@ namespace tme
         int iResult = send(m_socket, static_cast<const char*>(data), static_cast<int>(size), 0);
         if (iResult == 0)
         {
-            ServiceLocator::Logger().LogWarning("Send failed: connection closed by peer\n");
+            ServiceLocator::Logger().LogWarning("Send failed: connection closed by peer");
             bytesSent = 0;
             return ErrorCodes::Failure;
         }
         else if (iResult < 0)
         {
             ServiceLocator::Logger().LogError(std::string("Send failed: error code = ") 
-                + std::to_string(Utils::GetLastSocketError()) + "\n");
+                + std::to_string(Utils::GetLastSocketError()));
             bytesSent = 0;
             return ErrorCodes::Failure;
         }
@@ -198,7 +203,7 @@ namespace tme
     {
         if (size > static_cast<size_t>(std::numeric_limits<int>::max()))
         {
-            ServiceLocator::Logger().LogError("Receive failed: size exceeds maximum allowed by system call\n");
+            ServiceLocator::Logger().LogError("Receive failed: size exceeds maximum allowed by system call");
             bytesReceived = 0;
             return ErrorCodes::Failure;
         }
@@ -213,7 +218,7 @@ namespace tme
         else if (iResult < 0)
         {
             ServiceLocator::Logger().LogError(std::string("Receive failed: error code = ") 
-                + std::to_string(Utils::GetLastSocketError()) + "\n");
+                + std::to_string(Utils::GetLastSocketError()));
             bytesReceived = 0;
             return ErrorCodes::Failure;
         }
@@ -231,14 +236,14 @@ namespace tme
             int IResult = ioctlsocket(m_socket, FIONBIO, &mode);
             if (IResult != 0)
             {
-                ServiceLocator::Logger().LogError("SetBlocking failed: ioctlsocket error\n");
+                ServiceLocator::Logger().LogError("SetBlocking failed: ioctlsocket error");
                 return ErrorCodes::Failure;
             }
         #else
             int flags = fcntl(m_socket, F_GETFL, 0);
             if (flags == -1)
             {
-                ServiceLocator::Logger().LogError("SetBlocking failed: fcntl F_GETFL error\n");
+                ServiceLocator::Logger().LogError("SetBlocking failed: fcntl F_GETFL error");
                 return ErrorCodes::Failure;
             }
 
@@ -254,7 +259,7 @@ namespace tme
             int iResult = fcntl(m_socket, F_SETFL, flags);
             if (iResult == -1)
             {
-                ServiceLocator::Logger().LogError("SetBlocking failed: fcntl F_SETFL error\n");
+                ServiceLocator::Logger().LogError("SetBlocking failed: fcntl F_SETFL error");
                 return ErrorCodes::Failure;
             }
         #endif

@@ -1,6 +1,10 @@
 #ifndef TME_NETWORK_ENGINE_HPP
 #define TME_NETWORK_ENGINE_HPP
 
+#include <string>
+#include <vector>
+#include <cstdint>
+
 #include "TME/Export.hpp"
 
 #include "TME/ErrorCodes.hpp"

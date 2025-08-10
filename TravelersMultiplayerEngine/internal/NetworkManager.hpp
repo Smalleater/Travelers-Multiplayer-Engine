@@ -2,8 +2,13 @@
 #define TME_NETWORK_MANAGER_HPP
 
 #include <memory>
+#include <unordered_map>
 
 #include "TME/ErrorCodes.hpp"
+
+#ifdef _WIN32
+#include "WsaInitializer.hpp"
+#endif
 
 #include "sockets/TcpSocket.hpp"
 
@@ -12,6 +17,10 @@ namespace tme
     class NetworkManager
     {
     private:
+        #ifdef _WIN32
+            std::unique_ptr<WsaInitializer> m_wsa;
+        #endif
+
         std::unique_ptr<TcpSocket> m_serverTcpSocket;
 
         std::unique_ptr<TcpSocket> m_clientTcpSocket;
