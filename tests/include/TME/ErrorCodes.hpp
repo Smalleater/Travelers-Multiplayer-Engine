@@ -8,10 +8,12 @@ namespace tme
     enum class ErrorCodes
     {
         Success = 0,
+        Failure,
+
         CompletedWithErrors,
         NetworkEngineNotInitialized,
 
-        Failure
+        GetaddrinfoFailure,
     };  
 }
 

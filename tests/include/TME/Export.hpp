@@ -1,7 +1,7 @@
 #ifndef TME_EXPORT_HPP
 #define TME_EXPORT_HPP
 
-#if defined(_WIN32) || defined(_WIN64)
+#ifdef _WIN32
     #ifdef TME_EXPORTS
         #define TME_API __declspec(dllexport)
     #else
