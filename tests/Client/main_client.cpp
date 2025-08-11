@@ -28,7 +28,21 @@ int main()
         std::cout << "TME client failed to start" << std::endl;
     }
 
-    std::this_thread::sleep_for(std::chrono::seconds(5));
+    std::this_thread::sleep_for(std::chrono::seconds(1));
+
+    while (tme::NetworkEngine::IsInitialized())
+    {
+        std::string str = "Hello world from client";
+        std::vector<uint8_t> message(str.begin(), str.end());
+
+        ecResult = tme::NetworkEngine::SendToServerReliable(message);
+        if (ecResult != tme::ErrorCodes::Success)
+        {
+            std::cout << "failed to send message" << std::endl;
+        }
+        
+        std::this_thread::sleep_for(std::chrono::seconds(1));
+    }
 
     ecResult = tme::NetworkEngine::ShutDown();
     if (ecResult == tme::ErrorCodes::Success)

@@ -29,5 +29,17 @@ int main ()
     while (tme::NetworkEngine::IsInitialized())
     {
         tme::NetworkEngine::Update();
+
+        std::vector<std::pair<uint32_t, std::vector<uint8_t>>> outMessages;
+        tme::NetworkEngine::ReceiveAllReliableFromServer(outMessages);
+
+        if (outMessages.size() > 0)
+        {
+            for (const std::pair<uint32_t, std::vector<uint8_t>>& outMessagePair : outMessages)
+            {
+                std::string message = std::string(outMessagePair.second.begin(), outMessagePair.second.end());
+                std::cout << "New message -> clientId: " << outMessagePair.first << " message: " << message << std::endl;
+            }
+        }
     }
 }
