@@ -13,9 +13,20 @@ namespace tme
         CompletedWithErrors,
         NetworkEngineNotInitialized,
 
-        GetaddrinfoFailure,
-
-        NoDataAvailable,
+        InvalidSocket,
+        ShutdownFailed,
+        AddrInfoFailed,
+        ConnectFailed,
+        BindFailed,
+        ListenFailed,
+        SendSizeTooLarge,
+        SendConnectionClosed,
+        SendFailed,
+        ReceiveSizeTooLarge,
+        ReceiveConnectionClosed,
+        ReceiveWouldBlock,
+        ReceiveFailed,
+        SetBlockingFailed,
     };  
 }
 
