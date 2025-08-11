@@ -14,6 +14,8 @@ namespace tme
         NetworkEngineNotInitialized,
 
         GetaddrinfoFailure,
+
+        NoDataAvailable,
     };  
 }
 

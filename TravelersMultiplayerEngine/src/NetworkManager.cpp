@@ -54,24 +54,27 @@ namespace tme
         ecResult = m_serverTcpSocket->Bind(port);
         if (ecResult != ErrorCodes::Success)
         {
-            ServiceLocator::Logger().LogError("Bind failed with code: " + std::to_string(static_cast<int>(ecResult)) 
-                + " Last socket error: " + std::to_string(Utils::GetLastSocketError()));
+            ServiceLocator::Logger().LogError("Bind failed with code: " 
+                + std::to_string(static_cast<int>(ecResult)) + " Last socket error: " 
+                + std::to_string(Utils::GetLastSocketError()));
             return ecResult;
         }
 
         ecResult = m_serverTcpSocket->Listen();
         if (ecResult != ErrorCodes::Success)
         {
-            ServiceLocator::Logger().LogError("Listen failed with code: " + std::to_string(static_cast<int>(ecResult))
-                + " Last socket error: " + std::to_string(Utils::GetLastSocketError()));
+            ServiceLocator::Logger().LogError("Listen failed with code: " 
+                + std::to_string(static_cast<int>(ecResult)) + " Last socket error: " 
+                + std::to_string(Utils::GetLastSocketError()));
             return ecResult;
         }
 
         ecResult = m_serverTcpSocket->SetBlocking(false);
         if (ecResult != ErrorCodes::Success)
         {
-            ServiceLocator::Logger().LogError("SetBlocking failed with code: " + std::to_string(static_cast<int>(ecResult))
-                + " Last socket error: " + std::to_string(Utils::GetLastSocketError()));
+            ServiceLocator::Logger().LogError("SetBlocking failed with code: " 
+                + std::to_string(static_cast<int>(ecResult)) + " Last socket error: " 
+                + std::to_string(Utils::GetLastSocketError()));
             return ecResult;
         }
 
@@ -101,8 +104,9 @@ namespace tme
         ecResult = m_clientTcpSocket->Connect(address, port);
         if (ecResult != ErrorCodes::Success)
         {
-            ServiceLocator::Logger().LogError("Connect failed with code: " + std::to_string(static_cast<int>(ecResult))
-                + " Last socket error: " + std::to_string(Utils::GetLastSocketError()));
+            ServiceLocator::Logger().LogError("Connect failed with code: " 
+                + std::to_string(static_cast<int>(ecResult)) + " Last socket error: " 
+                + std::to_string(Utils::GetLastSocketError()));
             return ecResult;
         }
 
@@ -128,6 +132,52 @@ namespace tme
             if (ecResult != ErrorCodes::Success)
             {
                 return ecResult;
+            }
+        }
+
+        return ErrorCodes::Success;
+    }
+
+    ErrorCodes NetworkManager::SendToServerTcp(const std::vector<uint8_t>& data)
+    {
+        ErrorCodes ecResult;
+
+        int bytesSent;
+        ecResult = m_clientTcpSocket->Send(data.data(), data.size(), bytesSent);
+        if (ecResult != ErrorCodes::Success)
+        {
+            ServiceLocator::Logger().LogError("Send failed with code: " 
+                + std::to_string(static_cast<int>(ecResult)) + " Last socket error: " 
+                + std::to_string(Utils::GetLastSocketError()));
+            return ecResult;
+        }
+
+        return ErrorCodes::Success;
+    }
+
+    ErrorCodes NetworkManager::ReceiveAllFromServerTcp(
+        std::vector<std::pair<uint32_t, std::vector<uint8_t>>>& outMessages)
+    {
+        ErrorCodes ecResult;
+
+        for(std::pair<const uint32_t, std::unique_ptr<TcpSocket>>& clientPair: m_clients)
+        {
+            uint32_t clientId = clientPair.first;
+            std::unique_ptr<TcpSocket>& clientSocket = clientPair.second;
+
+            while (true)
+            {
+                std::vector<uint8_t> buffer(4096);
+                int bytesReceived = 0;
+
+                ecResult = clientSocket->Receive(buffer.data(), buffer.size(), bytesReceived);
+                if (ecResult != ErrorCodes::Success || bytesReceived == 0)
+                {
+                    break;
+                }
+
+                buffer.resize(bytesReceived);
+                outMessages.emplace_back(clientId, std::move(buffer));
             }
         }
 

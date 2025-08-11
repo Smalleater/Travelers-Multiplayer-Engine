@@ -107,4 +107,25 @@ namespace tme
 
         return static_cast<NetworkManager*>(m_networkManager)->StartClient(address, port);
     }
+
+    ErrorCodes NetworkEngine::SendToServerReliable(const std::vector<uint8_t>& data)
+    {
+        if (m_networkManager == nullptr)
+        {
+            return ErrorCodes::NetworkEngineNotInitialized;
+        }
+
+        return static_cast<NetworkManager*>(m_networkManager)->SendToServerTcp(data);
+    }
+
+    ErrorCodes NetworkEngine::ReceiveAllReliableFromServer(
+        std::vector<std::pair<uint32_t, std::vector<uint8_t>>>& outMessages)
+    {
+        if (m_networkManager == nullptr)
+        {
+            return ErrorCodes::NetworkEngineNotInitialized;
+        }
+
+        return static_cast<NetworkManager*>(m_networkManager)->ReceiveAllFromServerTcp(outMessages);
+    }
 }

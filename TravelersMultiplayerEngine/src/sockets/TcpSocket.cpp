@@ -217,8 +217,15 @@ namespace tme
         }
         else if (iResult < 0)
         {
+            int err = Utils::GetLastSocketError();
+            if (Utils::IsWouldBlockError(err))
+            {
+                bytesReceived = 0;
+                return ErrorCodes::NoDataAvailable;
+            }
+
             ServiceLocator::Logger().LogError(std::string("Receive failed: error code = ") 
-                + std::to_string(Utils::GetLastSocketError()));
+                + std::to_string(err));
             bytesReceived = 0;
             return ErrorCodes::Failure;
         }

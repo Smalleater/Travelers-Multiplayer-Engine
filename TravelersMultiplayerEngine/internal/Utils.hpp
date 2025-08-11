@@ -19,6 +19,8 @@ namespace tme
     static bool HasAnyConsoleOutput();
 
     static int GetLastSocketError();
+
+    static bool IsWouldBlockError(int err);
     };
 }
 

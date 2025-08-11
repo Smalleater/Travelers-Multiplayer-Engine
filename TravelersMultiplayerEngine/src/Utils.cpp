@@ -73,4 +73,13 @@ namespace tme
             return errno;
         #endif
     }
+
+    bool Utils::IsWouldBlockError(int err)
+    {
+        #ifdef _WIN32
+            return err == WSAEWOULDBLOCK;
+        #else
+            return err == EWOULDBLOCK || err == EAGAIN;
+        #endif
+    }
 }

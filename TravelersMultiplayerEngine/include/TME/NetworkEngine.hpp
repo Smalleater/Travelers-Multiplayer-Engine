@@ -60,22 +60,8 @@ namespace tme
         /// @return ErrorCodes Result of the send operation.
         static TME_API ErrorCodes SendToServerReliable(const std::vector<uint8_t>& data);
 
-        /// @brief Sends data unreliably to the server (may be lost or arrive out of order).
-        /// @param data The data buffer to send.
-        /// @return ErrorCodes Result of the send operation.
-        static TME_API ErrorCodes SendToServerUnreliable(const std::vector<uint8_t>& data);
-
-        /// @brief Sends data reliably to a specific client.
-        /// @param data The data buffer to send.
-        /// @param clientId The unique identifier of the target client.
-        /// @return ErrorCodes Result of the send operation.
-        static TME_API ErrorCodes SendToClientReliable(const std::vector<uint8_t>& data, uint32_t clientId);
-
-        /// @brief Sends data unreliably to a specific client (may be lost or arrive out of order).
-        /// @param data The data buffer to send.
-        /// @param clientId The unique identifier of the target client.
-        /// @return ErrorCodes Result of the send operation.
-        static TME_API ErrorCodes SendToClientUnreliable(const std::vector<uint8_t>& data, uint32_t clientId);
+        static TME_API ErrorCodes ReceiveAllReliableFromServer(
+            std::vector<std::pair<uint32_t, std::vector<uint8_t>>>& outMessages);
     };    
 }
 

@@ -3,6 +3,7 @@
 
 #include <memory>
 #include <unordered_map>
+#include <vector>
 
 #include "TME/ErrorCodes.hpp"
 
@@ -39,6 +40,11 @@ namespace tme
         ErrorCodes StartClient(const std::string& address, uint16_t port);
 
         ErrorCodes Update();
+
+        ErrorCodes SendToServerTcp(const std::vector<uint8_t>& data);
+
+        ErrorCodes ReceiveAllFromServerTcp(
+            std::vector<std::pair<uint32_t, std::vector<uint8_t>>>& outMessages);
     };    
 }
 
