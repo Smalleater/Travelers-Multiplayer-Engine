@@ -18,6 +18,9 @@ namespace tme
         /// @brief Native socket handle.
         socket_t m_socket = INVALID_SOCKET_FD;
 
+        /// @brief Last socket error code.
+        int m_lastSocketError = 0;
+
     public:
         /// @brief Constructs a new TcpSocket instance.
         TcpSocket() {};
