@@ -46,7 +46,7 @@ namespace tme
                 continue;
             }
 
-            tcpClient = std::make_unique<TcpSocket>(dynamic_cast<TcpSocket*>(outClient.release()));
+            tcpClient = std::unique_ptr<TcpSocket>(dynamic_cast<TcpSocket*>(outClient.release()));
             if (tcpClient == nullptr)
             {
                 ServiceLocator::Logger().LogError("UpdateServer: Failed to cast ISocket* to TcpSocket*");

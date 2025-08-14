@@ -12,7 +12,7 @@ namespace tme
     bool NetworkEngine::m_initialized = false;
     void* NetworkEngine::m_networkManager = nullptr;
 
-    // Initialize all required services and create the NetworkManager instance
+    // Initializes the network engine and its dependencies
     ErrorCodes NetworkEngine::Init()
     {
         ErrorCodes result;
@@ -20,21 +20,18 @@ namespace tme
         result = ServiceManager::Init();
         if (result != ErrorCodes::Success)
         {
-            // Throw exception if service initialization fails
             throw std::runtime_error("Service initialization failed");
         }
 
-        // Instantiate the network manager
         m_networkManager = new NetworkManager();
 
         m_initialized = true;
 
-        // Log successful startup
         ServiceLocator::Logger().LogInfo("Network Engine has been started successfully");
         return ErrorCodes::Success;
     }
 
-    // Updates the network manager
+    // Updates the network manager (should be called regularly)
     ErrorCodes NetworkEngine::Update()
     {
         if (m_networkManager == nullptr)
@@ -45,20 +42,17 @@ namespace tme
         return static_cast<NetworkManager*>(m_networkManager)->Update();
     }
 
-    // Shut down all services and cleanup resources
+    // Shuts down the network engine and cleans up resources
     ErrorCodes NetworkEngine::ShutDown()
     {
         ErrorCodes result = ErrorCodes::Success;
 
-        // Shutdown thread manager service
         ServiceLocator::ThreadManager().Shutdown();
         ServiceLocator::Logger().LogInfo("ThreadManager was shutdown successfully");
 
-        // Delete network manager instance
         delete static_cast<NetworkManager*>(m_networkManager);
         m_networkManager = nullptr;
 
-        // Shutdown services and check for errors
         if (ServiceManager::ShutDown() != ErrorCodes::Success)
         {
             result = ErrorCodes::CompletedWithErrors;
@@ -69,7 +63,7 @@ namespace tme
         return result;
     }
 
-    // Ensure the engine is initialized, initialize if necessary
+    // Ensures the network engine is initialized before use
     ErrorCodes NetworkEngine::EnsureInitialized()
     {
         if (m_initialized)
@@ -80,13 +74,13 @@ namespace tme
         return Init();
     }
 
-    // Return whether the engine is initialized
+    // Returns whether the network engine is initialized
     bool NetworkEngine::IsInitialized()
     {
         return m_initialized;
     }
 
-    // Start the engine as a server
+    // Starts the server on the specified port
     ErrorCodes NetworkEngine::StartServer(uint16_t port)
     {
         if (m_networkManager == nullptr)
@@ -97,7 +91,7 @@ namespace tme
         return static_cast<NetworkManager*>(m_networkManager)->StartServer(port);
     }
 
-    // Start the engine as a client
+    // Starts the client and connects to the specified address and port
     ErrorCodes NetworkEngine::StartClient(const std::string& address, uint16_t port)
     {
         if (m_networkManager == nullptr)
@@ -108,6 +102,7 @@ namespace tme
         return static_cast<NetworkManager*>(m_networkManager)->StartClient(address, port);
     }
 
+    // Sends data reliably to the server (TCP)
     ErrorCodes NetworkEngine::SendToServerReliable(const std::vector<uint8_t>& data)
     {
         if (m_networkManager == nullptr)
@@ -118,7 +113,8 @@ namespace tme
         return static_cast<NetworkManager*>(m_networkManager)->SendToServerTcp(data);
     }
 
-    ErrorCodes NetworkEngine::ReceiveAllReliableFromServer(
+    // Receives all reliable messages from clients (TCP)
+    ErrorCodes NetworkEngine::ReceiveAllReliableFromClient(
         std::vector<std::pair<uint32_t, std::vector<uint8_t>>>& outMessages)
     {
         if (m_networkManager == nullptr)
@@ -126,6 +122,6 @@ namespace tme
             return ErrorCodes::NetworkEngineNotInitialized;
         }
 
-        return static_cast<NetworkManager*>(m_networkManager)->ReceiveAllFromServerTcp(outMessages);
+        return static_cast<NetworkManager*>(m_networkManager)->ReceiveAllFromClientTcp(outMessages);
     }
 }
