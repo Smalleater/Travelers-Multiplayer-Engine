@@ -42,7 +42,7 @@ namespace tme
 
         /// @brief Accepts an incoming connection and returns a new socket for it.
         /// @return Unique pointer to the accepted socket, or nullptr on failure. 
-        virtual std::unique_ptr<ISocket> Accept() = 0;
+        virtual ErrorCodes Accept(std::unique_ptr<ISocket>& outClient) = 0;
 
         /// @brief Sends data through the socket.
         /// @param data Pointer to the data buffer.
@@ -70,6 +70,8 @@ namespace tme
         /// @brief Returns the native socket handle.
         /// @return The underlying socket descriptor/handle.
         virtual socket_t GetNativeSocket() const = 0;
+
+        virtual int GetLastSocketError() const = 0;
     }; 
 }
 

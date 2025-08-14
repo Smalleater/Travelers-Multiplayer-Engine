@@ -50,7 +50,7 @@ namespace tme
         
         /// @brief Accepts an incoming connection and returns a new TcpSocket for it.
         /// @return Unique pointer to the accepted socket, or nullptr on failure.
-        std::unique_ptr<ISocket> Accept() override;
+        ErrorCodes Accept(std::unique_ptr<ISocket>& outClient) override;
 
         /// @brief Sends data through the socket.
         /// @param data Pointer to the data buffer.
@@ -78,6 +78,8 @@ namespace tme
         /// @brief Returns the native socket handle.
         /// @return The underlying socket descriptor/handle.
         socket_t GetNativeSocket() const override;
+
+        int GetLastSocketError() const override;
     };
 }
 

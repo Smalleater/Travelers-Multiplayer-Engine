@@ -8,6 +8,8 @@ namespace tme
     enum class ErrorCodes
     {
         Success = 0,
+        PartialSuccess,
+        AlreadyInitialized,
         Failure,
 
         CompletedWithErrors,
@@ -18,6 +20,7 @@ namespace tme
         AddrInfoFailed,
         ConnectFailed,
         BindFailed,
+        AcceptFailed,
         ListenFailed,
         SendSizeTooLarge,
         SendConnectionClosed,

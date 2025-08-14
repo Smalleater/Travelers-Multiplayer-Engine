@@ -20,6 +20,8 @@ namespace tme
         /// @brief Structure to hold Winsock initialization data.
         WSADATA m_wsaData;
 
+        int m_wsaStartupResult = 0;
+
     public:
         /// @brief Default constructor. 
         /// Does not initialize Winsock; call Init() explicitly.
@@ -38,6 +40,8 @@ namespace tme
         /// @brief Initializes the Winsock library.
         /// @return ErrorCodes::Success on success, or ErrorCodes::Failure on error.
         ErrorCodes Init();
+
+        int GetWsaStartupResult() const;
     };
 }
 

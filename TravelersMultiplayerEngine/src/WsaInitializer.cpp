@@ -7,8 +7,8 @@ namespace tme
     // Initializes Winsock (version 2.2)
     ErrorCodes WsaInitializer::Init()
     {
-        int result = WSAStartup(MAKEWORD(2, 2), &m_wsaData);
-        if (result != 0)
+        m_wsaStartupResult = WSAStartup(MAKEWORD(2, 2), &m_wsaData);
+        if (m_wsaStartupResult != 0)
         {
             return ErrorCodes::Failure;
         }
@@ -20,6 +20,11 @@ namespace tme
     WsaInitializer::~WsaInitializer()
     {
         WSACleanup();
+    }
+
+    int WsaInitializer::GetWsaStartupResult() const
+    {
+        return m_wsaStartupResult;
     }
 }
 
