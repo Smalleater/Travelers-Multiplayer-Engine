@@ -60,8 +60,15 @@ namespace tme
         /// @return ErrorCodes Result of the send operation.
         static TME_API ErrorCodes SendToServerReliable(const std::vector<uint8_t>& data);
 
+        static TME_API ErrorCodes SendToClientReliable(const std::vector<uint8_t>& data, uint32_t networkId);
+
+        static TME_API ErrorCodes SendToAllClientReliable(const std::vector<uint8_t>& data);
+
         static TME_API ErrorCodes ReceiveAllReliableFromClient(
             std::vector<std::pair<uint32_t, std::vector<uint8_t>>>& outMessages);
+
+        static TME_API ErrorCodes ReceiveAllReliableFromServer(
+            std::vector<std::vector<uint8_t>>& outMessages);
     };    
 }
 

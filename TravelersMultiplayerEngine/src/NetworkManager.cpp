@@ -27,7 +27,6 @@ namespace tme
             ecResult = m_serverTcpSocket->Accept(outClient);
             lastError = m_serverTcpSocket->GetLastSocketError();
 
-            // If accept fails, log error unless it's a non-blocking "would block" error
             if (ecResult != ErrorCodes::Success)
             {
                 if (lastError != WOULD_BLOCK_ERROR)
@@ -177,6 +176,16 @@ namespace tme
             return ecResult;
         }
 
+        ecResult = m_clientTcpSocket->SetBlocking(false);
+        lastError = m_clientTcpSocket->GetLastSocketError();
+        if (ecResult != ErrorCodes::Success)
+        {
+            ServiceLocator::Logger().LogError("StartClient: SetBlocking failed with code: " 
+                + std::to_string(static_cast<int>(ecResult)) + " Last socket error: " 
+                + std::to_string(lastError));
+            return ecResult;
+        }
+
         return ErrorCodes::Success;
     }
 
@@ -220,39 +229,151 @@ namespace tme
     // Sends data to server via TCP
     ErrorCodes NetworkManager::SendToServerTcp(const std::vector<uint8_t>& data)
     {
+        if (m_clientTcpSocket == nullptr)
+        {
+            ServiceLocator::Logger().LogError(
+                "SendToServerTcp: TCP client socket not initialized in NetworkManager");
+            return ErrorCodes::ClientNotInitialized;
+        }
+
         ErrorCodes ecResult;
         int lastError;
 
         int bytesSent;
+
         ecResult = m_clientTcpSocket->Send(data.data(), data.size(), bytesSent);
         lastError = m_clientTcpSocket->GetLastSocketError();
-        if (ecResult != ErrorCodes::Success)
+        if (ecResult == ErrorCodes::SendConnectionClosed)
+        {
+            m_clientTcpSocket->Shutdown();
+            m_clientTcpSocket.reset();
+            ServiceLocator::Logger().LogInfo(
+                "Disconnected from server (connection closed by remote host)");
+
+            return ErrorCodes::ReceiveConnectionClosed;
+        }
+        else if (ecResult != ErrorCodes::Success)
         {
             ServiceLocator::Logger().LogError("SendToServerTcp: Send failed with code: " 
                 + std::to_string(static_cast<int>(ecResult)) + " Last socket error: " 
                 + std::to_string(lastError));
+
+            m_clientTcpSocket->Shutdown();
+            m_clientTcpSocket.reset();
+            ServiceLocator::Logger().LogInfo(
+                "Disconnected from server (connection closed by remote host)");
+
             return ecResult;
         }
 
         return ErrorCodes::Success;
     }
 
+    ErrorCodes NetworkManager::SendToClientTcp(const std::vector<uint8_t>& data, uint32_t networkId)
+    {
+        if (m_clients.find(networkId) == m_clients.end())
+        {
+            ServiceLocator::Logger().LogError("SendToClientTcp: No TCP client found for networkId" 
+                + std::to_string(networkId));
+            return ErrorCodes::ClientNotFound;
+        }
+
+        ErrorCodes ecResult;
+        int lastError;
+
+        int bytesSent;
+
+        ecResult = m_clients[networkId]->Send(data.data(), data.size(), bytesSent);
+        lastError = m_clients[networkId]->GetLastSocketError();
+        if (ecResult == ErrorCodes::SendConnectionClosed)
+        {
+            m_clients[networkId]->Shutdown();
+            m_clients.erase(networkId);
+            ServiceLocator::Logger().LogInfo("Client with id: " + std::to_string(networkId) 
+                + " disconnected");
+            return ErrorCodes::SendConnectionClosed;
+        }
+        else if (ecResult != ErrorCodes::Success)
+        {
+            ServiceLocator::Logger().LogError("SendToClientTcp: Send failed with code: " 
+                + std::to_string(static_cast<int>(ecResult)) + " Last socket error: " 
+                + std::to_string(lastError));
+
+            m_clients[networkId]->Shutdown();
+            m_clients.erase(networkId);
+            ServiceLocator::Logger().LogInfo("Client with id: " + std::to_string(networkId) 
+                + " disconnected");
+
+            return ecResult;
+        }
+
+        return ErrorCodes::Success;
+    }
+
+    ErrorCodes NetworkManager::SendToAllClientTcp(const std::vector<uint8_t>& data)
+    {
+        if (m_clients.empty())
+        {
+            return ErrorCodes::Success;
+        }
+
+        bool hadSuccess = false;
+        bool hadError = false;
+
+        ErrorCodes ecResult;
+
+        for (std::pair<const uint32_t, std::unique_ptr<TcpSocket>>& clientPair : m_clients)
+        {
+            ecResult = SendToClientTcp(data, clientPair.first);
+            if (ecResult != ErrorCodes::Success)
+            {
+                hadError = true;
+            }
+            else
+            {
+                hadSuccess = true;
+            }
+        }
+
+        if (hadSuccess && !hadError)
+        {
+            return ErrorCodes::Success;
+        }
+        else if (hadSuccess && hadError)
+        {
+            return ErrorCodes::PartialSuccess;
+        }
+        else
+        {
+            return ErrorCodes::Failure;
+        }
+    }
+
     // Receives all available messages from all connected clients
     // Removes clients that have disconnected
-    ErrorCodes NetworkManager::ReceiveAllFromClientTcp(
+    ErrorCodes NetworkManager::ReceiveFromAllClientsTcp(
         std::vector<std::pair<uint32_t, std::vector<uint8_t>>>& outMessages)
     {
+        if (m_clients.empty())
+        {
+            return ErrorCodes::Success;
+        }
+
+        bool hadSuccess = false;
         bool hadError = false;
 
         const uint8_t maxMessagesPerClientPerFrame = 32;
         uint8_t messagesReceivedThisFrame;
+
+        int bytesReceived;
+        std::vector<uint8_t> buffer(4096);
 
         ErrorCodes ecResult;
         int lastError;
 
         std::vector<uint32_t> clientsToRemove;
 
-        for(std::pair<const uint32_t, std::unique_ptr<TcpSocket>>& clientPair: m_clients)
+        for(std::pair<const uint32_t, std::unique_ptr<TcpSocket>>& clientPair : m_clients)
         {
             uint32_t networkId = clientPair.first;
             std::unique_ptr<TcpSocket>& clientSocket = clientPair.second;
@@ -260,28 +381,37 @@ namespace tme
             messagesReceivedThisFrame = 0;
             while (messagesReceivedThisFrame < maxMessagesPerClientPerFrame)
             {
-                std::vector<uint8_t> buffer(4096);
-                int bytesReceived = 0;
+                bytesReceived = 0;
+                buffer.resize(4096);
 
                 ecResult = clientSocket->Receive(buffer.data(), buffer.size(), bytesReceived);
                 lastError = clientSocket->GetLastSocketError();
-                if (ecResult != ErrorCodes::Success || bytesReceived == 0)
+                if (ecResult != ErrorCodes::Success)
                 {
-                    // If connection closed, mark client for removal
                     if (ecResult == ErrorCodes::ReceiveConnectionClosed)
                     {
                         clientsToRemove.push_back(networkId);
                     }
-                    // Log errors except for non-blocking "would block"
                     else if (ecResult != ErrorCodes::ReceiveWouldBlock)
                     {
                         ServiceLocator::Logger().LogError("ReceiveAllFromServerTcp: Receive failed with code: " 
                             + std::to_string(static_cast<int>(ecResult)) + " Last socket error: " 
                             + std::to_string(lastError));
+
+                        clientsToRemove.push_back(networkId);
+
                         hadError = true;
+                    }
+                    else
+                    {
+                        hadSuccess = true;
                     }
 
                     break;
+                }
+                else
+                {
+                    hadSuccess = true;
                 }
 
                 buffer.resize(bytesReceived);
@@ -293,11 +423,78 @@ namespace tme
 
         for (uint32_t networkId : clientsToRemove)
         {
+            m_clients[networkId]->Shutdown();
             m_clients.erase(networkId);
             ServiceLocator::Logger().LogInfo("Client with id: " + std::to_string(networkId) 
                 + " disconnected");
         }
 
-        return hadError ? ErrorCodes::PartialSuccess : ErrorCodes::Success;
+        if (hadSuccess && !hadError)
+        {
+            return ErrorCodes::Success;
+        }
+        else if (hadSuccess && hadError)
+        {
+            return ErrorCodes::PartialSuccess;
+        }
+        else
+        {
+            return ErrorCodes::Failure;
+        }
+    }
+
+    ErrorCodes NetworkManager::ReceiveFromServerTcp(std::vector<std::vector<uint8_t>>& outMessages)
+    {
+        const uint8_t maxMessagesPerFrame = 32;
+        uint8_t messagesReceivedThisFrame = 0;
+
+        int bytesReceived;
+        std::vector<uint8_t> buffer(4096);
+
+        ErrorCodes ecResult;
+        int lastError;
+
+        while (messagesReceivedThisFrame < maxMessagesPerFrame)
+        {
+            bytesReceived = 0;
+            buffer.resize(4096);
+
+            ecResult = m_clientTcpSocket->Receive(buffer.data(), buffer.size(), bytesReceived);
+            lastError = m_clientTcpSocket->GetLastSocketError();
+            if (ecResult != ErrorCodes::Success)
+            {
+                if (ecResult == ErrorCodes::ReceiveConnectionClosed)
+                {
+                    m_clientTcpSocket->Shutdown();
+                    m_clientTcpSocket.reset();
+                    ServiceLocator::Logger().LogInfo(
+                        "Disconnected from server (connection closed by remote host)");
+                    return ErrorCodes::ReceiveConnectionClosed;
+                }
+                else if (ecResult != ErrorCodes::ReceiveWouldBlock)
+                {
+                    ServiceLocator::Logger().LogError("ReceiveFromClientTcp: Receive failed with code: " 
+                            + std::to_string(static_cast<int>(ecResult)) + " Last socket error: " 
+                            + std::to_string(lastError));
+                    
+                    m_clientTcpSocket->Shutdown();
+                    m_clientTcpSocket.reset();
+                    ServiceLocator::Logger().LogInfo(
+                        "Disconnected from server (connection closed by remote host)");
+                    
+                    return messagesReceivedThisFrame > 0 
+                        ? ErrorCodes::PartialSuccess : ErrorCodes::ReceiveFailed;
+                }
+
+                break;
+            }
+
+            buffer.resize(bytesReceived);
+            outMessages.emplace_back(std::move(buffer));
+
+            messagesReceivedThisFrame++;
+        }
+        
+        return ErrorCodes::Success;
     }
 }

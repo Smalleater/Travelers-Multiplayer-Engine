@@ -74,11 +74,17 @@ namespace tme
         /// @return Error code indicating success or failure.
         ErrorCodes SendToServerTcp(const std::vector<uint8_t>& data);
 
+        ErrorCodes SendToClientTcp(const std::vector<uint8_t>& data, uint32_t networkId);
+
+        ErrorCodes SendToAllClientTcp(const std::vector<uint8_t>& data);
+
         /// @brief Receives all messages from clients via TCP (server-side).
         /// @param outMessages Output vector of pairs (network ID, message data).
         /// @return Error code indicating success or failure.
-        ErrorCodes ReceiveAllFromClientTcp(
+        ErrorCodes ReceiveFromAllClientsTcp(
             std::vector<std::pair<uint32_t, std::vector<uint8_t>>>& outMessages);
+
+        ErrorCodes ReceiveFromServerTcp(std::vector<std::vector<uint8_t>>& outMessages);
     };    
 }
 

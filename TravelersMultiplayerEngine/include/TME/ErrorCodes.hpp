@@ -15,6 +15,9 @@ namespace tme
         CompletedWithErrors,
         NetworkEngineNotInitialized,
 
+        ClientNotInitialized,
+        ClientNotFound,
+
         InvalidSocket,
         ShutdownFailed,
         AddrInfoFailed,

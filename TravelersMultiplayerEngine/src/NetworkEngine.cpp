@@ -113,6 +113,26 @@ namespace tme
         return static_cast<NetworkManager*>(m_networkManager)->SendToServerTcp(data);
     }
 
+    ErrorCodes NetworkEngine::SendToClientReliable(const std::vector<uint8_t>& data, uint32_t networkId)
+    {
+        if (m_networkManager == nullptr)
+        {
+            return ErrorCodes::NetworkEngineNotInitialized;
+        }
+
+        return static_cast<NetworkManager*>(m_networkManager)->SendToClientTcp(data, networkId);
+    }
+
+    ErrorCodes NetworkEngine::SendToAllClientReliable(const std::vector<uint8_t>& data)
+    {
+        if (m_networkManager == nullptr)
+        {
+            return ErrorCodes::NetworkEngineNotInitialized;
+        }
+
+        return static_cast<NetworkManager*>(m_networkManager)->SendToAllClientTcp(data);
+    }
+
     // Receives all reliable messages from clients (TCP)
     ErrorCodes NetworkEngine::ReceiveAllReliableFromClient(
         std::vector<std::pair<uint32_t, std::vector<uint8_t>>>& outMessages)
@@ -122,6 +142,17 @@ namespace tme
             return ErrorCodes::NetworkEngineNotInitialized;
         }
 
-        return static_cast<NetworkManager*>(m_networkManager)->ReceiveAllFromClientTcp(outMessages);
+        return static_cast<NetworkManager*>(m_networkManager)->ReceiveFromAllClientsTcp(outMessages);
+    }
+
+    ErrorCodes NetworkEngine::ReceiveAllReliableFromServer(
+        std::vector<std::vector<uint8_t>>& outMessages)
+    {
+        if (m_networkManager == nullptr)
+        {
+            return ErrorCodes::NetworkEngineNotInitialized;
+        }
+
+        return static_cast<NetworkManager*>(m_networkManager)->ReceiveFromServerTcp(outMessages);
     }
 }
