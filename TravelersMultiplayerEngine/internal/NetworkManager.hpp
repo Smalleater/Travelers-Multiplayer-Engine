@@ -54,6 +54,10 @@ namespace tme
         /// @brief Destroys the NetworkManager object and cleans up resources.
         ~NetworkManager() {}
 
+        bool HasServerSocket() const;
+
+        bool HasClientSocket() const;
+
         /// @brief Starts the server on the specified port.
         /// @param port The port to listen on.
         /// @return Error code indicating success or failure.

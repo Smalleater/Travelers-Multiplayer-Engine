@@ -80,6 +80,26 @@ namespace tme
         return m_initialized;
     }
 
+    bool NetworkEngine::IsServerStarted()
+    {
+        if (m_networkManager == nullptr)
+        {
+            return false;
+        }
+
+        return static_cast<NetworkManager*>(m_networkManager)->HasServerSocket();
+    }
+
+    bool NetworkEngine::IsClientConnected()
+    {
+        if (m_networkManager == nullptr)
+        {
+            return false;
+        }
+
+        return static_cast<NetworkManager*>(m_networkManager)->HasClientSocket();
+    }
+
     // Starts the server on the specified port
     ErrorCodes NetworkEngine::StartServer(uint16_t port)
     {
@@ -102,22 +122,15 @@ namespace tme
         return static_cast<NetworkManager*>(m_networkManager)->StartClient(address, port);
     }
 
-    // Sends data reliably to the server (TCP)
-    ErrorCodes NetworkEngine::SendToServerReliable(const std::vector<uint8_t>& data)
-    {
-        if (m_networkManager == nullptr)
-        {
-            return ErrorCodes::NetworkEngineNotInitialized;
-        }
-
-        return static_cast<NetworkManager*>(m_networkManager)->SendToServerTcp(data);
-    }
-
     ErrorCodes NetworkEngine::SendToClientReliable(const std::vector<uint8_t>& data, uint32_t networkId)
     {
         if (m_networkManager == nullptr)
         {
             return ErrorCodes::NetworkEngineNotInitialized;
+        }
+        else if (!static_cast<NetworkManager*>(m_networkManager)->HasServerSocket())
+        {
+            return ErrorCodes::NetworkServerNotStarted;
         }
 
         return static_cast<NetworkManager*>(m_networkManager)->SendToClientTcp(data, networkId);
@@ -129,8 +142,27 @@ namespace tme
         {
             return ErrorCodes::NetworkEngineNotInitialized;
         }
+        else if (!static_cast<NetworkManager*>(m_networkManager)->HasServerSocket())
+        {
+            return ErrorCodes::NetworkServerNotStarted;
+        }
 
         return static_cast<NetworkManager*>(m_networkManager)->SendToAllClientTcp(data);
+    }
+
+    // Sends data reliably to the server (TCP)
+    ErrorCodes NetworkEngine::SendToServerReliable(const std::vector<uint8_t>& data)
+    {
+        if (m_networkManager == nullptr)
+        {
+            return ErrorCodes::NetworkEngineNotInitialized;
+        }
+        else if (!static_cast<NetworkManager*>(m_networkManager)->HasClientSocket())
+        {
+            return ErrorCodes::NetworkClientNotConnected;
+        }
+
+        return static_cast<NetworkManager*>(m_networkManager)->SendToServerTcp(data);
     }
 
     // Receives all reliable messages from clients (TCP)
@@ -140,6 +172,10 @@ namespace tme
         if (m_networkManager == nullptr)
         {
             return ErrorCodes::NetworkEngineNotInitialized;
+        }
+        else if (!static_cast<NetworkManager*>(m_networkManager)->HasServerSocket())
+        {
+            return ErrorCodes::NetworkServerNotStarted;
         }
 
         return static_cast<NetworkManager*>(m_networkManager)->ReceiveFromAllClientsTcp(outMessages);
@@ -151,6 +187,10 @@ namespace tme
         if (m_networkManager == nullptr)
         {
             return ErrorCodes::NetworkEngineNotInitialized;
+        }
+        else if (!static_cast<NetworkManager*>(m_networkManager)->HasClientSocket())
+        {
+            return ErrorCodes::NetworkClientNotConnected;
         }
 
         return static_cast<NetworkManager*>(m_networkManager)->ReceiveFromServerTcp(outMessages);

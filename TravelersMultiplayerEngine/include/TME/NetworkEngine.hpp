@@ -47,6 +47,10 @@ namespace tme
         /// @return true if initialized, false otherwise.
         static TME_API bool IsInitialized();
 
+        static TME_API bool IsServerStarted();
+
+        static TME_API bool IsClientConnected();
+
         /// @brief Starts the network engine in server mode.
         /// @return ErrorCodes Result of the server start operation.
         static TME_API ErrorCodes StartServer(uint16_t port);
@@ -55,14 +59,14 @@ namespace tme
         /// @return ErrorCodes Result of the client start operation.
         static TME_API ErrorCodes StartClient(const std::string& address, uint16_t port);
 
+        static TME_API ErrorCodes SendToClientReliable(const std::vector<uint8_t>& data, uint32_t networkId);
+
+        static TME_API ErrorCodes SendToAllClientReliable(const std::vector<uint8_t>& data);
+
         /// @brief Sends data reliably to the server.
         /// @param data The data buffer to send.
         /// @return ErrorCodes Result of the send operation.
         static TME_API ErrorCodes SendToServerReliable(const std::vector<uint8_t>& data);
-
-        static TME_API ErrorCodes SendToClientReliable(const std::vector<uint8_t>& data, uint32_t networkId);
-
-        static TME_API ErrorCodes SendToAllClientReliable(const std::vector<uint8_t>& data);
 
         static TME_API ErrorCodes ReceiveAllReliableFromClient(
             std::vector<std::pair<uint32_t, std::vector<uint8_t>>>& outMessages);

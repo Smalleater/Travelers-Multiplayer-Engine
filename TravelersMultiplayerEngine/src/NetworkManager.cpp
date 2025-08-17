@@ -69,6 +69,16 @@ namespace tme
         return ErrorCodes::Success;
     }
 
+    bool NetworkManager::HasServerSocket() const
+    {
+        return m_serverTcpSocket != nullptr;
+    }
+
+    bool NetworkManager::HasClientSocket() const
+    {
+        return m_clientTcpSocket != nullptr;
+    }
+
     // Starts the server, binds and listens on the given port
     // Initializes WSA on Windows if needed
     ErrorCodes NetworkManager::StartServer(uint16_t port)

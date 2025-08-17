@@ -14,6 +14,8 @@ namespace tme
 
         CompletedWithErrors,
         NetworkEngineNotInitialized,
+        NetworkServerNotStarted,
+        NetworkClientNotConnected,
 
         ClientNotInitialized,
         ClientNotFound,
