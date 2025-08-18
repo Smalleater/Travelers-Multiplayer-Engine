@@ -51,6 +51,8 @@ namespace tme
                 ServiceLocator::Logger().LogError("UpdateServer: Failed to cast ISocket* to TcpSocket*");
                 continue;
             }
+
+            tcpClient->SetBlocking(false);
             
             networkId = m_nextNetworkId++;
             m_clients[networkId] = std::move(tcpClient);

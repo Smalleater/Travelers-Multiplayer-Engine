@@ -71,6 +71,15 @@
         "fstream": "cpp",
         "filesystem": "cpp",
         "chrono": "cpp",
-        "forward_list": "cpp"
+        "forward_list": "cpp",
+        "codecvt": "cpp",
+        "cstdarg": "cpp",
+        "cwctype": "cpp",
+        "memory_resource": "cpp",
+        "numeric": "cpp",
+        "random": "cpp",
+        "string_view": "cpp",
+        "numbers": "cpp",
+        "semaphore": "cpp"
     }
 }
