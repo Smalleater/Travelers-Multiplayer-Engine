@@ -1,4 +1,6 @@
 #include <iostream>
+#include <thread>
+#include <chrono>
 
 #include "TME/NetworkEngine.hpp"
 
@@ -26,14 +28,27 @@ int main ()
     
     std::cout << "TME server started successfully" << std::endl;
 
-    while (tme::NetworkEngine::IsInitialized())
+    while (tme::NetworkEngine::IsServerStarted())
     {
         tme::NetworkEngine::Update();
 
-        std::vector<std::pair<uint32_t, std::vector<uint8_t>>> outMessages;
-        tme::NetworkEngine::ReceiveAllReliableFromServer(outMessages);
+        std::string messageToSend("Hello world from server");
+        std::vector<uint8_t> serializedMessage(messageToSend.begin(), messageToSend.end());
 
-        if (outMessages.size() > 0)
+        ecResult = tme::NetworkEngine::SendToAllClientReliable(serializedMessage);
+        if (ecResult != tme::ErrorCodes::Success)
+        {
+            std::cout << "Failed to send message" << std::endl;
+        }
+
+        std::vector<std::pair<uint32_t, std::vector<uint8_t>>> outMessages;
+
+        ecResult = tme::NetworkEngine::ReceiveAllReliableFromClient(outMessages);
+        if (ecResult != tme::ErrorCodes::Success)
+        {
+            std::cout << "Receive failed" << std::endl;
+        }
+        else if (outMessages.size() > 0)
         {
             for (const std::pair<uint32_t, std::vector<uint8_t>>& outMessagePair : outMessages)
             {
@@ -41,5 +56,24 @@ int main ()
                 std::cout << "New message -> clientId: " << outMessagePair.first << " message: " << message << std::endl;
             }
         }
+
+        std::this_thread::sleep_for(std::chrono::seconds(1));
     }
+
+    ecResult = tme::NetworkEngine::ShutDown();
+    if (ecResult == tme::ErrorCodes::Success)
+    {
+        std::cout << "TME shutdown successfully" << std::endl;
+    }
+    else if (ecResult == tme::ErrorCodes::CompletedWithErrors)
+    {
+        std::cout << "TME shutdown completed, but with errors" << std::endl;
+    }
+    else
+    {
+        std::cout << "TME failed to shutdown" << std::endl;
+    }
+
+    std::cout << "Press Enter to exit..." << std::endl;
+    std::cin.get();
 }

@@ -8,14 +8,33 @@ namespace tme
     enum class ErrorCodes
     {
         Success = 0,
+        PartialSuccess,
+        AlreadyInitialized,
         Failure,
 
         CompletedWithErrors,
         NetworkEngineNotInitialized,
+        NetworkServerNotStarted,
+        NetworkClientNotConnected,
 
-        GetaddrinfoFailure,
+        ClientNotInitialized,
+        ClientNotFound,
 
-        NoDataAvailable,
+        InvalidSocket,
+        ShutdownFailed,
+        AddrInfoFailed,
+        ConnectFailed,
+        BindFailed,
+        AcceptFailed,
+        ListenFailed,
+        SendSizeTooLarge,
+        SendConnectionClosed,
+        SendFailed,
+        ReceiveSizeTooLarge,
+        ReceiveConnectionClosed,
+        ReceiveWouldBlock,
+        ReceiveFailed,
+        SetBlockingFailed,
     };  
 }
 

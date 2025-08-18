@@ -28,9 +28,7 @@ int main()
         std::cout << "TME client failed to start" << std::endl;
     }
 
-    std::this_thread::sleep_for(std::chrono::seconds(1));
-
-    while (tme::NetworkEngine::IsInitialized())
+    while (tme::NetworkEngine::IsClientConnected())
     {
         std::string str = "Hello world from client";
         std::vector<uint8_t> message(str.begin(), str.end());
@@ -40,7 +38,24 @@ int main()
         {
             std::cout << "failed to send message" << std::endl;
         }
-        
+
+        std::vector<std::vector<uint8_t>> outMessages;
+
+        ecResult = tme::NetworkEngine::ReceiveAllReliableFromServer(outMessages);
+        if (ecResult != tme::ErrorCodes::Success)
+        {
+            std::cout << "failed to receive message" << std::endl;
+        }
+
+        if (outMessages.size() > 0)
+        {
+            for (std::vector<uint8_t>& outMessage : outMessages)
+            {
+                std::string message(outMessage.begin(), outMessage.end());
+                std::cout << "New message from server -> " << message << std::endl;
+            }
+        }
+
         std::this_thread::sleep_for(std::chrono::seconds(1));
     }
 
