@@ -188,46 +188,6 @@
 
 ---
 
-## 📡 PHASE 5: UDP IMPLEMENTATION (TO DO ❌) - **VERSION 0.3**
-
-> **Version 0.3 Release Criteria:**
-> - Complete UDP socket implementation with reliability layer
-> - **Multi-threading transition** - Move networking to dedicated threads
-> - Packet acknowledgment and retransmission system
-> - Mixed TCP/UDP support in NetworkManager
-> - Channel system for reliable/unreliable communication
-> - UDP integration tests and performance benchmarks
-
-### 🧵 5.0 Multi-Threading Transition (New Priority)
-- [ ] **Network thread separation** - Move I/O operations to dedicated thread
-- [ ] **Thread-safe message queues** - Communication between network and main threads
-- [ ] **NetworkManager refactoring** - Async Update() with job submission
-- [ ] **Performance monitoring** - Compare single vs multi-thread performance
-- [ ] **Race condition testing** - Ensure thread safety under load
-
-### 🌐 5.1 UDP Socket Foundation
-- [ ] **UdpSocket class** - ISocket implementation for UDP
-- [ ] **Connectionless design** - Source/destination address handling
-- [ ] **Port binding** - Bind to specific port
-- [ ] **Error handling** - UDP-specific error handling
-- [ ] **Broadcast support** - Broadcast/multicast messages
-
-### 🔄 5.2 Reliability Layer
-- [ ] **Sequence numbers** - Packet numbering
-- [ ] **Acknowledgement system** - ACK/NACK for selective reliability
-- [ ] **Retransmission** - Automatic lost packet resending
-- [ ] **Duplicate detection** - Detection and removal of duplicates
-- [ ] **Timeout management** - Adaptive timeout handling
-- [ ] **Flow control** - Basic flow control
-
-### 🔗 5.3 Network Manager Integration
-- [ ] **UDP support** - Integration into NetworkManager
-- [ ] **Mixed TCP/UDP** - Simultaneous TCP + UDP support
-- [ ] **Channel system** - Reliable/unreliable channels
-- [ ] **Public API** - UDP methods in NetworkEngine
-
----
-
 ## 🧵 MULTI-THREADING STRATEGY
 
 ### 📋 **Current Architecture (v0.1-0.2): Single-Thread with Multi-Thread Infrastructure**
@@ -266,6 +226,46 @@
 - **Connection state**: Thread-safe client connection management  
 - **Error handling**: Propagate network errors to main thread
 - **Performance**: Monitor latency impact of thread switching
+
+---
+
+## 📡 PHASE 5: UDP IMPLEMENTATION (TO DO ❌) - **VERSION 0.3**
+
+> **Version 0.3 Release Criteria:**
+> - Complete UDP socket implementation with reliability layer
+> - **Multi-threading transition** - Move networking to dedicated threads
+> - Packet acknowledgment and retransmission system
+> - Mixed TCP/UDP support in NetworkManager
+> - Channel system for reliable/unreliable communication
+> - UDP integration tests and performance benchmarks
+
+### 🧵 5.0 Multi-Threading Transition (New Priority)
+- [ ] **Network thread separation** - Move I/O operations to dedicated thread
+- [ ] **Thread-safe message queues** - Communication between network and main threads
+- [ ] **NetworkManager refactoring** - Async Update() with job submission
+- [ ] **Performance monitoring** - Compare single vs multi-thread performance
+- [ ] **Race condition testing** - Ensure thread safety under load
+
+### 🌐 5.1 UDP Socket Foundation
+- [ ] **UdpSocket class** - ISocket implementation for UDP
+- [ ] **Connectionless design** - Source/destination address handling
+- [ ] **Port binding** - Bind to specific port
+- [ ] **Error handling** - UDP-specific error handling
+- [ ] **Broadcast support** - Broadcast/multicast messages
+
+### 🔄 5.2 Reliability Layer
+- [ ] **Sequence numbers** - Packet numbering
+- [ ] **Acknowledgement system** - ACK/NACK for selective reliability
+- [ ] **Retransmission** - Automatic lost packet resending
+- [ ] **Duplicate detection** - Detection and removal of duplicates
+- [ ] **Timeout management** - Adaptive timeout handling
+- [ ] **Flow control** - Basic flow control
+
+### 🔗 5.3 Network Manager Integration
+- [ ] **UDP support** - Integration into NetworkManager
+- [ ] **Mixed TCP/UDP** - Simultaneous TCP + UDP support
+- [ ] **Channel system** - Reliable/unreliable channels
+- [ ] **Public API** - UDP methods in NetworkEngine
 
 ---
 
