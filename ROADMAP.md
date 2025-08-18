@@ -233,12 +233,6 @@
 ### 📋 **Current Architecture (v0.1-0.2): Single-Thread with Multi-Thread Infrastructure**
 
 **Status**: ✅ **RECOMMENDED APPROACH**
-```cpp
-// Current implementation (by design):
-ErrorCodes NetworkEngine::Update() {
-    return static_cast<NetworkManager*>(m_networkManager)->Update(); // Main thread
-}
-```
 
 **Why this is optimal:**
 - ✅ Infrastructure multi-thread ready (ThreadManager, ServiceLocator)
@@ -249,34 +243,16 @@ ErrorCodes NetworkEngine::Update() {
 ### 🔄 **Transition Strategy (v0.3): Gradual Multi-Threading**
 
 **Phase 1: Message Queue Infrastructure**
-```cpp
-class NetworkManager {
-private:
-    std::queue<NetworkMessage> m_incomingMessages;
-    std::queue<NetworkMessage> m_outgoingMessages;
-    std::mutex m_messageQueueMutex;
-};
-```
+- Implementation of thread-safe message queues between threads
 
 **Phase 2: Dedicated Network Thread**
-```cpp
-ErrorCodes NetworkManager::Update() {
-    // Submit network I/O to dedicated thread
-    ServiceLocator::ThreadManager().SubmitJob([this]() {
-        this->ProcessNetworkIO();
-    });
-    
-    // Process messages on main thread
-    ProcessMessageQueues();
-}
-```
+- Submit network I/O to dedicated thread
+- Process messages on main thread
 
 **Phase 3: Full Multi-Threading (v0.3+)**
-```cpp
-// Network thread: I/O operations
-// Main thread: Game logic and message processing
-// Worker threads: Message parsing and validation
-```
+- Network thread: I/O operations
+- Main thread: Game logic and message processing
+- Worker threads: Message parsing and validation
 
 ### 🎯 **Benefits of Gradual Transition:**
 
