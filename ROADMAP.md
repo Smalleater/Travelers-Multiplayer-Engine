@@ -159,7 +159,9 @@
 
 ### 🔄 4.1 Current State & Critical Issues
 - [x] **Basic data transmission** - Raw byte arrays (current implementation)
+- [x] **Multi-thread infrastructure** - ThreadManager ready but not used in networking yet
 - [ ] **Message framing** - Message delimitation in TCP stream (CRITICAL)
+- [ ] **Single-thread execution** - NetworkManager::Update() runs on main thread (by design)
 - [ ] **Heartbeat system** - Dead connection detection
 - [ ] **Message ordering** - Ensure proper message sequence
 
@@ -190,10 +192,18 @@
 
 > **Version 0.3 Release Criteria:**
 > - Complete UDP socket implementation with reliability layer
+> - **Multi-threading transition** - Move networking to dedicated threads
 > - Packet acknowledgment and retransmission system
 > - Mixed TCP/UDP support in NetworkManager
 > - Channel system for reliable/unreliable communication
 > - UDP integration tests and performance benchmarks
+
+### 🧵 5.0 Multi-Threading Transition (New Priority)
+- [ ] **Network thread separation** - Move I/O operations to dedicated thread
+- [ ] **Thread-safe message queues** - Communication between network and main threads
+- [ ] **NetworkManager refactoring** - Async Update() with job submission
+- [ ] **Performance monitoring** - Compare single vs multi-thread performance
+- [ ] **Race condition testing** - Ensure thread safety under load
 
 ### 🌐 5.1 UDP Socket Foundation
 - [ ] **UdpSocket class** - ISocket implementation for UDP
@@ -215,6 +225,71 @@
 - [ ] **Mixed TCP/UDP** - Simultaneous TCP + UDP support
 - [ ] **Channel system** - Reliable/unreliable channels
 - [ ] **Public API** - UDP methods in NetworkEngine
+
+---
+
+## 🧵 MULTI-THREADING STRATEGY
+
+### 📋 **Current Architecture (v0.1-0.2): Single-Thread with Multi-Thread Infrastructure**
+
+**Status**: ✅ **RECOMMENDED APPROACH**
+```cpp
+// Current implementation (by design):
+ErrorCodes NetworkEngine::Update() {
+    return static_cast<NetworkManager*>(m_networkManager)->Update(); // Main thread
+}
+```
+
+**Why this is optimal:**
+- ✅ Infrastructure multi-thread ready (ThreadManager, ServiceLocator)
+- ✅ Simple debugging and development
+- ✅ Stable protocol development
+- ✅ Easy transition when needed
+
+### 🔄 **Transition Strategy (v0.3): Gradual Multi-Threading**
+
+**Phase 1: Message Queue Infrastructure**
+```cpp
+class NetworkManager {
+private:
+    std::queue<NetworkMessage> m_incomingMessages;
+    std::queue<NetworkMessage> m_outgoingMessages;
+    std::mutex m_messageQueueMutex;
+};
+```
+
+**Phase 2: Dedicated Network Thread**
+```cpp
+ErrorCodes NetworkManager::Update() {
+    // Submit network I/O to dedicated thread
+    ServiceLocator::ThreadManager().SubmitJob([this]() {
+        this->ProcessNetworkIO();
+    });
+    
+    // Process messages on main thread
+    ProcessMessageQueues();
+}
+```
+
+**Phase 3: Full Multi-Threading (v0.3+)**
+```cpp
+// Network thread: I/O operations
+// Main thread: Game logic and message processing
+// Worker threads: Message parsing and validation
+```
+
+### 🎯 **Benefits of Gradual Transition:**
+
+1. **v0.1-0.2 (Single-thread)**: Stable protocol development
+2. **v0.3 (Multi-thread)**: Better performance for UDP + multiple clients
+3. **v0.4+ (Optimized)**: Advanced features with proven threading model
+
+### ⚠️ **Key Considerations:**
+
+- **Message ordering**: Ensure TCP message order preservation
+- **Connection state**: Thread-safe client connection management  
+- **Error handling**: Propagate network errors to main thread
+- **Performance**: Monitor latency impact of thread switching
 
 ---
 
@@ -411,10 +486,11 @@
 - Structured message system
 - Basic serialization
 - Connection health monitoring
+- **Single-thread execution maintained** for stability
 
 ### 📅 **Future Versions:**
-- **v0.3** (October 2025): UDP Implementation
-- **v0.4** (December 2025): Gaming Features & Performance
+- **v0.3** (October 2025): **Multi-Threading Transition** + UDP Implementation
+- **v0.4** (December 2025): Gaming Features & Performance Optimizations
 - **v0.5** (February 2026): Advanced Synchronization
 - **v0.6** (April 2026): Advanced Features
 - **v0.7** (June 2026): Monitoring & Analytics
@@ -429,6 +505,7 @@
    - Implement 4-byte message length header
    - Modify Send/Receive methods to handle framed messages
    - Test with variable-length messages
+   - **Keep single-thread execution** for stable development
    
 2. **Fix Integration Testing** - Enhance existing test applications
    - Add structured message exchange in client/server tests
@@ -465,18 +542,24 @@
    - Add endianness handling for cross-platform compatibility
 
 ### 🎮 MEDIUM TERM (September - November 2025)
-1. **UDP Implementation** - 4-6 weeks
+1. **Complete v0.2 - Message Protocol** - 3-4 weeks (September)
+   - Finish TCP message framing and structured messages
+   - Heartbeat/ping system implementation
+   - **Maintain single-thread architecture** for protocol stability
+   
+2. **v0.3 Multi-Threading Transition** - 3-4 weeks (October)
+   - **Phase 1**: Create thread-safe message queues between threads
+   - **Phase 2**: Move NetworkManager::Update() to dedicated network thread
+   - **Phase 3**: Implement job-based networking with ThreadManager
+   - **Phase 4**: Performance testing and optimization
+   
+3. **UDP Implementation** - 4-6 weeks (October-November)
    - UdpSocket class with reliability layer
    - Packet acknowledgment and retransmission
-   - Integration with existing NetworkManager
+   - Integration with multi-threaded NetworkManager
    
-2. **Performance & Gaming Features** - 6-8 weeks
-   - Delta compression for state updates
-   - Client-side prediction basics
-   - Message batching and priority queues
-   
-3. **Example Applications** - 4-5 weeks
-   - Simple chat application
+4. **Example Applications** - 2-3 weeks (November)
+   - Simple chat application demonstrating multi-threading
    - Basic multiplayer pong game
    - Real-time position synchronization demo
 
