@@ -477,42 +477,63 @@
 ## 🎯 IMMEDIATE PRIORITIES
 
 ### 🚨 URGENT (Week of August 18-24, 2025)
-1. **TCP Message Framing Implementation** - ⚠️ CRITICAL: Add message length prefix to TCP stream
+1. **Refactor Update Logic Architecture** - ⚠️ NEW PRIORITY: Split NetworkManager::Update() into two phases
+   - **BeginUpdate()** - Handle new client connections and receive all incoming messages
+     - Accept up to 16 new client connections per frame
+     - Receive and queue all TCP messages from existing clients
+     - Process client disconnections and cleanup
+     - Store all received messages for processing
+   - **EndUpdate()** - Send all outgoing messages for the current frame
+     - Process and send all queued outgoing messages
+     - Send TCP messages to specific clients or broadcast to all
+     - Flush network buffers and complete transmission
+   - **Benefits**: Better separation of concerns, improved frame timing control, cleaner message processing flow
+   
+2. **TCP Message Framing Implementation** - ⚠️ CRITICAL: Add message length prefix to TCP stream
    - Implement 4-byte message length header
    - Modify Send/Receive methods to handle framed messages
    - Test with variable-length messages
    - **Keep single-thread execution** for stable development
    
-2. **Fix Integration Testing** - Enhance existing test applications
+3. **Update NetworkEngine API** - Adapt public interface for new update logic
+   - Expose BeginUpdate() and EndUpdate() methods in NetworkEngine
+   - Update existing Update() method to call both phases sequentially (backward compatibility)
+   - Add documentation for proper usage of the new two-phase update
+   - Ensure thread-safety for the new update pattern
+   
+4. **Fix Integration Testing** - Enhance existing test applications with new update logic
+   - Update test applications to use BeginUpdate()/EndUpdate() pattern
    - Add structured message exchange in client/server tests
    - Implement ping/pong test with message validation
    - Add connection stability testing (auto-reconnect test)
    
-3. **Prepare v0.1 Release** - Finalize first official release
-   - Create comprehensive release notes for v0.1
-   - Tag v0.1 in git repository  
-   - Update README with build/usage instructions
-   - Test release builds on Windows/Linux
-
-4. **Code Quality & Documentation** - Clean up current implementation
-   - Add comprehensive code comments to NetworkManager
+5. **Code Quality & Documentation** - Clean up current implementation
+   - Add comprehensive code comments to new BeginUpdate/EndUpdate methods
+   - Update NetworkManager documentation with new update flow
    - Fix any compiler warnings in release build
    - Ensure consistent coding style
 
 ### 📈 SHORT TERM (August 25 - September 15, 2025)
-**Priority:** Complete v0.1 release and start v0.2 development
+**Priority:** Complete new update architecture and start v0.2 development
 
-1. **Finalize v0.1 Release** - Week 1 (Aug 25-31)
-   - Complete v0.1 release preparation tasks
-   - Official v0.1 tag and release
-   - Community announcement and documentation
+1. **Complete BeginUpdate/EndUpdate Architecture** - Week 1 (Aug 25-31)
+   - Finalize implementation of the two-phase update system
+   - Comprehensive testing of the new update flow with multiple clients
+   - Performance comparison between old and new update logic
+   - Update all example applications to use the new pattern
    
-2. **Message Protocol Foundation** - Week 2-3 (Sep 1-14)
+2. **Finalize v0.1 Release** - Week 1-2 (Aug 25 - Sep 7)
+   - Complete v0.1 release preparation tasks with new update architecture
+   - Official v0.1 tag and release including BeginUpdate/EndUpdate functionality
+   - Community announcement and documentation for the new update pattern
+   
+3. **Message Protocol Foundation** - Week 2-3 (Sep 1-14)
    - Design message header structure (type, size, ID, timestamp)
    - Implement basic message types (CONNECT, DISCONNECT, PING, PONG, DATA)
    - Add message validation and error handling
+   - Integrate message protocol with new BeginUpdate/EndUpdate flow
    
-3. **Basic Serialization System** - Week 3-4 (Sep 8-15)
+4. **Basic Serialization System** - Week 3-4 (Sep 8-15)
    - Create ISerializable interface
    - Implement serialization for primitive types (int, float, string, bool)
    - Add endianness handling for cross-platform compatibility
