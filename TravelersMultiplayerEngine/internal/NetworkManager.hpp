@@ -39,13 +39,15 @@ namespace tme
         /// @brief Next available network ID for new clients.
         uint32_t m_nextNetworkId = 0;
 
-        /// @brief Updates the server state (accepts clients, receives data, etc.).
-        /// @return Error code indicating the result of the update.
-        ErrorCodes UpdateServer();
+        std::vector<uint32_t> m_newClientsThisTick;
 
-        /// @brief Updates the client state (receives data, etc.).
-        /// @return Error code indicating the result of the update.
-        ErrorCodes UpdateClient();
+        std::vector<std::pair<uint32_t, std::vector<uint8_t>>> m_serverReceivedTcpThisTick;
+
+        ErrorCodes BeginUpdateServer();
+
+        ErrorCodes ServerAccept();
+
+        ErrorCodes ServerReceivedTcp();
 
     public:
         /// @brief Constructs a new NetworkManager object.
@@ -53,6 +55,10 @@ namespace tme
 
         /// @brief Destroys the NetworkManager object and cleans up resources.
         ~NetworkManager() {}
+
+        const std::vector<uint32_t>& GetNewClientsThisTick() const;
+        
+        const std::vector<std::pair<uint32_t, std::vector<uint8_t>>>& GetServerReceivedTcpThisTick() const;
 
         bool HasServerSocket() const;
 
@@ -69,9 +75,9 @@ namespace tme
         /// @return Error code indicating success or failure.
         ErrorCodes StartClient(const std::string& address, uint16_t port);
 
-        /// @brief Updates the network state (server or client).
-        /// @return Error code indicating the result of the update.
-        ErrorCodes Update();
+        ErrorCodes BeginUpdate();
+
+        ErrorCodes EndUpdate();
 
         /// @brief Sends data to the server via TCP (client-side).
         /// @param data The data to send.
@@ -81,12 +87,6 @@ namespace tme
         ErrorCodes SendToClientTcp(const std::vector<uint8_t>& data, uint32_t networkId);
 
         ErrorCodes SendToAllClientTcp(const std::vector<uint8_t>& data);
-
-        /// @brief Receives all messages from clients via TCP (server-side).
-        /// @param outMessages Output vector of pairs (network ID, message data).
-        /// @return Error code indicating success or failure.
-        ErrorCodes ReceiveFromAllClientsTcp(
-            std::vector<std::pair<uint32_t, std::vector<uint8_t>>>& outMessages);
 
         ErrorCodes ReceiveFromServerTcp(std::vector<std::vector<uint8_t>>& outMessages);
     };    

@@ -5,10 +5,68 @@
 
 namespace tme
 {
-    // Handles accepting new clients on the server socket
-    // Returns PartialSuccess if some errors occured, Success otherwise
-    ErrorCodes NetworkManager::UpdateServer()
+    ErrorCodes NetworkManager::BeginUpdateServer()
     {
+        bool hadSuccess = false;
+        bool hadError = false;
+        ErrorCodes ecResult;
+
+        ecResult = ServerAccept();
+        switch (ecResult)
+        {
+        case ErrorCodes::Success:
+            hadSuccess = true;
+            break;
+        case ErrorCodes::PartialSuccess:
+            hadSuccess = true;
+            hadError = true;
+            break;
+        case ErrorCodes::Failure:
+            hadError = true;
+            break;
+        default:
+            hadError = true;
+            break;
+        }
+
+        ecResult = ServerReceivedTcp();
+        switch (ecResult)
+        {
+        case ErrorCodes::Success:
+            hadSuccess = true;
+            break;
+        case ErrorCodes::PartialSuccess:
+            hadSuccess = true;
+            hadError = true;
+            break;
+        case ErrorCodes::Failure:
+            hadError = true;
+            break;
+        default:
+            hadError = true;
+            break;
+        }
+
+        if ((hadSuccess && !hadError) 
+            || (!hadSuccess && !hadError))
+        {
+            return ErrorCodes::Success;
+        }
+        else if (hadSuccess && hadError)
+        {
+            return ErrorCodes::PartialSuccess;
+        }
+        else
+        {
+            return ErrorCodes::Failure;
+        }
+    }
+
+    ErrorCodes NetworkManager::ServerAccept()
+    {
+        m_newClientsThisTick.clear();
+
+        bool hadSuccess = false;
         bool hadError = false;
 
         const uint8_t maxAcceptPerFrame = 16;
@@ -31,7 +89,7 @@ namespace tme
             {
                 if (lastError != WOULD_BLOCK_ERROR)
                 {
-                    ServiceLocator::Logger().LogError("UpdateServer: Failed to accept new client with code: "
+                    ServiceLocator::Logger().LogError("ServerAcceptClient: Failed to accept new client with code: "
                         + std::to_string(static_cast<int>(ecResult)) + " Last socket error: "
                         + std::to_string(lastError));        
                     hadError = true;
@@ -49,6 +107,7 @@ namespace tme
             if (tcpClient == nullptr)
             {
                 ServiceLocator::Logger().LogError("UpdateServer: Failed to cast ISocket* to TcpSocket*");
+                hadError = true;
                 continue;
             }
 
@@ -59,16 +118,127 @@ namespace tme
             ServiceLocator::Logger().LogInfo("New client connected, with network id: " 
                 + std::to_string(networkId));
 
+            m_newClientsThisTick.push_back(networkId);
+
+            hadSuccess = true;
+
             acceptedThisFrame++;
         }
 
-        return hadError ? ErrorCodes::PartialSuccess : ErrorCodes::Success;
+        if ((hadSuccess && !hadError) 
+            || (!hadSuccess && !hadError))
+        {
+            return ErrorCodes::Success;
+        }
+        else if (hadSuccess && hadError)
+        {
+            return ErrorCodes::PartialSuccess;
+        }
+        else
+        {
+            return ErrorCodes::Failure;
+        }
     }
 
-    // Handles client-side network updates (currently sub)
-    ErrorCodes NetworkManager::UpdateClient()
+    ErrorCodes NetworkManager::ServerReceivedTcp()
     {
-        return ErrorCodes::Success;
+        m_serverReceivedTcpThisTick.clear();
+
+        if (m_clients.empty())
+        {
+            return ErrorCodes::Success;
+        }
+
+        bool hadSuccess = false;
+        bool hadError = false;
+
+        const uint8_t maxMessagesPerClientPerFrame = 32;
+        uint8_t messagesReceivedThisFrame;
+
+        int bytesReceived;
+        std::vector<uint8_t> buffer(4096);
+
+        ErrorCodes ecResult;
+        int lastError;
+
+        std::vector<uint32_t> clientsToRemove;
+
+        for(std::pair<const uint32_t, std::unique_ptr<TcpSocket>>& clientPair : m_clients)
+        {
+            uint32_t networkId = clientPair.first;
+            std::unique_ptr<TcpSocket>& clientSocket = clientPair.second;
+
+            messagesReceivedThisFrame = 0;
+            while (messagesReceivedThisFrame < maxMessagesPerClientPerFrame)
+            {
+                bytesReceived = 0;
+                buffer.resize(4096);
+
+                ecResult = clientSocket->Receive(buffer.data(), buffer.size(), bytesReceived);
+                lastError = clientSocket->GetLastSocketError();
+                if (ecResult != ErrorCodes::Success)
+                {
+                    if (ecResult == ErrorCodes::ReceiveConnectionClosed)
+                    {
+                        clientsToRemove.push_back(networkId);
+                    }
+                    else if (ecResult != ErrorCodes::ReceiveWouldBlock)
+                    {
+                        ServiceLocator::Logger().LogError("ReceiveAllFromServerTcp: Receive failed with code: " 
+                            + std::to_string(static_cast<int>(ecResult)) + " Last socket error: " 
+                            + std::to_string(lastError));
+
+                        clientsToRemove.push_back(networkId);
+
+                        hadError = true;
+                    }
+
+                    break;
+                }
+                else
+                {
+                    hadSuccess = true;
+                }
+
+                buffer.resize(bytesReceived);
+                m_serverReceivedTcpThisTick.emplace_back(networkId, std::move(buffer));
+
+                messagesReceivedThisFrame++;
+            }
+        }
+
+        for (uint32_t networkId : clientsToRemove)
+        {
+            m_clients[networkId]->Shutdown();
+            m_clients.erase(networkId);
+            ServiceLocator::Logger().LogInfo("Client with id: " + std::to_string(networkId) 
+                + " disconnected");
+        }
+
+        if ((hadSuccess && !hadError) 
+            || (!hadSuccess && !hadError))
+        {
+            return ErrorCodes::Success;
+        }
+        else if (hadSuccess && hadError)
+        {
+            return ErrorCodes::PartialSuccess;
+        }
+        else
+        {
+            return ErrorCodes::Failure;
+        }
+    }
+
+    const std::vector<uint32_t>& NetworkManager::GetNewClientsThisTick() const
+    {
+        return m_newClientsThisTick;
+    }
+
+    const std::vector<std::pair<uint32_t, std::vector<uint8_t>>>& 
+    NetworkManager::GetServerReceivedTcpThisTick() const
+    {
+        return m_serverReceivedTcpThisTick;
     }
 
     bool NetworkManager::HasServerSocket() const
@@ -201,41 +371,51 @@ namespace tme
         return ErrorCodes::Success;
     }
 
-    // Main update function, calls server/client update as needed
-    ErrorCodes NetworkManager::Update()
+    ErrorCodes NetworkManager::BeginUpdate()
     {
+        bool hadSuccess = false;
         bool hadError = false;
         ErrorCodes ecResult;
 
         if (m_serverTcpSocket != nullptr)
         {
-            ecResult = UpdateServer();
-            if (ecResult != ErrorCodes::Success)
+            ecResult = BeginUpdateServer();
+            switch (ecResult)
             {
-                if (ecResult != ErrorCodes::PartialSuccess)
-                {
-                    return ecResult;
-                }
-
+            case ErrorCodes::Success:
+                hadSuccess = true;
+                break;
+            case ErrorCodes::PartialSuccess:
+                hadSuccess = true;
                 hadError = true;
+                break;
+            case ErrorCodes::Failure:
+                hadError = true;
+                break;
+            default:
+                hadError = true;
+                break;
             }
         }
 
-        if (m_clientTcpSocket != nullptr)
+        if ((hadSuccess && !hadError) 
+            || (!hadSuccess && !hadError))
         {
-            ecResult = UpdateClient();
-            if (ecResult != ErrorCodes::Success)
-            {
-                if (ecResult != ErrorCodes::PartialSuccess)
-                {
-                    return ecResult;
-                }
-
-                hadError = true;
-            }
+            return ErrorCodes::Success;
         }
+        else if (hadSuccess && hadError)
+        {
+            return ErrorCodes::PartialSuccess;
+        }
+        else
+        {
+            return ErrorCodes::Failure;
+        }
+    }
 
-        return hadError ? ErrorCodes::PartialSuccess : ErrorCodes::Success;
+    ErrorCodes NetworkManager::EndUpdate()
+    {
+        return ErrorCodes::Success;
     }
 
     // Sends data to server via TCP
@@ -347,101 +527,8 @@ namespace tme
             }
         }
 
-        if (hadSuccess && !hadError)
-        {
-            return ErrorCodes::Success;
-        }
-        else if (hadSuccess && hadError)
-        {
-            return ErrorCodes::PartialSuccess;
-        }
-        else
-        {
-            return ErrorCodes::Failure;
-        }
-    }
-
-    // Receives all available messages from all connected clients
-    // Removes clients that have disconnected
-    ErrorCodes NetworkManager::ReceiveFromAllClientsTcp(
-        std::vector<std::pair<uint32_t, std::vector<uint8_t>>>& outMessages)
-    {
-        if (m_clients.empty())
-        {
-            return ErrorCodes::Success;
-        }
-
-        bool hadSuccess = false;
-        bool hadError = false;
-
-        const uint8_t maxMessagesPerClientPerFrame = 32;
-        uint8_t messagesReceivedThisFrame;
-
-        int bytesReceived;
-        std::vector<uint8_t> buffer(4096);
-
-        ErrorCodes ecResult;
-        int lastError;
-
-        std::vector<uint32_t> clientsToRemove;
-
-        for(std::pair<const uint32_t, std::unique_ptr<TcpSocket>>& clientPair : m_clients)
-        {
-            uint32_t networkId = clientPair.first;
-            std::unique_ptr<TcpSocket>& clientSocket = clientPair.second;
-
-            messagesReceivedThisFrame = 0;
-            while (messagesReceivedThisFrame < maxMessagesPerClientPerFrame)
-            {
-                bytesReceived = 0;
-                buffer.resize(4096);
-
-                ecResult = clientSocket->Receive(buffer.data(), buffer.size(), bytesReceived);
-                lastError = clientSocket->GetLastSocketError();
-                if (ecResult != ErrorCodes::Success)
-                {
-                    if (ecResult == ErrorCodes::ReceiveConnectionClosed)
-                    {
-                        clientsToRemove.push_back(networkId);
-                    }
-                    else if (ecResult != ErrorCodes::ReceiveWouldBlock)
-                    {
-                        ServiceLocator::Logger().LogError("ReceiveAllFromServerTcp: Receive failed with code: " 
-                            + std::to_string(static_cast<int>(ecResult)) + " Last socket error: " 
-                            + std::to_string(lastError));
-
-                        clientsToRemove.push_back(networkId);
-
-                        hadError = true;
-                    }
-                    else
-                    {
-                        hadSuccess = true;
-                    }
-
-                    break;
-                }
-                else
-                {
-                    hadSuccess = true;
-                }
-
-                buffer.resize(bytesReceived);
-                outMessages.emplace_back(networkId, std::move(buffer));
-
-                messagesReceivedThisFrame++;
-            }
-        }
-
-        for (uint32_t networkId : clientsToRemove)
-        {
-            m_clients[networkId]->Shutdown();
-            m_clients.erase(networkId);
-            ServiceLocator::Logger().LogInfo("Client with id: " + std::to_string(networkId) 
-                + " disconnected");
-        }
-
-        if (hadSuccess && !hadError)
+        if ((hadSuccess && !hadError) 
+            || (!hadSuccess && !hadError))
         {
             return ErrorCodes::Success;
         }

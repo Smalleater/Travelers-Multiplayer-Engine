@@ -28,9 +28,9 @@ namespace tme
         /// @return ErrorCodes Result of the initialization operation.
         static TME_API ErrorCodes Init();
 
-        /// @brief Updates the network engine state (processes network events, etc.).
-        /// @return ErrorCodes Result of the update operation.
-        static TME_API ErrorCodes Update();
+        static TME_API ErrorCodes BeginUpdate();
+
+        static TME_API ErrorCodes EndUpdate();
 
         /// @brief Shuts down the network engine and releases resources.
         /// @return ErrorCodes Result of the shutdown operation.
@@ -42,6 +42,11 @@ namespace tme
         ///
         /// @return ErrorCodes Result of the initialization check or operation. 
         static TME_API ErrorCodes EnsureInitialized();
+
+        static TME_API ErrorCodes GetNewClientThisTick(std::vector<uint32_t>& outNetworkIds);
+
+        static TME_API ErrorCodes GetServerReceivedReliableThisTick(
+            std::vector<std::pair<uint32_t, std::vector<uint8_t>>>& outMessages);
 
         /// @brief Checks if the network engine is currently initialized.
         /// @return true if initialized, false otherwise.
@@ -68,11 +73,7 @@ namespace tme
         /// @return ErrorCodes Result of the send operation.
         static TME_API ErrorCodes SendToServerReliable(const std::vector<uint8_t>& data);
 
-        static TME_API ErrorCodes ReceiveAllReliableFromClient(
-            std::vector<std::pair<uint32_t, std::vector<uint8_t>>>& outMessages);
-
-        static TME_API ErrorCodes ReceiveAllReliableFromServer(
-            std::vector<std::vector<uint8_t>>& outMessages);
+        static TME_API ErrorCodes ReceiveAllReliableFromServer(std::vector<std::vector<uint8_t>>& outMessages);
     };    
 }
 
