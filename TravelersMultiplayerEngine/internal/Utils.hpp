@@ -5,6 +5,8 @@
 
 #include "TME/ErrorCodes.hpp"
 
+#include "interfaces/ISocket.hpp"
+
 namespace tme
 {
     /// @brief Utility class for system-related helper functions.
@@ -29,6 +31,9 @@ namespace tme
         static ErrorCodes GetCombinedErrorCode(bool hadSuccess, bool hadError);
 
         static void UpdateSuccessErrorFlags(ErrorCodes ecResult, bool& hadSuccess, bool& hadError);
+
+        template<typename Func>
+        static ErrorCodes TrySocketOperation(Func&& op, ISocket* socket, const std::string& context);
     };
 }
 

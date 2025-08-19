@@ -85,14 +85,14 @@ namespace tme
         #endif
     }
 
-    void LogSocketError(const std::string& context, ErrorCodes ecResult, int lastSocketError)
+    void Utils::LogSocketError(const std::string& context, ErrorCodes ecResult, int lastSocketError)
     {
         ServiceLocator::Logger().LogError(context + " failed with error: " 
             + std::to_string(static_cast<int>(ecResult)) + " Last socket error: " 
             + std::to_string(lastSocketError));
     }
 
-    ErrorCodes GetCombinedErrorCode(bool hadSuccess, bool hadError)
+    ErrorCodes Utils::GetCombinedErrorCode(bool hadSuccess, bool hadError)
     {
         if ((hadSuccess && !hadError) 
             || (!hadSuccess && !hadError))
@@ -109,7 +109,7 @@ namespace tme
         }
     }
 
-    void UpdateSuccessErrorFlags(ErrorCodes ecResult, bool& hadSuccess, bool& hadError)
+    void Utils::UpdateSuccessErrorFlags(ErrorCodes ecResult, bool& hadSuccess, bool& hadError)
     {
         switch (ecResult)
         {
@@ -127,5 +127,19 @@ namespace tme
             hadError = true;
             break;
         }
+    }
+
+    template<typename Func>
+    ErrorCodes Utils::TrySocketOperation(Func&& op, ISocket* socket, const std::string& context)
+    {
+        ErrorCodes ecResult = op();
+        int lastSocketError = socket ? socket->GetLastSocketError() : 0;
+        if (ecResult != ErrorCodes::Success)
+        {
+            LogSocketError(context, ecResult, lastSocketError);
+            return ecResult;
+        }
+
+        return ErrorCodes::Success;
     }
 }
