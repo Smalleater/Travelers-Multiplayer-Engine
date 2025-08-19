@@ -1,4 +1,5 @@
 # 🗺️ Travelers Multiplayer Engine - Roadmap
+> **⚠️ Important Note**: This roadmap is purely indicative and may evolve based on project needs, technical priorities, and community feedback. The dates and features mentioned are estimates and do not constitute firm commitments.
 
 ## 📊 Project Overview
 
