@@ -11,6 +11,8 @@
     #include <cstdio>
 #endif
 
+#include "ServiceLocator.hpp"
+
 namespace tme
 {
     // Returns the current system time formatted according to the provided format string
@@ -81,5 +83,49 @@ namespace tme
         #else
             return err == EWOULDBLOCK || err == EAGAIN;
         #endif
+    }
+
+    void LogSocketError(const std::string& context, ErrorCodes ecResult, int lastSocketError)
+    {
+        ServiceLocator::Logger().LogError(context + " failed with error: " 
+            + std::to_string(static_cast<int>(ecResult)) + " Last socket error: " 
+            + std::to_string(lastSocketError));
+    }
+
+    ErrorCodes GetCombinedErrorCode(bool hadSuccess, bool hadError)
+    {
+        if ((hadSuccess && !hadError) 
+            || (!hadSuccess && !hadError))
+        {
+            return ErrorCodes::Success;
+        }
+        else if (hadSuccess && hadError)
+        {
+            return ErrorCodes::PartialSuccess;
+        }
+        else
+        {
+            return ErrorCodes::Failure;
+        }
+    }
+
+    void UpdateSuccessErrorFlags(ErrorCodes ecResult, bool& hadSuccess, bool& hadError)
+    {
+        switch (ecResult)
+        {
+        case ErrorCodes::Success:
+            hadSuccess = true;
+            break;
+        case ErrorCodes::PartialSuccess:
+            hadSuccess = true;
+            hadError = true;
+            break;
+        case ErrorCodes::Failure:
+            hadError = true;
+            break;
+        default:
+            hadError = true;
+            break;
+        }
     }
 }

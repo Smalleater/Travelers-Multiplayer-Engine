@@ -5,231 +5,6 @@
 
 namespace tme
 {
-    ErrorCodes NetworkManager::BeginUpdateServer()
-    {
-        bool hadSuccess = false;
-        bool hadError = false;
-        ErrorCodes ecResult;
-
-        ecResult = ServerAccept();
-        switch (ecResult)
-        {
-        case ErrorCodes::Success:
-            hadSuccess = true;
-            break;
-        case ErrorCodes::PartialSuccess:
-            hadSuccess = true;
-            hadError = true;
-            break;
-        case ErrorCodes::Failure:
-            hadError = true;
-            break;
-        default:
-            hadError = true;
-            break;
-        }
-
-        ecResult = ServerReceivedTcp();
-        switch (ecResult)
-        {
-        case ErrorCodes::Success:
-            hadSuccess = true;
-            break;
-        case ErrorCodes::PartialSuccess:
-            hadSuccess = true;
-            hadError = true;
-            break;
-        case ErrorCodes::Failure:
-            hadError = true;
-            break;
-        default:
-            hadError = true;
-            break;
-        }
-
-        if ((hadSuccess && !hadError) 
-            || (!hadSuccess && !hadError))
-        {
-            return ErrorCodes::Success;
-        }
-        else if (hadSuccess && hadError)
-        {
-            return ErrorCodes::PartialSuccess;
-        }
-        else
-        {
-            return ErrorCodes::Failure;
-        }
-    }
-
-    ErrorCodes NetworkManager::ServerAccept()
-    {
-        m_newClientsThisTick.clear();
-
-        bool hadSuccess = false;
-        bool hadError = false;
-
-        const uint8_t maxAcceptPerFrame = 16;
-        uint8_t acceptedThisFrame = 0;
-
-        std::unique_ptr<ISocket> outClient;
-        std::unique_ptr<TcpSocket> tcpClient;
-
-        ErrorCodes ecResult;
-        int lastError;
-
-        uint32_t networkId;
-
-        while (acceptedThisFrame < maxAcceptPerFrame)
-        {
-            ecResult = m_serverTcpSocket->Accept(outClient);
-            lastError = m_serverTcpSocket->GetLastSocketError();
-
-            if (ecResult != ErrorCodes::Success)
-            {
-                if (lastError != WOULD_BLOCK_ERROR)
-                {
-                    ServiceLocator::Logger().LogError("ServerAcceptClient: Failed to accept new client with code: "
-                        + std::to_string(static_cast<int>(ecResult)) + " Last socket error: "
-                        + std::to_string(lastError));        
-                    hadError = true;
-                }
-
-                break;
-            }
-
-            if (outClient == nullptr)
-            {
-                continue;
-            }
-
-            tcpClient = std::unique_ptr<TcpSocket>(dynamic_cast<TcpSocket*>(outClient.release()));
-            if (tcpClient == nullptr)
-            {
-                ServiceLocator::Logger().LogError("UpdateServer: Failed to cast ISocket* to TcpSocket*");
-                hadError = true;
-                continue;
-            }
-
-            tcpClient->SetBlocking(false);
-            
-            networkId = m_nextNetworkId++;
-            m_clients[networkId] = std::move(tcpClient);
-            ServiceLocator::Logger().LogInfo("New client connected, with network id: " 
-                + std::to_string(networkId));
-
-            m_newClientsThisTick.push_back(networkId);
-
-            hadSuccess = true;
-
-            acceptedThisFrame++;
-        }
-
-        if ((hadSuccess && !hadError) 
-            || (!hadSuccess && !hadError))
-        {
-            return ErrorCodes::Success;
-        }
-        else if (hadSuccess && hadError)
-        {
-            return ErrorCodes::PartialSuccess;
-        }
-        else
-        {
-            return ErrorCodes::Failure;
-        }
-    }
-
-    ErrorCodes NetworkManager::ServerReceivedTcp()
-    {
-        m_serverReceivedTcpThisTick.clear();
-
-        if (m_clients.empty())
-        {
-            return ErrorCodes::Success;
-        }
-
-        bool hadSuccess = false;
-        bool hadError = false;
-
-        const uint8_t maxMessagesPerClientPerFrame = 32;
-        uint8_t messagesReceivedThisFrame;
-
-        int bytesReceived;
-        std::vector<uint8_t> buffer(4096);
-
-        ErrorCodes ecResult;
-        int lastError;
-
-        std::vector<uint32_t> clientsToRemove;
-
-        for(std::pair<const uint32_t, std::unique_ptr<TcpSocket>>& clientPair : m_clients)
-        {
-            uint32_t networkId = clientPair.first;
-            std::unique_ptr<TcpSocket>& clientSocket = clientPair.second;
-
-            messagesReceivedThisFrame = 0;
-            while (messagesReceivedThisFrame < maxMessagesPerClientPerFrame)
-            {
-                bytesReceived = 0;
-                buffer.resize(4096);
-
-                ecResult = clientSocket->Receive(buffer.data(), buffer.size(), bytesReceived);
-                lastError = clientSocket->GetLastSocketError();
-                if (ecResult != ErrorCodes::Success)
-                {
-                    if (ecResult == ErrorCodes::ReceiveConnectionClosed)
-                    {
-                        clientsToRemove.push_back(networkId);
-                    }
-                    else if (ecResult != ErrorCodes::ReceiveWouldBlock)
-                    {
-                        ServiceLocator::Logger().LogError("ReceiveAllFromServerTcp: Receive failed with code: " 
-                            + std::to_string(static_cast<int>(ecResult)) + " Last socket error: " 
-                            + std::to_string(lastError));
-
-                        clientsToRemove.push_back(networkId);
-
-                        hadError = true;
-                    }
-
-                    break;
-                }
-                else
-                {
-                    hadSuccess = true;
-                }
-
-                buffer.resize(bytesReceived);
-                m_serverReceivedTcpThisTick.emplace_back(networkId, std::move(buffer));
-
-                messagesReceivedThisFrame++;
-            }
-        }
-
-        for (uint32_t networkId : clientsToRemove)
-        {
-            m_clients[networkId]->Shutdown();
-            m_clients.erase(networkId);
-            ServiceLocator::Logger().LogInfo("Client with id: " + std::to_string(networkId) 
-                + " disconnected");
-        }
-
-        if ((hadSuccess && !hadError) 
-            || (!hadSuccess && !hadError))
-        {
-            return ErrorCodes::Success;
-        }
-        else if (hadSuccess && hadError)
-        {
-            return ErrorCodes::PartialSuccess;
-        }
-        else
-        {
-            return ErrorCodes::Failure;
-        }
-    }
-
     const std::vector<uint32_t>& NetworkManager::GetNewClientsThisTick() const
     {
         return m_newClientsThisTick;
@@ -256,7 +31,7 @@ namespace tme
     ErrorCodes NetworkManager::StartServer(uint16_t port)
     {
         ErrorCodes ecResult;
-        int lastError;
+        int lastSocketError;
 
         if (m_serverTcpSocket != nullptr)
         {
@@ -270,12 +45,10 @@ namespace tme
                 m_wsa = std::make_unique<WsaInitializer>();
                 
                 ecResult = m_wsa->Init();
-                lastError = m_wsa->GetWsaStartupResult();
-                if (ecResult != ErrorCodes::Success || lastError != 0)
+                lastSocketError = m_wsa->GetWsaStartupResult();
+                if (ecResult != ErrorCodes::Success)
                 {
-                    ServiceLocator::Logger().LogError("StartServer: WSA initialization failed with code: " 
-                        + std::to_string(static_cast<int>(ecResult)) + " Wsa startup error: " 
-                        + std::to_string(lastError));
+                    Utils::LogSocketError("StartServer : WSA initialization", ecResult, lastSocketError);
                     return ecResult;
                 }
             }
@@ -284,32 +57,26 @@ namespace tme
         m_serverTcpSocket = std::make_unique<TcpSocket>();
 
         ecResult = m_serverTcpSocket->Bind(port);
-        lastError = m_serverTcpSocket->GetLastSocketError();
+        lastSocketError = m_serverTcpSocket->GetLastSocketError();
         if (ecResult != ErrorCodes::Success)
         {
-            ServiceLocator::Logger().LogError("StartServer: Bind failed with code: " 
-                + std::to_string(static_cast<int>(ecResult)) + " Last socket error: " 
-                + std::to_string(lastError));
+            Utils::LogSocketError("StartServer: Bind", ecResult, lastSocketError);
             return ecResult;
         }
 
         ecResult = m_serverTcpSocket->Listen();
-        lastError = m_serverTcpSocket->GetLastSocketError();
+        lastSocketError = m_serverTcpSocket->GetLastSocketError();
         if (ecResult != ErrorCodes::Success)
         {
-            ServiceLocator::Logger().LogError("StartServer: Listen failed with code: " 
-                + std::to_string(static_cast<int>(ecResult)) + " Last socket error: " 
-                + std::to_string(lastError));
+            Utils::LogSocketError("StartServer: Listen", ecResult, lastSocketError);
             return ecResult;
         }
 
         ecResult = m_serverTcpSocket->SetBlocking(false);
-        lastError = m_serverTcpSocket->GetLastSocketError();
+        lastSocketError = m_serverTcpSocket->GetLastSocketError();
         if (ecResult != ErrorCodes::Success)
         {
-            ServiceLocator::Logger().LogError("StartServer: SetBlocking failed with code: " 
-                + std::to_string(static_cast<int>(ecResult)) + " Last socket error: " 
-                + std::to_string(lastError));
+            Utils::LogSocketError("StartServer: SetBlocking", ecResult, lastSocketError);
             return ecResult;
         }
 
@@ -321,7 +88,7 @@ namespace tme
     ErrorCodes NetworkManager::StartClient(const std::string& address, uint16_t port)
     {
         ErrorCodes ecResult;
-        int lastError;
+        int lastSocketError;
 
         if (m_serverTcpSocket != nullptr)
         {
@@ -335,12 +102,10 @@ namespace tme
                 m_wsa = std::make_unique<WsaInitializer>();
 
                 ecResult = m_wsa->Init();
-                lastError = m_wsa->GetWsaStartupResult();
-                if (ecResult != ErrorCodes::Success || lastError != 0)
+                lastSocketError = m_wsa->GetWsaStartupResult();
+                if (ecResult != ErrorCodes::Success)
                 {
-                    ServiceLocator::Logger().LogError("StartClient: WSA initialization failed with code: " 
-                        + std::to_string(static_cast<int>(ecResult)) + " Wsa startup error: " 
-                        + std::to_string(lastError));
+                    Utils::LogSocketError("StartClient: WSA initialization", ecResult, lastSocketError);
                     return ecResult;
                 }
             }
@@ -349,22 +114,18 @@ namespace tme
         m_clientTcpSocket = std::make_unique<TcpSocket>();
 
         ecResult = m_clientTcpSocket->Connect(address, port);
-        lastError = m_clientTcpSocket->GetLastSocketError();
+        lastSocketError = m_clientTcpSocket->GetLastSocketError();
         if (ecResult != ErrorCodes::Success)
         {
-            ServiceLocator::Logger().LogError("StartClient: Connect failed with code: " 
-                + std::to_string(static_cast<int>(ecResult)) + " Last socket error: " 
-                + std::to_string(lastError));
+            Utils::LogSocketError("StartClient: Connect", ecResult, lastSocketError);
             return ecResult;
         }
 
         ecResult = m_clientTcpSocket->SetBlocking(false);
-        lastError = m_clientTcpSocket->GetLastSocketError();
+        lastSocketError = m_clientTcpSocket->GetLastSocketError();
         if (ecResult != ErrorCodes::Success)
         {
-            ServiceLocator::Logger().LogError("StartClient: SetBlocking failed with code: " 
-                + std::to_string(static_cast<int>(ecResult)) + " Last socket error: " 
-                + std::to_string(lastError));
+            Utils::LogSocketError("StartClient: SetBlocking", ecResult, lastSocketError);
             return ecResult;
         }
 
@@ -380,37 +141,10 @@ namespace tme
         if (m_serverTcpSocket != nullptr)
         {
             ecResult = BeginUpdateServer();
-            switch (ecResult)
-            {
-            case ErrorCodes::Success:
-                hadSuccess = true;
-                break;
-            case ErrorCodes::PartialSuccess:
-                hadSuccess = true;
-                hadError = true;
-                break;
-            case ErrorCodes::Failure:
-                hadError = true;
-                break;
-            default:
-                hadError = true;
-                break;
-            }
+            Utils::UpdateSuccessErrorFlags(ecResult, hadSuccess, hadError);
         }
 
-        if ((hadSuccess && !hadError) 
-            || (!hadSuccess && !hadError))
-        {
-            return ErrorCodes::Success;
-        }
-        else if (hadSuccess && hadError)
-        {
-            return ErrorCodes::PartialSuccess;
-        }
-        else
-        {
-            return ErrorCodes::Failure;
-        }
+        return Utils::GetCombinedErrorCode(hadSuccess, hadError);
     }
 
     ErrorCodes NetworkManager::EndUpdate()
@@ -429,12 +163,12 @@ namespace tme
         }
 
         ErrorCodes ecResult;
-        int lastError;
+        int lastSocketError;
 
         int bytesSent;
 
         ecResult = m_clientTcpSocket->Send(data.data(), data.size(), bytesSent);
-        lastError = m_clientTcpSocket->GetLastSocketError();
+        lastSocketError = m_clientTcpSocket->GetLastSocketError();
         if (ecResult == ErrorCodes::SendConnectionClosed)
         {
             m_clientTcpSocket->Shutdown();
@@ -446,9 +180,7 @@ namespace tme
         }
         else if (ecResult != ErrorCodes::Success)
         {
-            ServiceLocator::Logger().LogError("SendToServerTcp: Send failed with code: " 
-                + std::to_string(static_cast<int>(ecResult)) + " Last socket error: " 
-                + std::to_string(lastError));
+            Utils::LogSocketError("SendToServerTcp: Send", ecResult, lastSocketError);
 
             m_clientTcpSocket->Shutdown();
             m_clientTcpSocket.reset();
@@ -471,12 +203,12 @@ namespace tme
         }
 
         ErrorCodes ecResult;
-        int lastError;
+        int lastSocketError;
 
         int bytesSent;
 
         ecResult = m_clients[networkId]->Send(data.data(), data.size(), bytesSent);
-        lastError = m_clients[networkId]->GetLastSocketError();
+        lastSocketError = m_clients[networkId]->GetLastSocketError();
         if (ecResult == ErrorCodes::SendConnectionClosed)
         {
             m_clients[networkId]->Shutdown();
@@ -487,9 +219,7 @@ namespace tme
         }
         else if (ecResult != ErrorCodes::Success)
         {
-            ServiceLocator::Logger().LogError("SendToClientTcp: Send failed with code: " 
-                + std::to_string(static_cast<int>(ecResult)) + " Last socket error: " 
-                + std::to_string(lastError));
+            Utils::LogSocketError("SendToClientTcp: Send", ecResult, lastSocketError);
 
             m_clients[networkId]->Shutdown();
             m_clients.erase(networkId);
@@ -527,19 +257,7 @@ namespace tme
             }
         }
 
-        if ((hadSuccess && !hadError) 
-            || (!hadSuccess && !hadError))
-        {
-            return ErrorCodes::Success;
-        }
-        else if (hadSuccess && hadError)
-        {
-            return ErrorCodes::PartialSuccess;
-        }
-        else
-        {
-            return ErrorCodes::Failure;
-        }
+        return Utils::GetCombinedErrorCode(hadSuccess, hadError);
     }
 
     ErrorCodes NetworkManager::ReceiveFromServerTcp(std::vector<std::vector<uint8_t>>& outMessages)
@@ -551,7 +269,7 @@ namespace tme
         std::vector<uint8_t> buffer(4096);
 
         ErrorCodes ecResult;
-        int lastError;
+        int lastSocketError;
 
         while (messagesReceivedThisFrame < maxMessagesPerFrame)
         {
@@ -559,7 +277,7 @@ namespace tme
             buffer.resize(4096);
 
             ecResult = m_clientTcpSocket->Receive(buffer.data(), buffer.size(), bytesReceived);
-            lastError = m_clientTcpSocket->GetLastSocketError();
+            lastSocketError = m_clientTcpSocket->GetLastSocketError();
             if (ecResult != ErrorCodes::Success)
             {
                 if (ecResult == ErrorCodes::ReceiveConnectionClosed)
@@ -572,9 +290,7 @@ namespace tme
                 }
                 else if (ecResult != ErrorCodes::ReceiveWouldBlock)
                 {
-                    ServiceLocator::Logger().LogError("ReceiveFromClientTcp: Receive failed with code: " 
-                            + std::to_string(static_cast<int>(ecResult)) + " Last socket error: " 
-                            + std::to_string(lastError));
+                    Utils::LogSocketError("ReceiveFromClientTcp: Receive", ecResult, lastSocketError);
                     
                     m_clientTcpSocket->Shutdown();
                     m_clientTcpSocket.reset();
@@ -595,5 +311,158 @@ namespace tme
         }
         
         return ErrorCodes::Success;
+    }
+
+    ErrorCodes NetworkManager::BeginUpdateServer()
+    {
+        bool hadSuccess = false;
+        bool hadError = false;
+        ErrorCodes ecResult;
+
+        ecResult = ServerAccept();
+        Utils::UpdateSuccessErrorFlags(ecResult, hadSuccess, hadError);
+
+        ecResult = ServerReceivedTcp();
+        Utils::UpdateSuccessErrorFlags(ecResult, hadSuccess, hadError);
+
+        return Utils::GetCombinedErrorCode(hadSuccess, hadError);
+    }
+
+    ErrorCodes NetworkManager::ServerAccept()
+    {
+        m_newClientsThisTick.clear();
+
+        bool hadSuccess = false;
+        bool hadError = false;
+
+        const uint8_t maxAcceptPerFrame = 16;
+        uint8_t acceptedThisFrame = 0;
+
+        std::unique_ptr<ISocket> outClient;
+        std::unique_ptr<TcpSocket> tcpClient;
+
+        ErrorCodes ecResult;
+        int lastSocketError;
+
+        uint32_t networkId;
+
+        while (acceptedThisFrame < maxAcceptPerFrame)
+        {
+            ecResult = m_serverTcpSocket->Accept(outClient);
+            lastSocketError = m_serverTcpSocket->GetLastSocketError();
+
+            if (ecResult != ErrorCodes::Success)
+            {
+                if (ecResult != ErrorCodes::AcceptWouldBlock)
+                {
+                    Utils::LogSocketError("ServerAcceptClient: Accept new client", ecResult, lastSocketError);
+                    hadError = true;
+                }
+
+                break;
+            }
+
+            if (outClient == nullptr)
+            {
+                continue;
+            }
+
+            tcpClient = std::unique_ptr<TcpSocket>(dynamic_cast<TcpSocket*>(outClient.release()));
+            if (tcpClient == nullptr)
+            {
+                ServiceLocator::Logger().LogError("UpdateServer: Failed to cast ISocket* to TcpSocket*");
+                hadError = true;
+                continue;
+            }
+
+            tcpClient->SetBlocking(false);
+            
+            networkId = m_nextNetworkId++;
+            m_clients[networkId] = std::move(tcpClient);
+            ServiceLocator::Logger().LogInfo("New client connected, with network id: " 
+                + std::to_string(networkId));
+
+            m_newClientsThisTick.push_back(networkId);
+
+            hadSuccess = true;
+
+            acceptedThisFrame++;
+        }
+
+        return Utils::GetCombinedErrorCode(hadSuccess, hadError);
+    }
+
+    ErrorCodes NetworkManager::ServerReceivedTcp()
+    {
+        m_serverReceivedTcpThisTick.clear();
+
+        if (m_clients.empty())
+        {
+            return ErrorCodes::Success;
+        }
+
+        bool hadSuccess = false;
+        bool hadError = false;
+
+        const uint8_t maxMessagesPerClientPerFrame = 32;
+        uint8_t messagesReceivedThisFrame;
+
+        int bytesReceived;
+        std::vector<uint8_t> buffer(4096);
+
+        ErrorCodes ecResult;
+        int lastSocketError;
+
+        std::vector<uint32_t> clientsToRemove;
+
+        for(std::pair<const uint32_t, std::unique_ptr<TcpSocket>>& clientPair : m_clients)
+        {
+            uint32_t networkId = clientPair.first;
+            std::unique_ptr<TcpSocket>& clientSocket = clientPair.second;
+
+            messagesReceivedThisFrame = 0;
+            while (messagesReceivedThisFrame < maxMessagesPerClientPerFrame)
+            {
+                bytesReceived = 0;
+                buffer.resize(4096);
+
+                ecResult = clientSocket->Receive(buffer.data(), buffer.size(), bytesReceived);
+                lastSocketError = clientSocket->GetLastSocketError();
+                if (ecResult != ErrorCodes::Success)
+                {
+                    if (ecResult == ErrorCodes::ReceiveConnectionClosed)
+                    {
+                        clientsToRemove.push_back(networkId);
+                    }
+                    else if (ecResult != ErrorCodes::ReceiveWouldBlock)
+                    {
+                        Utils::LogSocketError("ReceiveAllFromServerTcp: Receive", ecResult, lastSocketError);
+                        clientsToRemove.push_back(networkId);
+                        hadError = true;
+                    }
+
+                    break;
+                }
+                else
+                {
+                    hadSuccess = true;
+                }
+
+                buffer.resize(bytesReceived);
+                m_serverReceivedTcpThisTick.emplace_back(networkId, std::move(buffer));
+
+                messagesReceivedThisFrame++;
+            }
+        }
+
+        for (uint32_t networkId : clientsToRemove)
+        {
+            m_clients[networkId]->Shutdown();
+            m_clients.erase(networkId);
+            ServiceLocator::Logger().LogInfo("Client with id: " + std::to_string(networkId) 
+                + " disconnected");
+        }
+
+        return Utils::GetCombinedErrorCode(hadSuccess, hadError);
     }
 }

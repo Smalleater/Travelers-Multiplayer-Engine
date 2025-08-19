@@ -23,7 +23,6 @@ namespace tme
     #define CLOSE_SOCKET closesocket
 
     constexpr socket_t INVALID_SOCKET_FD = INVALID_SOCKET;
-    constexpr int WOULD_BLOCK_ERROR = WSAEWOULDBLOCK;
 }
 
 // POSIX Sockets
@@ -45,7 +44,6 @@ namespace tme
     #define CLOSE_SOCKET close
 
     constexpr socket_t INVALID_SOCKET_FD = -1;
-    constexpr int WOULD_BLOCK_ERROR = EWOULDBLOCK;
 }
 
 #endif

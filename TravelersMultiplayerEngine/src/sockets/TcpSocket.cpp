@@ -161,7 +161,13 @@ namespace tme
         socket_t clientSocket = accept(m_socket, NULL, NULL);
         if (clientSocket == INVALID_SOCKET_FD)
         {
-            m_lastSocketError = Utils::GetLastSocketError();
+            int err = Utils::GetLastSocketError();
+            m_lastSocketError = err;
+            if (Utils::IsWouldBlockError(err))
+            {
+                return ErrorCodes::AcceptWouldBlock;
+            }
+
             return ErrorCodes::AcceptFailed;
         }
 
