@@ -186,6 +186,16 @@
 - [ ] **Compression** - LZ4/Zlib for large messages
 - [ ] **Encryption hooks** - Preparation for encryption
 
+### 🎪 4.5 Basic Event System (To Do)
+- [ ] **IEventHandler interface** - Event handler abstraction
+- [ ] **EventManager** - Core event management system
+- [ ] **Connection events** - NewClientConnected, ClientDisconnected, ClientReconnected
+- [ ] **Network events** - MessageReceived, MessageSent, ConnectionLost
+- [ ] **Error events** - NetworkError, TimeoutError, AuthenticationFailed
+- [ ] **Event subscription** - Type-safe event registration and callbacks
+- [ ] **Event queuing** - Thread-safe event queue for main thread processing
+- [ ] **Event data** - Structured event data with client info and timestamps
+
 ---
 
 ## 🧵 MULTI-THREADING STRATEGY
@@ -325,12 +335,17 @@
 - [ ] **Consistent state** - Global consistency guarantee
 - [ ] **State prediction** - Future state prediction
 
-### 📡 7.3 Event System
-- [ ] **Reliable events** - Events with delivery guarantee
-- [ ] **RPC system** - Typed Remote Procedure Calls
-- [ ] **Event ordering** - Guaranteed event ordering
-- [ ] **Event filtering** - Filtering by client/zone
-- [ ] **Custom events** - Custom event support
+### 📡 7.3 Advanced Event System
+- [ ] **Reliable events** - Events with delivery guarantee across network
+- [ ] **RPC system** - Typed Remote Procedure Calls with events
+- [ ] **Event ordering** - Guaranteed event ordering across clients
+- [ ] **Event filtering** - Filtering by client/zone/permission level
+- [ ] **Custom events** - User-defined event types and data
+- [ ] **Event broadcasting** - Multi-cast events to specific client groups
+- [ ] **Event persistence** - Event history and replay capabilities
+- [ ] **Event validation** - Server-side event validation and sanitization
+- [ ] **Event compression** - Efficient event serialization and compression
+- [ ] **Cross-server events** - Events spanning multiple server instances
 
 ---
 
@@ -461,6 +476,7 @@
 - TCP message framing and protocol
 - Structured message system
 - Basic serialization
+- **Basic event system** - NewClientConnected, ClientDisconnected, NetworkError events
 - Connection health monitoring
 - **Single-thread execution maintained** for stability
 
@@ -538,9 +554,16 @@
    - Implement serialization for primitive types (int, float, string, bool)
    - Add endianness handling for cross-platform compatibility
 
+5. **Basic Event System Implementation** - Week 4 (Sep 15-21)
+   - Implement IEventHandler interface and EventManager
+   - Add core connection events: NewClientConnected, ClientDisconnected, ClientReconnected
+   - Integrate events with BeginUpdate/EndUpdate flow for thread-safe event dispatch
+   - Create example usage in test applications
+
 ### 🎮 MEDIUM TERM (September - November 2025)
-1. **Complete v0.2 - Message Protocol** - 3-4 weeks (September)
+1. **Complete v0.2 - Message Protocol & Events** - 3-4 weeks (September)
    - Finish TCP message framing and structured messages
+   - **Basic event system** with connection events (NewClientConnected, ClientDisconnected)
    - Heartbeat/ping system implementation
    - **Maintain single-thread architecture** for protocol stability
    
