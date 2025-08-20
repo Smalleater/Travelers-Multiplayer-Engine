@@ -128,18 +128,4 @@ namespace tme
             break;
         }
     }
-
-    template<typename Func>
-    ErrorCodes Utils::TrySocketOperation(Func&& op, ISocket* socket, const std::string& context)
-    {
-        ErrorCodes ecResult = op();
-        int lastSocketError = socket ? socket->GetLastSocketError() : 0;
-        if (ecResult != ErrorCodes::Success)
-        {
-            LogSocketError(context, ecResult, lastSocketError);
-            return ecResult;
-        }
-
-        return ErrorCodes::Success;
-    }
 }
