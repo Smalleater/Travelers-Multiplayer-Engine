@@ -25,6 +25,7 @@ namespace tme
         AddrInfoFailed,
         ConnectFailed,
         BindFailed,
+        AcceptWouldBlock,
         AcceptFailed,
         ListenFailed,
         SendSizeTooLarge,
