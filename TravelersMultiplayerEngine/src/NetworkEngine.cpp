@@ -164,7 +164,7 @@ namespace tme
         return static_cast<NetworkManager*>(m_networkManager)->StartClient(address, port);
     }
 
-    ErrorCodes NetworkEngine::SendToClientReliable(const std::vector<uint8_t>& data, uint32_t networkId)
+    ErrorCodes NetworkEngine::SendToClientReliable(uint32_t networkId, const std::vector<uint8_t>& data)
     {
         if (m_networkManager == nullptr)
         {
@@ -175,7 +175,9 @@ namespace tme
             return ErrorCodes::NetworkServerNotStarted;
         }
 
-        return static_cast<NetworkManager*>(m_networkManager)->SendToClientTcp(data, networkId);
+        static_cast<NetworkManager*>(m_networkManager)->AddMessageToServerTcpPerClientSendQueue(networkId, data);
+
+        return ErrorCodes::Success;
     }
 
     ErrorCodes NetworkEngine::SendToAllClientReliable(const std::vector<uint8_t>& data)
@@ -189,7 +191,9 @@ namespace tme
             return ErrorCodes::NetworkServerNotStarted;
         }
 
-        return static_cast<NetworkManager*>(m_networkManager)->SendToAllClientTcp(data);
+        static_cast<NetworkManager*>(m_networkManager)->AddMessageToServerTcpBroadcastQueue(data);
+
+        return ErrorCodes::Success;
     }
 
     // Sends data reliably to the server (TCP)

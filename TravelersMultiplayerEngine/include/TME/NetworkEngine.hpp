@@ -64,7 +64,7 @@ namespace tme
         /// @return ErrorCodes Result of the client start operation.
         static TME_API ErrorCodes StartClient(const std::string& address, uint16_t port);
 
-        static TME_API ErrorCodes SendToClientReliable(const std::vector<uint8_t>& data, uint32_t networkId);
+        static TME_API ErrorCodes SendToClientReliable(uint32_t networkId, const std::vector<uint8_t>& data);
 
         static TME_API ErrorCodes SendToAllClientReliable(const std::vector<uint8_t>& data);
 

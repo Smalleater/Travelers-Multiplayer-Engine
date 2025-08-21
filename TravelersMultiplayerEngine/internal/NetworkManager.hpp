@@ -4,6 +4,7 @@
 #include <memory>
 #include <unordered_map>
 #include <vector>
+#include <queue>
 
 #include "TME/ErrorCodes.hpp"
 
@@ -43,11 +44,23 @@ namespace tme
 
         std::vector<std::pair<uint32_t, std::vector<uint8_t>>> m_serverReceivedTcpThisTick;
 
+        std::vector<std::pair<uint32_t, std::vector<uint8_t>>> m_serverTcpPerClientSendQueue;
+
+        std::vector<std::vector<uint8_t>> m_serverTcpBroadcastSendQueue;
+
         ErrorCodes BeginUpdateServer();
+
+        ErrorCodes EndUpdateServer();
 
         ErrorCodes ServerAccept();
 
         ErrorCodes ServerReceivedTcp();
+
+        ErrorCodes ServerSendToClientTcp();
+
+        ErrorCodes ServerSendToAllClientTcp();
+
+        ErrorCodes ServerSendTcp(uint32_t networkId, const std::vector<uint8_t>& data);
 
     public:
         /// @brief Constructs a new NetworkManager object.
@@ -63,6 +76,10 @@ namespace tme
         bool HasServerSocket() const;
 
         bool HasClientSocket() const;
+
+        void AddMessageToServerTcpPerClientSendQueue(uint32_t networkId, const std::vector<uint8_t>& data);
+
+        void AddMessageToServerTcpBroadcastQueue(const std::vector<uint8_t>& data);
 
         /// @brief Starts the server on the specified port.
         /// @param port The port to listen on.
@@ -83,10 +100,6 @@ namespace tme
         /// @param data The data to send.
         /// @return Error code indicating success or failure.
         ErrorCodes SendToServerTcp(const std::vector<uint8_t>& data);
-
-        ErrorCodes SendToClientTcp(const std::vector<uint8_t>& data, uint32_t networkId);
-
-        ErrorCodes SendToAllClientTcp(const std::vector<uint8_t>& data);
 
         ErrorCodes ReceiveFromServerTcp(std::vector<std::vector<uint8_t>>& outMessages);
     };    

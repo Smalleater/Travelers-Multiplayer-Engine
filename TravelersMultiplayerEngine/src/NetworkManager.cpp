@@ -26,6 +26,16 @@ namespace tme
         return m_clientTcpSocket != nullptr;
     }
 
+    void NetworkManager::AddMessageToServerTcpPerClientSendQueue(uint32_t networkId, const std::vector<uint8_t>& data)
+    {
+        m_serverTcpPerClientSendQueue.emplace_back(networkId, data);
+    }
+
+    void NetworkManager::AddMessageToServerTcpBroadcastQueue(const std::vector<uint8_t>& data)
+    {
+        m_serverTcpBroadcastSendQueue.push_back(data);
+    }
+
     // Starts the server, binds and listens on the given port
     // Initializes WSA on Windows if needed
     ErrorCodes NetworkManager::StartServer(uint16_t port)
@@ -136,6 +146,7 @@ namespace tme
     {
         bool hadSuccess = false;
         bool hadError = false;
+
         ErrorCodes ecResult;
 
         if (m_serverTcpSocket != nullptr)
@@ -149,7 +160,18 @@ namespace tme
 
     ErrorCodes NetworkManager::EndUpdate()
     {
-        return ErrorCodes::Success;
+        bool hadSuccess = false;
+        bool hadError = false;
+        
+        ErrorCodes ecResult;
+
+        if (m_serverTcpSocket != nullptr)
+        {
+            ecResult = EndUpdateServer();
+            Utils::UpdateSuccessErrorFlags(ecResult, hadSuccess, hadError);
+        }
+
+        return Utils::GetCombinedErrorCode(hadSuccess, hadError);
     }
 
     // Sends data to server via TCP
@@ -192,74 +214,7 @@ namespace tme
 
         return ErrorCodes::Success;
     }
-
-    ErrorCodes NetworkManager::SendToClientTcp(const std::vector<uint8_t>& data, uint32_t networkId)
-    {
-        if (m_clients.find(networkId) == m_clients.end())
-        {
-            ServiceLocator::Logger().LogError("SendToClientTcp: No TCP client found for networkId" 
-                + std::to_string(networkId));
-            return ErrorCodes::ClientNotFound;
-        }
-
-        ErrorCodes ecResult;
-        int lastSocketError;
-
-        int bytesSent;
-
-        ecResult = m_clients[networkId]->Send(data.data(), data.size(), bytesSent);
-        lastSocketError = m_clients[networkId]->GetLastSocketError();
-        if (ecResult == ErrorCodes::SendConnectionClosed)
-        {
-            m_clients[networkId]->Shutdown();
-            m_clients.erase(networkId);
-            ServiceLocator::Logger().LogInfo("Client with id: " + std::to_string(networkId) 
-                + " disconnected");
-            return ErrorCodes::SendConnectionClosed;
-        }
-        else if (ecResult != ErrorCodes::Success)
-        {
-            Utils::LogSocketError("SendToClientTcp: Send", ecResult, lastSocketError);
-
-            m_clients[networkId]->Shutdown();
-            m_clients.erase(networkId);
-            ServiceLocator::Logger().LogInfo("Client with id: " + std::to_string(networkId) 
-                + " disconnected");
-
-            return ecResult;
-        }
-
-        return ErrorCodes::Success;
-    }
-
-    ErrorCodes NetworkManager::SendToAllClientTcp(const std::vector<uint8_t>& data)
-    {
-        if (m_clients.empty())
-        {
-            return ErrorCodes::Success;
-        }
-
-        bool hadSuccess = false;
-        bool hadError = false;
-
-        ErrorCodes ecResult;
-
-        for (std::pair<const uint32_t, std::unique_ptr<TcpSocket>>& clientPair : m_clients)
-        {
-            ecResult = SendToClientTcp(data, clientPair.first);
-            if (ecResult != ErrorCodes::Success)
-            {
-                hadError = true;
-            }
-            else
-            {
-                hadSuccess = true;
-            }
-        }
-
-        return Utils::GetCombinedErrorCode(hadSuccess, hadError);
-    }
-
+    
     ErrorCodes NetworkManager::ReceiveFromServerTcp(std::vector<std::vector<uint8_t>>& outMessages)
     {
         const uint8_t maxMessagesPerFrame = 32;
@@ -317,12 +272,29 @@ namespace tme
     {
         bool hadSuccess = false;
         bool hadError = false;
+
         ErrorCodes ecResult;
 
         ecResult = ServerAccept();
         Utils::UpdateSuccessErrorFlags(ecResult, hadSuccess, hadError);
 
         ecResult = ServerReceivedTcp();
+        Utils::UpdateSuccessErrorFlags(ecResult, hadSuccess, hadError);
+
+        return Utils::GetCombinedErrorCode(hadSuccess, hadError);
+    }
+
+    ErrorCodes NetworkManager::EndUpdateServer()
+    {
+        bool hadSuccess = false;
+        bool hadError = false;
+
+        ErrorCodes ecResult;
+
+        ecResult = ServerSendToClientTcp();
+        Utils::UpdateSuccessErrorFlags(ecResult, hadSuccess, hadError);
+
+        ecResult = ServerSendToAllClientTcp();
         Utils::UpdateSuccessErrorFlags(ecResult, hadSuccess, hadError);
 
         return Utils::GetCombinedErrorCode(hadSuccess, hadError);
@@ -464,5 +436,100 @@ namespace tme
         }
 
         return Utils::GetCombinedErrorCode(hadSuccess, hadError);
+    }
+
+    ErrorCodes NetworkManager::ServerSendToClientTcp()
+    {
+        bool hadSuccess = false;
+        bool hadError = false;
+
+        ErrorCodes ecResult;
+
+        for (const std::pair<uint32_t, std::vector<uint8_t>>& messagePair : m_serverTcpPerClientSendQueue)
+        {
+            if (m_clients.find(messagePair.first) == m_clients.end())
+            {
+                ServiceLocator::Logger().LogError("ServerSendToClientTcp: No TCP client found for networkId" 
+                    + std::to_string(messagePair.first));
+                hadError = true;
+                continue;
+            }
+
+            ecResult = ServerSendTcp(messagePair.first, messagePair.second);
+            if (ecResult != ErrorCodes::Success && ecResult != ErrorCodes::SendConnectionClosed)
+            {
+                hadError = true;
+                continue;
+            }
+
+            hadSuccess = true;
+        }
+
+        m_serverTcpPerClientSendQueue.clear();
+
+        return Utils::GetCombinedErrorCode(hadSuccess, hadError);
+    }
+
+    ErrorCodes NetworkManager::ServerSendToAllClientTcp()
+    {
+        bool hadSuccess = false;
+        bool hadError = false;
+
+        ErrorCodes ecResult;
+
+        for (std::pair<const uint32_t, std::unique_ptr<TcpSocket>>& clientPair : m_clients)
+        {
+            for (const std::vector<uint8_t>& message : m_serverTcpBroadcastSendQueue)
+            {
+                ecResult = ServerSendTcp(clientPair.first, message);
+                if (ecResult != ErrorCodes::Success)
+                {
+                    if (ecResult != ErrorCodes::SendConnectionClosed)
+                    {
+                        hadError = true;
+                    }
+
+                    break;
+                }
+
+                hadSuccess = true;
+            }
+        }
+
+        m_serverTcpBroadcastSendQueue.clear();
+
+        return Utils::GetCombinedErrorCode(hadSuccess, hadError);
+    }
+
+    ErrorCodes NetworkManager::ServerSendTcp(uint32_t networkId, const std::vector<uint8_t>& data)
+    {
+        ErrorCodes ecResult;
+        int lastSocketError;
+
+        int bytesSent;
+
+        ecResult = m_clients[networkId]->Send(data.data(), data.size(), bytesSent);
+        lastSocketError = m_clients[networkId]->GetLastSocketError();
+        if (ecResult == ErrorCodes::SendConnectionClosed)
+        {
+            m_clients[networkId]->Shutdown();
+            m_clients.erase(networkId);
+            ServiceLocator::Logger().LogInfo("Client with id: " + std::to_string(networkId) 
+                + " disconnected");
+            return ErrorCodes::SendConnectionClosed;
+        }
+        else if (ecResult != ErrorCodes::Success)
+        {
+            Utils::LogSocketError("ServerSendTcp: Send", ecResult, lastSocketError);
+
+            m_clients[networkId]->Shutdown();
+            m_clients.erase(networkId);
+            ServiceLocator::Logger().LogInfo("Client with id: " + std::to_string(networkId) 
+                + " disconnected");
+
+            return ecResult;
+        }
+
+        return ErrorCodes::Success;
     }
 }
