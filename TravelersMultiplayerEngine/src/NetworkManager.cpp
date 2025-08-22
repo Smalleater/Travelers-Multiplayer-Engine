@@ -35,9 +35,14 @@ namespace tme
         m_serverTcpPerClientSendQueue.emplace_back(networkId, data);
     }
 
-    void NetworkManager::AddMessageToServerTcpBroadcastQueue(const std::vector<uint8_t>& data)
+    void NetworkManager::AddMessageToServerTcpBroadcastSendQueue(const std::vector<uint8_t>& data)
     {
         m_serverTcpBroadcastSendQueue.push_back(data);
+    }
+
+    void NetworkManager::AddMessageToClientTcpSendQueue(const std::vector<uint8_t>& data)
+    {
+        m_clientTcpSendQueue.push_back(data);
     }
 
     // Starts the server, binds and listens on the given port
@@ -181,48 +186,13 @@ namespace tme
             Utils::UpdateSuccessErrorFlags(ecResult, hadSuccess, hadError);
         }
 
+        if (m_clientTcpSocket != nullptr)
+        {
+            ecResult = EndUpdateClient();
+            Utils::UpdateSuccessErrorFlags(ecResult, hadSuccess, hadError);
+        }
+
         return Utils::GetCombinedErrorCode(hadSuccess, hadError);
-    }
-
-    // Sends data to server via TCP
-    ErrorCodes NetworkManager::SendToServerTcp(const std::vector<uint8_t>& data)
-    {
-        if (m_clientTcpSocket == nullptr)
-        {
-            ServiceLocator::Logger().LogError(
-                "SendToServerTcp: TCP client socket not initialized in NetworkManager");
-            return ErrorCodes::ClientNotInitialized;
-        }
-
-        ErrorCodes ecResult;
-        int lastSocketError;
-
-        int bytesSent;
-
-        ecResult = m_clientTcpSocket->Send(data.data(), data.size(), bytesSent);
-        lastSocketError = m_clientTcpSocket->GetLastSocketError();
-        if (ecResult == ErrorCodes::SendConnectionClosed)
-        {
-            m_clientTcpSocket->Shutdown();
-            m_clientTcpSocket.reset();
-            ServiceLocator::Logger().LogInfo(
-                "Disconnected from server (connection closed by remote host)");
-
-            return ErrorCodes::ReceiveConnectionClosed;
-        }
-        else if (ecResult != ErrorCodes::Success)
-        {
-            Utils::LogSocketError("SendToServerTcp: Send", ecResult, lastSocketError);
-
-            m_clientTcpSocket->Shutdown();
-            m_clientTcpSocket.reset();
-            ServiceLocator::Logger().LogInfo(
-                "Disconnected from server (connection closed by remote host)");
-
-            return ecResult;
-        }
-
-        return ErrorCodes::Success;
     }
 
     ErrorCodes NetworkManager::BeginUpdateServer()
@@ -503,6 +473,19 @@ namespace tme
         return Utils::GetCombinedErrorCode(hadSuccess, hadError);
     }
 
+    ErrorCodes NetworkManager::EndUpdateClient()
+    {
+        bool hadSuccess = false;
+        bool hadError = false;
+
+        ErrorCodes ecResult;
+
+        ecResult = ClientSendTcp();
+        Utils::UpdateSuccessErrorFlags(ecResult, hadSuccess, hadError);
+
+        return Utils::GetCombinedErrorCode(hadSuccess, hadError);
+    }
+
     ErrorCodes NetworkManager::ClientReceivedTcp()
     {
         m_clientReceivedTcpThisTick.clear();
@@ -555,6 +538,45 @@ namespace tme
             messagesReceivedThisFrame++;
         }
         
+        return ErrorCodes::Success;
+    }
+
+    ErrorCodes NetworkManager::ClientSendTcp()
+    {
+        ErrorCodes ecResult;
+        int lastSocketError;
+
+        int bytesSent;
+
+        for (const std::vector<uint8_t>& message : m_clientTcpSendQueue)
+        {
+            ecResult = m_clientTcpSocket->Send(message.data(), message.size(), bytesSent);
+            lastSocketError = m_clientTcpSocket->GetLastSocketError();
+            if (ecResult == ErrorCodes::SendConnectionClosed)
+            {
+                m_clientTcpSocket->Shutdown();
+                m_clientTcpSocket.reset();
+                ServiceLocator::Logger().LogInfo(
+                    "Disconnected from server (connection closed by remote host)");
+
+                m_clientTcpSendQueue.clear();
+                return ErrorCodes::ReceiveConnectionClosed;
+            }
+            else if (ecResult != ErrorCodes::Success)
+            {
+                Utils::LogSocketError("SendToServerTcp: Send", ecResult, lastSocketError);
+
+                m_clientTcpSocket->Shutdown();
+                m_clientTcpSocket.reset();
+                ServiceLocator::Logger().LogInfo(
+                    "Disconnected from server (connection closed by remote host)");
+
+                m_clientTcpSendQueue.clear();
+                return ecResult;
+            }
+        }
+
+        m_clientTcpSendQueue.clear();
         return ErrorCodes::Success;
     }
 }

@@ -207,7 +207,7 @@ namespace tme
             return ErrorCodes::NetworkServerNotStarted;
         }
 
-        static_cast<NetworkManager*>(m_networkManager)->AddMessageToServerTcpBroadcastQueue(data);
+        static_cast<NetworkManager*>(m_networkManager)->AddMessageToServerTcpBroadcastSendQueue(data);
 
         return ErrorCodes::Success;
     }
@@ -224,6 +224,8 @@ namespace tme
             return ErrorCodes::NetworkClientNotConnected;
         }
 
-        return static_cast<NetworkManager*>(m_networkManager)->SendToServerTcp(data);
+        static_cast<NetworkManager*>(m_networkManager)->AddMessageToClientTcpSendQueue(data);
+
+        return ErrorCodes::Success;
     }
 }

@@ -50,6 +50,8 @@ namespace tme
 
         std::vector<std::vector<uint8_t>> m_clientReceivedTcpThisTick;
 
+        std::vector<std::vector<uint8_t>> m_clientTcpSendQueue;
+
         ErrorCodes BeginUpdateServer();
 
         ErrorCodes EndUpdateServer();
@@ -66,7 +68,11 @@ namespace tme
 
         ErrorCodes BeginUpdateClient();
 
+        ErrorCodes EndUpdateClient();
+
         ErrorCodes ClientReceivedTcp();
+
+        ErrorCodes ClientSendTcp();
 
     public:
         /// @brief Constructs a new NetworkManager object.
@@ -87,7 +93,9 @@ namespace tme
 
         void AddMessageToServerTcpPerClientSendQueue(uint32_t networkId, const std::vector<uint8_t>& data);
 
-        void AddMessageToServerTcpBroadcastQueue(const std::vector<uint8_t>& data);
+        void AddMessageToServerTcpBroadcastSendQueue(const std::vector<uint8_t>& data);
+
+        void AddMessageToClientTcpSendQueue(const std::vector<uint8_t>& data);
 
         /// @brief Starts the server on the specified port.
         /// @param port The port to listen on.
@@ -103,11 +111,6 @@ namespace tme
         ErrorCodes BeginUpdate();
 
         ErrorCodes EndUpdate();
-
-        /// @brief Sends data to the server via TCP (client-side).
-        /// @param data The data to send.
-        /// @return Error code indicating success or failure.
-        ErrorCodes SendToServerTcp(const std::vector<uint8_t>& data);
     };    
 }
 
