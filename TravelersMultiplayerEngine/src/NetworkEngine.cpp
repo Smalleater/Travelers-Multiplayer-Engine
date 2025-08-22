@@ -116,6 +116,22 @@ namespace tme
         return ErrorCodes::Success;
     }
 
+    ErrorCodes NetworkEngine::GetClientReceivedReliableThisTick(std::vector<std::vector<uint8_t>>& outMessages)
+    {
+        if (m_networkManager == nullptr)
+        {
+            return ErrorCodes::NetworkEngineNotInitialized;
+        }
+        else if (!static_cast<NetworkManager*>(m_networkManager)->HasClientSocket())
+        {
+            return ErrorCodes::NetworkClientNotConnected;
+        }
+
+        outMessages = static_cast<NetworkManager*>(m_networkManager)->GetClientReceivedTcpThisTick();
+
+        return ErrorCodes::Success;
+    }
+
     // Returns whether the network engine is initialized
     bool NetworkEngine::IsInitialized()
     {
@@ -209,19 +225,5 @@ namespace tme
         }
 
         return static_cast<NetworkManager*>(m_networkManager)->SendToServerTcp(data);
-    }
-
-    ErrorCodes NetworkEngine::ReceiveAllReliableFromServer(std::vector<std::vector<uint8_t>>& outMessages)
-    {
-        if (m_networkManager == nullptr)
-        {
-            return ErrorCodes::NetworkEngineNotInitialized;
-        }
-        else if (!static_cast<NetworkManager*>(m_networkManager)->HasClientSocket())
-        {
-            return ErrorCodes::NetworkClientNotConnected;
-        }
-
-        return static_cast<NetworkManager*>(m_networkManager)->ReceiveFromServerTcp(outMessages);
     }
 }

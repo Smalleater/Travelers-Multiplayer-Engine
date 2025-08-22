@@ -10,10 +10,14 @@ namespace tme
         return m_newClientsThisTick;
     }
 
-    const std::vector<std::pair<uint32_t, std::vector<uint8_t>>>& 
-    NetworkManager::GetServerReceivedTcpThisTick() const
+    const std::vector<std::pair<uint32_t, std::vector<uint8_t>>>& NetworkManager::GetServerReceivedTcpThisTick() const
     {
         return m_serverReceivedTcpThisTick;
+    }
+
+    const std::vector<std::vector<uint8_t>>& NetworkManager::GetClientReceivedTcpThisTick() const
+    {
+        return m_clientReceivedTcpThisTick;
     }
 
     bool NetworkManager::HasServerSocket() const
@@ -155,6 +159,12 @@ namespace tme
             Utils::UpdateSuccessErrorFlags(ecResult, hadSuccess, hadError);
         }
 
+        if (m_clientTcpSocket != nullptr)
+        {
+            ecResult = BeginUpdateClient();
+            Utils::UpdateSuccessErrorFlags(ecResult, hadSuccess, hadError);
+        }
+
         return Utils::GetCombinedErrorCode(hadSuccess, hadError);
     }
 
@@ -212,59 +222,6 @@ namespace tme
             return ecResult;
         }
 
-        return ErrorCodes::Success;
-    }
-    
-    ErrorCodes NetworkManager::ReceiveFromServerTcp(std::vector<std::vector<uint8_t>>& outMessages)
-    {
-        const uint8_t maxMessagesPerFrame = 32;
-        uint8_t messagesReceivedThisFrame = 0;
-
-        int bytesReceived;
-        std::vector<uint8_t> buffer(4096);
-
-        ErrorCodes ecResult;
-        int lastSocketError;
-
-        while (messagesReceivedThisFrame < maxMessagesPerFrame)
-        {
-            bytesReceived = 0;
-            buffer.resize(4096);
-
-            ecResult = m_clientTcpSocket->Receive(buffer.data(), buffer.size(), bytesReceived);
-            lastSocketError = m_clientTcpSocket->GetLastSocketError();
-            if (ecResult != ErrorCodes::Success)
-            {
-                if (ecResult == ErrorCodes::ReceiveConnectionClosed)
-                {
-                    m_clientTcpSocket->Shutdown();
-                    m_clientTcpSocket.reset();
-                    ServiceLocator::Logger().LogInfo(
-                        "Disconnected from server (connection closed by remote host)");
-                    return ErrorCodes::ReceiveConnectionClosed;
-                }
-                else if (ecResult != ErrorCodes::ReceiveWouldBlock)
-                {
-                    Utils::LogSocketError("ReceiveFromClientTcp: Receive", ecResult, lastSocketError);
-                    
-                    m_clientTcpSocket->Shutdown();
-                    m_clientTcpSocket.reset();
-                    ServiceLocator::Logger().LogInfo(
-                        "Disconnected from server (connection closed by remote host)");
-                    
-                    return messagesReceivedThisFrame > 0 
-                        ? ErrorCodes::PartialSuccess : ErrorCodes::ReceiveFailed;
-                }
-
-                break;
-            }
-
-            buffer.resize(bytesReceived);
-            outMessages.emplace_back(std::move(buffer));
-
-            messagesReceivedThisFrame++;
-        }
-        
         return ErrorCodes::Success;
     }
 
@@ -530,6 +487,74 @@ namespace tme
             return ecResult;
         }
 
+        return ErrorCodes::Success;
+    }
+
+    ErrorCodes NetworkManager::BeginUpdateClient()
+    {
+        bool hadSuccess = false;
+        bool hadError = false;
+
+        ErrorCodes ecResult;
+
+        ecResult = ClientReceivedTcp();
+        Utils::UpdateSuccessErrorFlags(ecResult, hadSuccess, hadError);
+
+        return Utils::GetCombinedErrorCode(hadSuccess, hadError);
+    }
+
+    ErrorCodes NetworkManager::ClientReceivedTcp()
+    {
+        m_clientReceivedTcpThisTick.clear();
+
+        const uint8_t maxMessagesPerFrame = 32;
+        uint8_t messagesReceivedThisFrame = 0;
+
+        int bytesReceived;
+        std::vector<uint8_t> buffer(4096);
+
+        ErrorCodes ecResult;
+        int lastSocketError;
+
+        while (messagesReceivedThisFrame < maxMessagesPerFrame)
+        {
+            bytesReceived = 0;
+            buffer.resize(4096);
+
+            ecResult = m_clientTcpSocket->Receive(buffer.data(), buffer.size(), bytesReceived);
+            lastSocketError = m_clientTcpSocket->GetLastSocketError();
+            if (ecResult != ErrorCodes::Success)
+            {
+                if (ecResult == ErrorCodes::ReceiveConnectionClosed)
+                {
+                    m_clientTcpSocket->Shutdown();
+                    m_clientTcpSocket.reset();
+                    ServiceLocator::Logger().LogInfo(
+                        "Disconnected from server (connection closed by remote host)");
+                    return ErrorCodes::ReceiveConnectionClosed;
+                }
+                else if (ecResult != ErrorCodes::ReceiveWouldBlock)
+                {
+                    Utils::LogSocketError("ReceiveFromClientTcp: Receive", ecResult, lastSocketError);
+                    
+                    m_clientTcpSocket->Shutdown();
+                    m_clientTcpSocket.reset();
+                    ServiceLocator::Logger().LogInfo(
+                        "Disconnected from server (connection closed by remote host)");
+                    
+                    return messagesReceivedThisFrame > 0 
+                        ? ErrorCodes::PartialSuccess : ErrorCodes::ReceiveFailed;
+                }
+
+                break;
+            }
+
+            buffer.resize(bytesReceived);
+            m_clientReceivedTcpThisTick.emplace_back(std::move(buffer));
+
+            messagesReceivedThisFrame++;
+        }
+        
         return ErrorCodes::Success;
     }
 }

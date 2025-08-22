@@ -48,6 +48,8 @@ namespace tme
         static TME_API ErrorCodes GetServerReceivedReliableThisTick(
             std::vector<std::pair<uint32_t, std::vector<uint8_t>>>& outMessages);
 
+        static TME_API ErrorCodes GetClientReceivedReliableThisTick(std::vector<std::vector<uint8_t>>& outMessages);
+
         /// @brief Checks if the network engine is currently initialized.
         /// @return true if initialized, false otherwise.
         static TME_API bool IsInitialized();
@@ -72,8 +74,6 @@ namespace tme
         /// @param data The data buffer to send.
         /// @return ErrorCodes Result of the send operation.
         static TME_API ErrorCodes SendToServerReliable(const std::vector<uint8_t>& data);
-
-        static TME_API ErrorCodes ReceiveAllReliableFromServer(std::vector<std::vector<uint8_t>>& outMessages);
     };    
 }
 
