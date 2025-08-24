@@ -65,7 +65,7 @@ namespace tme
         }
         else
         {
-            result = ErrorCodes::CompletedWithErrors;
+            result = ErrorCodes::PartialSuccess;
             ServiceLocator::Logger().LogWarning("Shutdown of all services completed with erros");
         }
 

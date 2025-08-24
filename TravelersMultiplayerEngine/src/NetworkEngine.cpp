@@ -1,6 +1,6 @@
 #include "TME/NetworkEngine.hpp"
 
-#include <stdexcept>
+#include <iostream>
 
 #include "ServiceManager.hpp"
 #include "NetworkManager.hpp"
@@ -8,53 +8,101 @@
 
 namespace tme
 {
-    // Static members initialization
-    bool NetworkEngine::m_initialized = false;
-    void* NetworkEngine::m_networkManager = nullptr;
+    void* Network::m_networkManager = nullptr;
 
-    // Initializes the network engine and its dependencies
-    ErrorCodes NetworkEngine::Init()
+    namespace
     {
-        ErrorCodes result;
-
-        result = ServiceManager::Init();
-        if (result != ErrorCodes::Success)
+        ErrorCodes ValidateEngineState()
         {
-            throw std::runtime_error("Service initialization failed");
+            if(!Network::Engine::IsInitialized())
+            {
+                std::cerr << "[TME ERROR] NetworkEngine is not initialized" << std::endl;
+                return ErrorCodes::EngineNotInitialized;
+            }
+
+            return ErrorCodes::Success;
         }
 
-        m_networkManager = new NetworkManager();
+        ErrorCodes ValidateServerState()
+        {
+            ErrorCodes ecResult = ValidateEngineState();
+            if (ecResult != ErrorCodes::Success)
+            {
+                return ecResult;
+            }
 
-        m_initialized = true;
+            if (!Network::Server::IsStarted())
+            {
+                ServiceLocator::Logger().LogError("Server is not started");
+                return ErrorCodes::ServerNotStarted;
+            }
+
+            return ErrorCodes::Success;
+        }
+
+        ErrorCodes ValidateClientState()
+        {
+            ErrorCodes ecResult = ValidateEngineState();
+            if (ecResult != ErrorCodes::Success)
+            {
+                return ecResult;
+            }
+
+            if (!Network::Client::IsConnected())
+            {
+                ServiceLocator::Logger().LogError("Client is not connected");
+                return ErrorCodes::ClientNotConnected;
+            }
+
+            return ErrorCodes::Success;
+        }
+    }
+
+    // Engine
+
+    ErrorCodes Network::Engine::Init()
+    {
+        if (IsInitialized())
+        {
+            ServiceLocator::Logger().LogWarning("Network Engine is already initialized");
+            return ErrorCodes::AlreadyInitialized;
+        }
+
+        ErrorCodes ecResult;
+
+        ecResult = ServiceManager::Init();
+        if (ecResult != ErrorCodes::Success)
+        {
+            std::cerr << "[TME ERROR] ServiceManager initialization failed with error code: " 
+                << static_cast<int>(ecResult) << std::endl;
+            return ecResult;
+        }
+
+        try
+        {
+            m_networkManager = new NetworkManager();
+        }
+        catch(const std::bad_alloc& e)
+        {
+            ServiceLocator::Logger().LogError("Failed to allocate NetworkManager: " + std::string(e.what()));
+
+            ecResult = ServiceManager::ShutDown();
+            if (ecResult != ErrorCodes::Success)
+            {
+                std::cerr << "[TME ERROR] ServiceManager shutdown failed with error code: " 
+                    << static_cast<int>(ecResult) << std::endl;
+            }
+
+            return ErrorCodes::OutOfMemory;
+        }
 
         ServiceLocator::Logger().LogInfo("Network Engine has been started successfully");
         return ErrorCodes::Success;
     }
 
-    ErrorCodes NetworkEngine::BeginUpdate()
+    ErrorCodes Network::Engine::ShutDown()
     {
-        if (m_networkManager == nullptr)
-        {
-            return ErrorCodes::NetworkEngineNotInitialized;
-        }
-        
-        return static_cast<NetworkManager*>(m_networkManager)->BeginUpdate();
-    }
-
-    ErrorCodes NetworkEngine::EndUpdate()
-    {
-        if (m_networkManager == nullptr)
-        {
-            return ErrorCodes::NetworkEngineNotInitialized;
-        }
-        
-        return static_cast<NetworkManager*>(m_networkManager)->EndUpdate();
-    }
-
-    // Shuts down the network engine and cleans up resources
-    ErrorCodes NetworkEngine::ShutDown()
-    {
-        ErrorCodes result = ErrorCodes::Success;
+        ErrorCodes ecResult;
 
         ServiceLocator::ThreadManager().Shutdown();
         ServiceLocator::Logger().LogInfo("ThreadManager was shutdown successfully");
@@ -62,20 +110,25 @@ namespace tme
         delete static_cast<NetworkManager*>(m_networkManager);
         m_networkManager = nullptr;
 
-        if (ServiceManager::ShutDown() != ErrorCodes::Success)
+        ecResult = ServiceManager::ShutDown();
+        if (ecResult != ErrorCodes::Success)
         {
-            result = ErrorCodes::CompletedWithErrors;
+            std::cerr << "[TME ERROR] ServiceManager shutdown failed with error code: " 
+                << static_cast<int>(ecResult) << std::endl;
+            return ErrorCodes::PartialSuccess;
         }
 
-        m_initialized = false;
-
-        return result;
+        return ErrorCodes::Success;
     }
 
-    // Ensures the network engine is initialized before use
-    ErrorCodes NetworkEngine::EnsureInitialized()
+    bool Network::Engine::IsInitialized()
     {
-        if (m_initialized)
+        return m_networkManager != nullptr;
+    }
+
+    ErrorCodes Network::Engine::EnsurInitialized()
+    {
+        if (m_networkManager != nullptr)
         {
             return ErrorCodes::Success;
         }
@@ -83,64 +136,50 @@ namespace tme
         return Init();
     }
 
-    ErrorCodes NetworkEngine::GetNewClientThisTick(std::vector<uint32_t>& outNetworkIds)
+    ErrorCodes Network::Engine::BeginUpdate()
     {
-        if (m_networkManager == nullptr)
+        ErrorCodes ecResult = ValidateEngineState();
+        if (ecResult != ErrorCodes::Success)
         {
-            return ErrorCodes::NetworkEngineNotInitialized;
-        }
-        else if (!static_cast<NetworkManager*>(m_networkManager)->HasServerSocket())
-        {
-            return ErrorCodes::NetworkServerNotStarted;
+            return ecResult;
         }
 
-        outNetworkIds = static_cast<NetworkManager*>(m_networkManager)->GetNewClientsThisTick();
-
-        return ErrorCodes::Success;
+        return static_cast<NetworkManager*>(m_networkManager)->BeginUpdate();
     }
 
-    ErrorCodes NetworkEngine::GetServerReceivedReliableThisTick(
-        std::vector<std::pair<uint32_t, std::vector<uint8_t>>>& outMessages)
+    ErrorCodes Network::Engine::EndUpdate()
     {
-        if (m_networkManager == nullptr)
+        ErrorCodes ecResult = ValidateEngineState();
+        if (ecResult != ErrorCodes::Success)
         {
-            return ErrorCodes::NetworkEngineNotInitialized;
-        }
-        else if (!static_cast<NetworkManager*>(m_networkManager)->HasServerSocket())
-        {
-            return ErrorCodes::NetworkServerNotStarted;
+            return ecResult;
         }
 
-        outMessages = static_cast<NetworkManager*>(m_networkManager)->GetServerReceivedTcpThisTick();
-
-        return ErrorCodes::Success;
+        return static_cast<NetworkManager*>(m_networkManager)->EndUpdate();
     }
 
-    ErrorCodes NetworkEngine::GetClientReceivedReliableThisTick(std::vector<std::vector<uint8_t>>& outMessages)
+    // Server
+
+    ErrorCodes Network::Server::Start(uint16_t port)
     {
-        if (m_networkManager == nullptr)
+        if (IsStarted())
         {
-            return ErrorCodes::NetworkEngineNotInitialized;
-        }
-        else if (!static_cast<NetworkManager*>(m_networkManager)->HasClientSocket())
-        {
-            return ErrorCodes::NetworkClientNotConnected;
+            ServiceLocator::Logger().LogWarning("Server is already started");
+            return ErrorCodes::Success;
         }
 
-        outMessages = static_cast<NetworkManager*>(m_networkManager)->GetClientReceivedTcpThisTick();
+        ErrorCodes ecResult = ValidateEngineState();
+        if (ecResult != ErrorCodes::Success)
+        {
+            return ecResult;
+        }
 
-        return ErrorCodes::Success;
+        return static_cast<NetworkManager*>(m_networkManager)->StartServer(port);
     }
 
-    // Returns whether the network engine is initialized
-    bool NetworkEngine::IsInitialized()
+    bool Network::Server::IsStarted()
     {
-        return m_initialized;
-    }
-
-    bool NetworkEngine::IsServerStarted()
-    {
-        if (m_networkManager == nullptr)
+        if (!Engine::IsInitialized())
         {
             return false;
         }
@@ -148,9 +187,80 @@ namespace tme
         return static_cast<NetworkManager*>(m_networkManager)->HasServerSocket();
     }
 
-    bool NetworkEngine::IsClientConnected()
+    ErrorCodes Network::Server::GetNewClientThisTick(std::vector<uint32_t>& outNetworkIds)
     {
-        if (m_networkManager == nullptr)
+        ErrorCodes ecResult = ValidateServerState();
+        if (ecResult != ErrorCodes::Success)
+        {
+            return ecResult;
+        }
+
+        outNetworkIds = static_cast<NetworkManager*>(m_networkManager)->GetNewClientsThisTick();
+
+        return ErrorCodes::Success;
+    }
+
+    ErrorCodes Network::Server::GetReceivedReliableThisTick(std::vector<std::pair<uint32_t, std::vector<uint8_t>>>& outMessages)
+    {
+        ErrorCodes ecResult = ValidateServerState();
+        if (ecResult != ErrorCodes::Success)
+        {
+            return ecResult;
+        }
+
+        outMessages = static_cast<NetworkManager*>(m_networkManager)->GetServerReceivedTcpThisTick();
+
+        return ErrorCodes::Success;
+    }
+
+    ErrorCodes Network::Server::SendReliableTo(uint32_t networkId, const std::vector<uint8_t>& message)
+    {
+        ErrorCodes ecResult = ValidateServerState();
+        if (ecResult != ErrorCodes::Success)
+        {
+            return ecResult;
+        }
+
+        static_cast<NetworkManager*>(m_networkManager)->AddMessageToServerTcpPerClientSendQueue(networkId, message);
+
+        return ErrorCodes::Success;
+    }
+
+    ErrorCodes Network::Server::SendReliableToAll(const std::vector<uint8_t>& message)
+    {
+        ErrorCodes ecResult = ValidateServerState();
+        if (ecResult != ErrorCodes::Success)
+        {
+            return ecResult;
+        }
+
+        static_cast<NetworkManager*>(m_networkManager)->AddMessageToServerTcpBroadcastSendQueue(message);
+
+        return ErrorCodes::Success;
+    }
+
+    // Client
+
+    ErrorCodes Network::Client::Connect(const std::string& address, uint16_t port)
+    {
+        if (IsConnected())
+        {
+            ServiceLocator::Logger().LogWarning("Client is already connected");
+            return ErrorCodes::AlreadyConnected;
+        }
+
+        ErrorCodes ecResult = ValidateEngineState();
+        if (ecResult != ErrorCodes::Success)
+        {
+            return ecResult;
+        }
+
+        return static_cast<NetworkManager*>(m_networkManager)->StartClient(address, port);
+    }
+
+    bool Network::Client::IsConnected()
+    {
+        if (!Engine::IsInitialized())
         {
             return false;
         }
@@ -158,73 +268,28 @@ namespace tme
         return static_cast<NetworkManager*>(m_networkManager)->HasClientSocket();
     }
 
-    // Starts the server on the specified port
-    ErrorCodes NetworkEngine::StartServer(uint16_t port)
+    ErrorCodes Network::Client::GetReceivedReliableThisTick(std::vector<std::vector<uint8_t>>& outMessages)
     {
-        if (m_networkManager == nullptr)
+        ErrorCodes ecResult = ValidateClientState();
+        if (ecResult != ErrorCodes::Success)
         {
-            return ErrorCodes::NetworkEngineNotInitialized;
+            return ecResult;
         }
 
-        return static_cast<NetworkManager*>(m_networkManager)->StartServer(port);
-    }
-
-    // Starts the client and connects to the specified address and port
-    ErrorCodes NetworkEngine::StartClient(const std::string& address, uint16_t port)
-    {
-        if (m_networkManager == nullptr)
-        {
-            return ErrorCodes::NetworkEngineNotInitialized;
-        }
-
-        return static_cast<NetworkManager*>(m_networkManager)->StartClient(address, port);
-    }
-
-    ErrorCodes NetworkEngine::SendToClientReliable(uint32_t networkId, const std::vector<uint8_t>& data)
-    {
-        if (m_networkManager == nullptr)
-        {
-            return ErrorCodes::NetworkEngineNotInitialized;
-        }
-        else if (!static_cast<NetworkManager*>(m_networkManager)->HasServerSocket())
-        {
-            return ErrorCodes::NetworkServerNotStarted;
-        }
-
-        static_cast<NetworkManager*>(m_networkManager)->AddMessageToServerTcpPerClientSendQueue(networkId, data);
+        outMessages = static_cast<NetworkManager*>(m_networkManager)->GetClientReceivedTcpThisTick();
 
         return ErrorCodes::Success;
     }
 
-    ErrorCodes NetworkEngine::SendToAllClientReliable(const std::vector<uint8_t>& data)
+    ErrorCodes Network::Client::SendReliable(const std::vector<uint8_t>& message)
     {
-        if (m_networkManager == nullptr)
+        ErrorCodes ecResult = ValidateClientState();
+        if (ecResult != ErrorCodes::Success)
         {
-            return ErrorCodes::NetworkEngineNotInitialized;
-        }
-        else if (!static_cast<NetworkManager*>(m_networkManager)->HasServerSocket())
-        {
-            return ErrorCodes::NetworkServerNotStarted;
+            return ecResult;
         }
 
-        static_cast<NetworkManager*>(m_networkManager)->AddMessageToServerTcpBroadcastSendQueue(data);
-
-        return ErrorCodes::Success;
-    }
-
-    // Sends data reliably to the server (TCP)
-    ErrorCodes NetworkEngine::SendToServerReliable(const std::vector<uint8_t>& data)
-    {
-        if (m_networkManager == nullptr)
-        {
-            return ErrorCodes::NetworkEngineNotInitialized;
-        }
-        else if (!static_cast<NetworkManager*>(m_networkManager)->HasClientSocket())
-        {
-            return ErrorCodes::NetworkClientNotConnected;
-        }
-
-        static_cast<NetworkManager*>(m_networkManager)->AddMessageToClientTcpSendQueue(data);
+        static_cast<NetworkManager*>(m_networkManager)->AddMessageToClientTcpSendQueue(message);
 
         return ErrorCodes::Success;
     }
