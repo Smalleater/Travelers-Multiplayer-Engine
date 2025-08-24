@@ -9,13 +9,17 @@ namespace tme
     {
         Success = 0,
         PartialSuccess,
-        AlreadyInitialized,
         Failure,
 
-        CompletedWithErrors,
-        NetworkEngineNotInitialized,
-        NetworkServerNotStarted,
-        NetworkClientNotConnected,
+        AlreadyInitialized,
+        AlreadyStarted,
+        AlreadyConnected,
+
+        OutOfMemory,
+
+        EngineNotInitialized,
+        ServerNotStarted,
+        ClientNotConnected,
 
         ClientNotInitialized,
         ClientNotFound,

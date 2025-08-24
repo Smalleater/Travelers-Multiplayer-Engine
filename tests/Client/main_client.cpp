@@ -8,7 +8,7 @@ int main()
 {
     tme::ErrorCodes ecResult;
 
-    ecResult = tme::NetworkEngine::Init();
+    ecResult = tme::Network::Engine::Init();
     if (ecResult == tme::ErrorCodes::Success)
     {
         std::cout << "TME started successfully" << std::endl;
@@ -18,7 +18,7 @@ int main()
         std::cout << "TME failed to start" << std::endl;
     }
 
-    ecResult = tme::NetworkEngine::StartClient("127.0.0.1", 2025);
+    ecResult = tme::Network::Client::Connect("127.0.0.1", 2025);
     if (ecResult == tme::ErrorCodes::Success)
     {
         std::cout << "TME client started successfully" << std::endl;
@@ -28,12 +28,18 @@ int main()
         std::cout << "TME client failed to start" << std::endl;
     }
 
-    while (tme::NetworkEngine::IsClientConnected())
+    while (tme::Network::Client::IsConnected())
     {
+        ecResult = tme::Network::Engine::BeginUpdate();
+        if (ecResult != tme::ErrorCodes::Success)
+        {
+            std::cout << "BeginUpdate failed with code: " << std::to_string(static_cast<int>(ecResult)) << std::endl;
+        }
+
         std::string str = "Hello world from client";
         std::vector<uint8_t> message(str.begin(), str.end());
 
-        ecResult = tme::NetworkEngine::SendToServerReliable(message);
+        ecResult = tme::Network::Client::SendReliable(message);
         if (ecResult != tme::ErrorCodes::Success)
         {
             std::cout << "failed to send message" << std::endl;
@@ -41,7 +47,7 @@ int main()
 
         std::vector<std::vector<uint8_t>> outMessages;
 
-        ecResult = tme::NetworkEngine::ReceiveAllReliableFromServer(outMessages);
+        ecResult = tme::Network::Client::GetReceivedReliableThisTick(outMessages);
         if (ecResult != tme::ErrorCodes::Success)
         {
             std::cout << "failed to receive message" << std::endl;
@@ -56,15 +62,21 @@ int main()
             }
         }
 
+        ecResult = tme::Network::Engine::EndUpdate();
+        if (ecResult != tme::ErrorCodes::Success)
+        {
+            std::cout << "EndUpdate failed with code: " << std::to_string(static_cast<int>(ecResult)) << std::endl;
+        }
+
         std::this_thread::sleep_for(std::chrono::seconds(1));
     }
 
-    ecResult = tme::NetworkEngine::ShutDown();
+    ecResult = tme::Network::Engine::ShutDown();
     if (ecResult == tme::ErrorCodes::Success)
     {
         std::cout << "TME shutdown successfully" << std::endl;
     }
-    else if (ecResult == tme::ErrorCodes::CompletedWithErrors)
+    else if (ecResult == tme::ErrorCodes::PartialSuccess)
     {
         std::cout << "TME shutdown completed, but with errors" << std::endl;
     }
