@@ -15,8 +15,6 @@ namespace tme
         AlreadyStarted,
         AlreadyConnected,
 
-        OutOfMemory,
-
         EngineNotInitialized,
         ServerNotStarted,
         ClientNotConnected,
