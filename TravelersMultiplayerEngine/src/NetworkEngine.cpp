@@ -78,23 +78,7 @@ namespace tme
             return ecResult;
         }
 
-        try
-        {
-            m_networkManager = new NetworkManager();
-        }
-        catch(const std::bad_alloc& e)
-        {
-            ServiceLocator::Logger().LogError("Failed to allocate NetworkManager: " + std::string(e.what()));
-
-            ecResult = ServiceManager::ShutDown();
-            if (ecResult != ErrorCodes::Success)
-            {
-                std::cerr << "[TME ERROR] ServiceManager shutdown failed with error code: " 
-                    << static_cast<int>(ecResult) << std::endl;
-            }
-
-            return ErrorCodes::OutOfMemory;
-        }
+        m_networkManager = new NetworkManager();
 
         ServiceLocator::Logger().LogInfo("Network Engine has been started successfully");
         return ErrorCodes::Success;
@@ -184,7 +168,7 @@ namespace tme
             return false;
         }
 
-        return static_cast<NetworkManager*>(m_networkManager)->HasServerSocket();
+        return static_cast<NetworkManager*>(m_networkManager)->HasServer();
     }
 
     ErrorCodes Network::Server::GetNewClientThisTick(std::vector<uint32_t>& outNetworkIds)
@@ -195,7 +179,8 @@ namespace tme
             return ecResult;
         }
 
-        outNetworkIds = static_cast<NetworkManager*>(m_networkManager)->GetNewClientsThisTick();
+        const std::unique_ptr<ServerCore>& server = static_cast<NetworkManager*>(m_networkManager)->GetServer();
+        outNetworkIds = server->GetNewClientsThisTick();
 
         return ErrorCodes::Success;
     }
@@ -208,7 +193,8 @@ namespace tme
             return ecResult;
         }
 
-        outMessages = static_cast<NetworkManager*>(m_networkManager)->GetServerReceivedTcpThisTick();
+        const std::unique_ptr<ServerCore>& server = static_cast<NetworkManager*>(m_networkManager)->GetServer();
+        outMessages = server->GetReceivedTcpThisTick();
 
         return ErrorCodes::Success;
     }
@@ -221,7 +207,8 @@ namespace tme
             return ecResult;
         }
 
-        static_cast<NetworkManager*>(m_networkManager)->AddMessageToServerTcpPerClientSendQueue(networkId, message);
+        const std::unique_ptr<ServerCore>& server = static_cast<NetworkManager*>(m_networkManager)->GetServer();
+        server->AddMessageToTcpPerClientSendQueue(networkId, message);
 
         return ErrorCodes::Success;
     }
@@ -234,7 +221,8 @@ namespace tme
             return ecResult;
         }
 
-        static_cast<NetworkManager*>(m_networkManager)->AddMessageToServerTcpBroadcastSendQueue(message);
+        const std::unique_ptr<ServerCore>& server = static_cast<NetworkManager*>(m_networkManager)->GetServer();
+        server->AddMessageToTcpBroadcastSendQueue(message);
 
         return ErrorCodes::Success;
     }
