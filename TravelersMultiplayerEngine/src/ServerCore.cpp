@@ -9,7 +9,7 @@ namespace tme
     {
         if (m_tcpSocket != nullptr)
         {
-            ServiceLocator::Logger().LogWarning("Server::Start called but server socket already exists");
+            ServiceLocator::Logger().LogWarning("ServerCore::Start called but server socket already exists");
             return ErrorCodes::AlreadyStarted;
         }
 
@@ -22,7 +22,7 @@ namespace tme
         lastSocketError = m_tcpSocket->GetLastSocketError();
         if (ecResult != ErrorCodes::Success)
         {
-            Utils::LogSocketError("Server::Start: Bind", ecResult, lastSocketError);
+            Utils::LogSocketError("ServerCore::Start: Bind", ecResult, lastSocketError);
             return ecResult;
         }
 
@@ -30,7 +30,7 @@ namespace tme
         lastSocketError = m_tcpSocket->GetLastSocketError();
         if (ecResult != ErrorCodes::Success)
         {
-            Utils::LogSocketError("Server::Start: Listen", ecResult, lastSocketError);
+            Utils::LogSocketError("ServerCore::Start: Listen", ecResult, lastSocketError);
             return ecResult;
         }
 
@@ -38,7 +38,7 @@ namespace tme
         lastSocketError = m_tcpSocket->GetLastSocketError();
         if (ecResult != ErrorCodes::Success)
         {
-            Utils::LogSocketError("Server::Start: SetBlocking", ecResult, lastSocketError);
+            Utils::LogSocketError("ServerCore::Start: SetBlocking", ecResult, lastSocketError);
             return ecResult;
         }
 
@@ -68,10 +68,10 @@ namespace tme
 
         ErrorCodes ecResult;
 
-        ecResult = SendToClientTcp();
+        ecResult = SendToTcp();
         Utils::UpdateSuccessErrorFlags(ecResult, hadSuccess, hadError);
 
-        ecResult = SendToAllClientTcp();
+        ecResult = SendToAllTcp();
         Utils::UpdateSuccessErrorFlags(ecResult, hadSuccess, hadError);
 
         return Utils::GetCombinedErrorCode(hadSuccess, hadError);
@@ -129,7 +129,7 @@ namespace tme
             {
                 if (ecResult != ErrorCodes::AcceptWouldBlock)
                 {
-                    Utils::LogSocketError("ServerAcceptClient: Accept new client", ecResult, lastSocketError);
+                    Utils::LogSocketError("ServerCore::Accept: Accept new client", ecResult, lastSocketError);
                     hadError = true;
                 }
 
@@ -144,7 +144,7 @@ namespace tme
             tcpClient = std::unique_ptr<TcpSocket>(dynamic_cast<TcpSocket*>(outClient.release()));
             if (tcpClient == nullptr)
             {
-                ServiceLocator::Logger().LogError("UpdateServer: Failed to cast ISocket* to TcpSocket*");
+                ServiceLocator::Logger().LogError("ServerCore::Accept: Failed to cast ISocket* to TcpSocket*");
                 hadError = true;
                 continue;
             }
@@ -210,7 +210,7 @@ namespace tme
                     }
                     else if (ecResult != ErrorCodes::ReceiveWouldBlock)
                     {
-                        Utils::LogSocketError("ReceiveAllFromServerTcp: Receive", ecResult, lastSocketError);
+                        Utils::LogSocketError("ServerCore::ReceiveAllFromTcp: Receive", ecResult, lastSocketError);
                         clientsToRemove.push_back(networkId);
                         hadError = true;
                     }
@@ -240,7 +240,7 @@ namespace tme
         return Utils::GetCombinedErrorCode(hadSuccess, hadError);
     }
 
-    ErrorCodes ServerCore::SendToClientTcp()
+    ErrorCodes ServerCore::SendToTcp()
     {
         bool hadSuccess = false;
         bool hadError = false;
@@ -251,7 +251,7 @@ namespace tme
         {
             if (m_clients.find(messagePair.first) == m_clients.end())
             {
-                ServiceLocator::Logger().LogError("ServerSendToClientTcp: No TCP client found for networkId" 
+                ServiceLocator::Logger().LogError("ServerCore::SendToClientTcp: No TCP client found for networkId" 
                     + std::to_string(messagePair.first));
                 hadError = true;
                 continue;
@@ -272,7 +272,7 @@ namespace tme
         return Utils::GetCombinedErrorCode(hadSuccess, hadError);
     }
 
-    ErrorCodes ServerCore::SendToAllClientTcp()
+    ErrorCodes ServerCore::SendToAllTcp()
     {
         bool hadSuccess = false;
         bool hadError = false;
@@ -322,7 +322,7 @@ namespace tme
         }
         else if (ecResult != ErrorCodes::Success)
         {
-            Utils::LogSocketError("ServerSendTcp: Send", ecResult, lastSocketError);
+            Utils::LogSocketError("ServerCore::SendTcp: Send", ecResult, lastSocketError);
 
             m_clients[networkId]->Shutdown();
             m_clients.erase(networkId);

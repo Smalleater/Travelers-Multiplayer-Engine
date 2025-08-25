@@ -1,5 +1,5 @@
-#ifndef TME_SERVER_HPP
-#define TME_SERVER_HPP
+#ifndef TME_SERVER_CORE_HPP
+#define TME_SERVER_CORE_HPP
 
 #include <unordered_map>
 #include <vector>
@@ -29,8 +29,8 @@ namespace tme
         ErrorCodes Accept();
         ErrorCodes ReceivedTcp();
 
-        ErrorCodes SendToClientTcp();
-        ErrorCodes SendToAllClientTcp();
+        ErrorCodes SendToTcp();
+        ErrorCodes SendToAllTcp();
         ErrorCodes SendTcp(uint32_t networkId, const std::vector<uint8_t>& data);
 
     public:
