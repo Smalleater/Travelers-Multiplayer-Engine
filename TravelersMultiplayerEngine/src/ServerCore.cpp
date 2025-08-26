@@ -7,10 +7,10 @@ namespace tme
 {
     ErrorCodes ServerCore::Start(uint16_t port)
     {
-        if (m_tcpSocket != nullptr)
+        if (IsStarted())
         {
-            ServiceLocator::Logger().LogWarning("ServerCore::Start called but server socket already exists");
-            return ErrorCodes::AlreadyStarted;
+            ServiceLocator::Logger().LogWarning("ServerCore::Start called but server is already started");
+            return ErrorCodes::ServerAlreadyStarted;
         }
 
         ErrorCodes ecResult;
@@ -47,6 +47,12 @@ namespace tme
 
     ErrorCodes ServerCore::BeginUpdate()
     {
+        if (!IsStarted())
+        {
+            ServiceLocator::Logger().LogWarning("ServerCore::BeginUpdate called but server are not started");
+            return ErrorCodes::ServerNotStarted;
+        }
+
         bool hadSuccess = false;
         bool hadError = false;
 
@@ -63,6 +69,12 @@ namespace tme
 
     ErrorCodes ServerCore::EndUpdate()
     {
+        if (!IsStarted())
+        {
+            ServiceLocator::Logger().LogWarning("ServerCore::EndUpdate called but server are not started");
+            return ErrorCodes::ServerNotStarted;
+        }
+
         bool hadSuccess = false;
         bool hadError = false;
 

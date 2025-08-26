@@ -12,8 +12,9 @@ namespace tme
         Failure,
 
         AlreadyInitialized,
-        AlreadyStarted,
-        AlreadyConnected,
+
+        ServerAlreadyStarted,
+        ClientAlreadyConnected,
 
         EngineNotInitialized,
         ServerNotStarted,

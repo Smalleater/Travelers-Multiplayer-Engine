@@ -14,6 +14,7 @@
 
 #include "sockets/TcpSocket.hpp"
 #include "ServerCore.hpp"
+#include "ClientCore.hpp"
 
 namespace tme
 {
@@ -30,20 +31,7 @@ namespace tme
         #endif
 
         std::unique_ptr<ServerCore> m_server;
-
-        std::unique_ptr<TcpSocket> m_clientTcpSocket;
-        
-        std::vector<std::vector<uint8_t>> m_clientReceivedTcpThisTick;
-
-        std::vector<std::vector<uint8_t>> m_clientTcpSendQueue;
-
-        ErrorCodes BeginUpdateClient();
-
-        ErrorCodes EndUpdateClient();
-
-        ErrorCodes ClientReceivedTcp();
-
-        ErrorCodes ClientSendTcp();
+        std::unique_ptr<ClientCore> m_client;
 
     public:
         /// @brief Constructs a new NetworkManager object.
@@ -52,20 +40,17 @@ namespace tme
         /// @brief Destroys the NetworkManager object and cleans up resources.
         ~NetworkManager() {}
 
-        const std::vector<std::vector<uint8_t>>& GetClientReceivedTcpThisTick() const;
-
-        const std::unique_ptr<ServerCore>& GetServer() const;
-
-        bool HasServer() const;
-        bool HasClientSocket() const;
-
-        void AddMessageToClientTcpSendQueue(const std::vector<uint8_t>& data);
-
         ErrorCodes StartServer(uint16_t port);
-        ErrorCodes StartClient(const std::string& address, uint16_t port);
+        ErrorCodes ConnectClient(const std::string& address, uint16_t port);
 
         ErrorCodes BeginUpdate();
         ErrorCodes EndUpdate();
+
+        const std::unique_ptr<ServerCore>& GetServer() const;
+        const std::unique_ptr<ClientCore>& GetClient() const;
+
+        bool HasServer() const;
+        bool HasClient() const;
     };    
 }
 

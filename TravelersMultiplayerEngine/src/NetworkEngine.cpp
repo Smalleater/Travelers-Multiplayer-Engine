@@ -229,12 +229,12 @@ namespace tme
 
     // Client
 
-    ErrorCodes Network::Client::Connect(const std::string& address, uint16_t port)
+    ErrorCodes Network::Client::ConnectTo(const std::string& address, uint16_t port)
     {
         if (IsConnected())
         {
             ServiceLocator::Logger().LogWarning("Client is already connected");
-            return ErrorCodes::AlreadyConnected;
+            return ErrorCodes::ClientAlreadyConnected;
         }
 
         ErrorCodes ecResult = ValidateEngineState();
@@ -243,7 +243,7 @@ namespace tme
             return ecResult;
         }
 
-        return static_cast<NetworkManager*>(m_networkManager)->StartClient(address, port);
+        return static_cast<NetworkManager*>(m_networkManager)->ConnectClient(address, port);
     }
 
     bool Network::Client::IsConnected()
@@ -253,7 +253,7 @@ namespace tme
             return false;
         }
 
-        return static_cast<NetworkManager*>(m_networkManager)->HasClientSocket();
+        return static_cast<NetworkManager*>(m_networkManager)->HasClient();
     }
 
     ErrorCodes Network::Client::GetReceivedReliableThisTick(std::vector<std::vector<uint8_t>>& outMessages)
@@ -264,7 +264,8 @@ namespace tme
             return ecResult;
         }
 
-        outMessages = static_cast<NetworkManager*>(m_networkManager)->GetClientReceivedTcpThisTick();
+        const std::unique_ptr<ClientCore>& client = static_cast<NetworkManager*>(m_networkManager)->GetClient();
+        outMessages = client->GetReceivedTcpThisTick();
 
         return ErrorCodes::Success;
     }
@@ -277,7 +278,8 @@ namespace tme
             return ecResult;
         }
 
-        static_cast<NetworkManager*>(m_networkManager)->AddMessageToClientTcpSendQueue(message);
+        const std::unique_ptr<ClientCore>& client = static_cast<NetworkManager*>(m_networkManager)->GetClient();
+        client->AddMessageToTcpSendQueue(message);
 
         return ErrorCodes::Success;
     }
