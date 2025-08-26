@@ -45,7 +45,7 @@ namespace tme
         class Client
         {
         public:
-            static TME_API ErrorCodes Connect(const std::string& address, uint16_t port);
+            static TME_API ErrorCodes ConnectTo(const std::string& address, uint16_t port);
 
             static TME_API bool IsConnected();
 

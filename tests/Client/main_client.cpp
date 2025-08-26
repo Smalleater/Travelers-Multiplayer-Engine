@@ -18,7 +18,7 @@ int main()
         std::cout << "TME failed to start" << std::endl;
     }
 
-    ecResult = tme::Network::Client::Connect("127.0.0.1", 2025);
+    ecResult = tme::Network::Client::ConnectTo("127.0.0.1", 2025);
     if (ecResult == tme::ErrorCodes::Success)
     {
         std::cout << "TME client started successfully" << std::endl;
