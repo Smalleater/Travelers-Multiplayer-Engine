@@ -1,5 +1,5 @@
-#ifndef TME_NETWORK_MANAGER_HPP
-#define TME_NETWORK_MANAGER_HPP
+#ifndef TME_ENGINE_CORE_HPP
+#define TME_ENGINE_CORE_HPP
 
 #include <memory>
 #include <unordered_map>
@@ -22,7 +22,7 @@ namespace tme
     ///
     /// This class handles the initialization, updating, and communication
     /// for TCP networking, supporting both server and client roles.
-    class NetworkManager
+    class EngineCore
     {
     private:
         #ifdef _WIN32
@@ -35,10 +35,10 @@ namespace tme
 
     public:
         /// @brief Constructs a new NetworkManager object.
-        NetworkManager() {}
+        EngineCore() {}
 
         /// @brief Destroys the NetworkManager object and cleans up resources.
-        ~NetworkManager() {}
+        ~EngineCore() {}
 
         ErrorCodes StartServer(uint16_t port);
         ErrorCodes ConnectClient(const std::string& address, uint16_t port);

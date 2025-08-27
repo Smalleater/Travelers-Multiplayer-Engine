@@ -10,7 +10,7 @@ namespace tme
     class Network
     {
     private:
-        static void* m_networkManager;
+        static void* m_engineCore;
 
     public:
         class Engine

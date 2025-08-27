@@ -2,13 +2,13 @@
 
 #include <iostream>
 
+#include "Core/EngineCore.hpp"
 #include "ServiceManager.hpp"
-#include "NetworkManager.hpp"
 #include "ServiceLocator.hpp"
 
 namespace tme
 {
-    void* Network::m_networkManager = nullptr;
+    void* Network::m_engineCore = nullptr;
 
     namespace
     {
@@ -78,7 +78,7 @@ namespace tme
             return ecResult;
         }
 
-        m_networkManager = new NetworkManager();
+        m_engineCore = new EngineCore();
 
         ServiceLocator::Logger().LogInfo("Network Engine has been started successfully");
         return ErrorCodes::Success;
@@ -91,8 +91,8 @@ namespace tme
         ServiceLocator::ThreadManager().Shutdown();
         ServiceLocator::Logger().LogInfo("ThreadManager was shutdown successfully");
 
-        delete static_cast<NetworkManager*>(m_networkManager);
-        m_networkManager = nullptr;
+        delete static_cast<EngineCore*>(m_engineCore);
+        m_engineCore = nullptr;
 
         ecResult = ServiceManager::ShutDown();
         if (ecResult != ErrorCodes::Success)
@@ -107,12 +107,12 @@ namespace tme
 
     bool Network::Engine::IsInitialized()
     {
-        return m_networkManager != nullptr;
+        return m_engineCore != nullptr;
     }
 
     ErrorCodes Network::Engine::EnsurInitialized()
     {
-        if (m_networkManager != nullptr)
+        if (m_engineCore != nullptr)
         {
             return ErrorCodes::Success;
         }
@@ -128,7 +128,7 @@ namespace tme
             return ecResult;
         }
 
-        return static_cast<NetworkManager*>(m_networkManager)->BeginUpdate();
+        return static_cast<EngineCore*>(m_engineCore)->BeginUpdate();
     }
 
     ErrorCodes Network::Engine::EndUpdate()
@@ -139,7 +139,7 @@ namespace tme
             return ecResult;
         }
 
-        return static_cast<NetworkManager*>(m_networkManager)->EndUpdate();
+        return static_cast<EngineCore*>(m_engineCore)->EndUpdate();
     }
 
     // Server
@@ -158,7 +158,7 @@ namespace tme
             return ecResult;
         }
 
-        return static_cast<NetworkManager*>(m_networkManager)->StartServer(port);
+        return static_cast<EngineCore*>(m_engineCore)->StartServer(port);
     }
 
     bool Network::Server::IsStarted()
@@ -168,7 +168,7 @@ namespace tme
             return false;
         }
 
-        return static_cast<NetworkManager*>(m_networkManager)->HasServer();
+        return static_cast<EngineCore*>(m_engineCore)->HasServer();
     }
 
     ErrorCodes Network::Server::GetNewClientThisTick(std::vector<uint32_t>& outNetworkIds)
@@ -179,7 +179,7 @@ namespace tme
             return ecResult;
         }
 
-        const std::unique_ptr<ServerCore>& server = static_cast<NetworkManager*>(m_networkManager)->GetServer();
+        const std::unique_ptr<ServerCore>& server = static_cast<EngineCore*>(m_engineCore)->GetServer();
         outNetworkIds = server->GetNewClientsThisTick();
 
         return ErrorCodes::Success;
@@ -193,7 +193,7 @@ namespace tme
             return ecResult;
         }
 
-        const std::unique_ptr<ServerCore>& server = static_cast<NetworkManager*>(m_networkManager)->GetServer();
+        const std::unique_ptr<ServerCore>& server = static_cast<EngineCore*>(m_engineCore)->GetServer();
         outMessages = server->GetReceivedTcpThisTick();
 
         return ErrorCodes::Success;
@@ -207,7 +207,7 @@ namespace tme
             return ecResult;
         }
 
-        const std::unique_ptr<ServerCore>& server = static_cast<NetworkManager*>(m_networkManager)->GetServer();
+        const std::unique_ptr<ServerCore>& server = static_cast<EngineCore*>(m_engineCore)->GetServer();
         server->AddMessageToTcpPerClientSendQueue(networkId, message);
 
         return ErrorCodes::Success;
@@ -221,7 +221,7 @@ namespace tme
             return ecResult;
         }
 
-        const std::unique_ptr<ServerCore>& server = static_cast<NetworkManager*>(m_networkManager)->GetServer();
+        const std::unique_ptr<ServerCore>& server = static_cast<EngineCore*>(m_engineCore)->GetServer();
         server->AddMessageToTcpBroadcastSendQueue(message);
 
         return ErrorCodes::Success;
@@ -243,7 +243,7 @@ namespace tme
             return ecResult;
         }
 
-        return static_cast<NetworkManager*>(m_networkManager)->ConnectClient(address, port);
+        return static_cast<EngineCore*>(m_engineCore)->ConnectClient(address, port);
     }
 
     bool Network::Client::IsConnected()
@@ -253,7 +253,7 @@ namespace tme
             return false;
         }
 
-        return static_cast<NetworkManager*>(m_networkManager)->HasClient();
+        return static_cast<EngineCore*>(m_engineCore)->HasClient();
     }
 
     ErrorCodes Network::Client::GetReceivedReliableThisTick(std::vector<std::vector<uint8_t>>& outMessages)
@@ -264,7 +264,7 @@ namespace tme
             return ecResult;
         }
 
-        const std::unique_ptr<ClientCore>& client = static_cast<NetworkManager*>(m_networkManager)->GetClient();
+        const std::unique_ptr<ClientCore>& client = static_cast<EngineCore*>(m_engineCore)->GetClient();
         outMessages = client->GetReceivedTcpThisTick();
 
         return ErrorCodes::Success;
@@ -278,7 +278,7 @@ namespace tme
             return ecResult;
         }
 
-        const std::unique_ptr<ClientCore>& client = static_cast<NetworkManager*>(m_networkManager)->GetClient();
+        const std::unique_ptr<ClientCore>& client = static_cast<EngineCore*>(m_engineCore)->GetClient();
         client->AddMessageToTcpSendQueue(message);
 
         return ErrorCodes::Success;

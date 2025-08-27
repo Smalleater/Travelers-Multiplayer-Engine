@@ -1,4 +1,4 @@
-#include "ClientCore.hpp"
+#include "Core/ClientCore.hpp"
 
 #include "ServiceLocator.hpp"
 #include "Utils.hpp"
