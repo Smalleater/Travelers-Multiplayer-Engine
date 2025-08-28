@@ -23,6 +23,8 @@ namespace tme
         ClientNotInitialized,
         ClientNotFound,
 
+        NullSocket,
+
         InvalidSocket,
         ShutdownFailed,
         AddrInfoFailed,
