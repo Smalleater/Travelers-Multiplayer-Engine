@@ -14,6 +14,8 @@ namespace tme
     private:
         std::unique_ptr<TcpSocket> m_tcpSocket;
 
+        std::vector<uint8_t> m_receiveBuffer;
+
         std::vector<std::vector<uint8_t>> m_receivedTcpThisTick;
 
         std::vector<std::vector<uint8_t>> m_tcpSendQueue;

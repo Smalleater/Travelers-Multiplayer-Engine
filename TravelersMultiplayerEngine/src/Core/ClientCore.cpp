@@ -2,6 +2,7 @@
 
 #include "ServiceLocator.hpp"
 #include "Utils.hpp"
+#include "TcpMessage.hpp"
 
 namespace tme
 {
@@ -98,7 +99,7 @@ namespace tme
         uint8_t messagesReceivedThisFrame = 0;
 
         int bytesReceived;
-        std::vector<uint8_t> buffer(4096);
+        std::vector<uint8_t> tempBuffer(4096);
 
         ErrorCodes ecResult;
         int lastSocketError;
@@ -106,9 +107,9 @@ namespace tme
         while (messagesReceivedThisFrame < maxMessagesPerFrame)
         {
             bytesReceived = 0;
-            buffer.resize(4096);
+            tempBuffer.resize(4096);
 
-            ecResult = m_tcpSocket->Receive(buffer.data(), buffer.size(), bytesReceived);
+            ecResult = m_tcpSocket->Receive(tempBuffer.data(), tempBuffer.size(), bytesReceived);
             lastSocketError = m_tcpSocket->GetLastSocketError();
             if (ecResult != ErrorCodes::Success)
             {
@@ -116,8 +117,11 @@ namespace tme
                 {
                     m_tcpSocket->Shutdown();
                     m_tcpSocket.reset();
+                    m_receiveBuffer.clear();
+
                     ServiceLocator::Logger().LogInfo(
                         "Disconnected from server (connection closed by remote host)");
+
                     return ErrorCodes::ReceiveConnectionClosed;
                 }
                 else if (ecResult != ErrorCodes::ReceiveWouldBlock)
@@ -126,6 +130,8 @@ namespace tme
                     
                     m_tcpSocket->Shutdown();
                     m_tcpSocket.reset();
+                    m_receiveBuffer.clear();
+
                     ServiceLocator::Logger().LogInfo(
                         "Disconnected from server (connection closed by remote host)");
                     
@@ -136,10 +142,43 @@ namespace tme
                 break;
             }
 
-            buffer.resize(bytesReceived);
-            m_receivedTcpThisTick.emplace_back(std::move(buffer));
+            tempBuffer.resize(bytesReceived);
+            m_receiveBuffer.insert(m_receiveBuffer.end(), tempBuffer.begin(), tempBuffer.end());
+            
+            while (TcpMessage::HasCompleteHeader(m_receiveBuffer) && messagesReceivedThisFrame < maxMessagesPerFrame)
+            {
+                uint32_t payloadSize = TcpMessage::GetPayloadSizeFromHeader(m_receiveBuffer);
+                uint32_t messageSize = TcpMessage::HEADER_SIZE + payloadSize;
 
-            messagesReceivedThisFrame++;
+                if (!TcpMessage::HasCompleteMessage(m_receiveBuffer))
+                {
+                    break;
+                }
+
+                TcpMessage message(MessageType::UNKNOWN);
+                if (message.Deserialize(m_receiveBuffer.data(), messageSize))
+                {
+                    std::vector<uint8_t> payload = message.GetPayload();
+                    m_receivedTcpThisTick.emplace_back(std::move(payload));
+
+                    messagesReceivedThisFrame++;
+                }
+                else
+                {
+                    ServiceLocator::Logger().LogError("ClientCore::ReceivedTcp: Failed to deserialize TCP message");
+                    m_receiveBuffer.clear();
+                    break;
+                }
+
+                m_receiveBuffer.erase(m_receiveBuffer.begin(), m_receiveBuffer.begin() + messageSize);
+            }
+
+            if (m_receiveBuffer.size() > 64 * 1024)
+            {
+                ServiceLocator::Logger().LogWarning("ClientCore::ReceivedTcp: Receive buffer to large, clearing");
+                m_receiveBuffer.clear();
+                break;
+            }
         }
         
         return ErrorCodes::Success;

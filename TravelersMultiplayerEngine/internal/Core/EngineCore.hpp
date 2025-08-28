@@ -49,8 +49,8 @@ namespace tme
         const std::unique_ptr<ServerCore>& GetServer() const;
         const std::unique_ptr<ClientCore>& GetClient() const;
 
-        bool HasServer() const;
-        bool HasClient() const;
+        bool IsServerStarted() const;
+        bool IsClientConnected() const;
     };    
 }
 

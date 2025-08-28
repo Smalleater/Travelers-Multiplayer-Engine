@@ -145,13 +145,23 @@ namespace tme
         return m_client;
     }
 
-    bool EngineCore::HasServer() const
+    bool EngineCore::IsServerStarted() const
     {
-        return m_server != nullptr;
+        if (m_server == nullptr)
+        {
+            return false;
+        }
+
+        return m_server->IsStarted();
     }
 
-    bool EngineCore::HasClient() const
+    bool EngineCore::IsClientConnected() const
     {
-        return m_client != nullptr;
+        if (m_client == nullptr)
+        {
+            return false;
+        }
+
+        return m_client->IsConnected();
     }
 }

@@ -7,6 +7,7 @@
 #include "TME/ErrorCodes.hpp"
 
 #include "sockets/TcpSocket.hpp"
+#include "MessageIdGenerator.hpp"
 
 namespace tme
 {
@@ -16,6 +17,7 @@ namespace tme
         std::unique_ptr<TcpSocket> m_tcpSocket;
 
         std::unordered_map<uint32_t, std::unique_ptr<TcpSocket>> m_clients;
+        std::unordered_map<uint32_t, std::unique_ptr<MessageIdGenerator>> m_clientMessageIdGenerators;
 
         uint32_t m_nextNetworkId = 0;
 

@@ -168,7 +168,7 @@ namespace tme
             return false;
         }
 
-        return static_cast<EngineCore*>(m_engineCore)->HasServer();
+        return static_cast<EngineCore*>(m_engineCore)->IsServerStarted();
     }
 
     ErrorCodes Network::Server::GetNewClientThisTick(std::vector<uint32_t>& outNetworkIds)
@@ -253,7 +253,7 @@ namespace tme
             return false;
         }
 
-        return static_cast<EngineCore*>(m_engineCore)->HasClient();
+        return static_cast<EngineCore*>(m_engineCore)->IsClientConnected();
     }
 
     ErrorCodes Network::Client::GetReceivedReliableThisTick(std::vector<std::vector<uint8_t>>& outMessages)
