@@ -37,12 +37,13 @@ namespace tme
 
     public:
         ServerCore() = default;
-        ~ServerCore() = default;
+        ~ServerCore();
 
         ServerCore(const ServerCore&) = delete;
         ServerCore& operator=(const ServerCore&) = delete;
 
         ErrorCodes Start(uint16_t port);
+        ErrorCodes Stop();
         ErrorCodes BeginUpdate();
         ErrorCodes EndUpdate();
 
@@ -53,6 +54,9 @@ namespace tme
 
         void AddMessageToTcpPerClientSendQueue(uint32_t networkId, const std::vector<uint8_t>& data);
         void AddMessageToTcpBroadcastSendQueue(const std::vector<uint8_t>& data);
+
+        ErrorCodes DisconnectClient(uint32_t networkId);
+        ErrorCodes DisconnectAllClient();
     };
 }
 

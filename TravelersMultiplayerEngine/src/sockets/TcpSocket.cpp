@@ -29,15 +29,15 @@ namespace tme
         }
 
         int iResult;
-        #ifdef _WIN32
-            iResult = shutdown(m_socket, SD_BOTH);
-        #else
-            iResult = shutdown(m_socket, SHUT_RDWR);
-        #endif
-        
+        iResult = shutdown(m_socket, SHUTDOWN_BOTH);
         if (iResult != 0)
         {
             m_lastSocketError = Utils::GetLastSocketError();
+            if (m_lastSocketError == SOCKET_NOT_CONNACTED)
+            {
+                return ErrorCodes::Success;
+            }
+            
             return ErrorCodes::ShutdownFailed;
         }
 

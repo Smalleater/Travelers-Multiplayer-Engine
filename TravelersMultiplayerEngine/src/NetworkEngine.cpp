@@ -88,6 +88,8 @@ namespace tme
     {
         ErrorCodes ecResult;
 
+        Server::Stop();
+
         ServiceLocator::ThreadManager().Shutdown();
         ServiceLocator::Logger().LogInfo("ThreadManager was shutdown successfully");
 
@@ -159,6 +161,22 @@ namespace tme
         }
 
         return static_cast<EngineCore*>(m_engineCore)->StartServer(port);
+    }
+
+    ErrorCodes Network::Server::Stop()
+    {
+        if (!IsStarted())
+        {
+            return ErrorCodes::Success;
+        }
+
+        ErrorCodes ecResult = ValidateEngineState();
+        if (ecResult != ErrorCodes::Success)
+        {
+            return ecResult;
+        }
+
+        return static_cast<EngineCore*>(m_engineCore)->StopServer();
     }
 
     bool Network::Server::IsStarted()

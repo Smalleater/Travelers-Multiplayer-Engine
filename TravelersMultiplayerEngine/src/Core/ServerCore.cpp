@@ -6,11 +6,16 @@
 
 namespace tme
 {
+    ServerCore::~ServerCore()
+    {
+        Stop();
+    }
+
     ErrorCodes ServerCore::Start(uint16_t port)
     {
         if (IsStarted())
         {
-            ServiceLocator::Logger().LogWarning("ServerCore::Start called but server is already started");
+            ServiceLocator::Logger().LogWarning("ServerCore::Start: Called but server is already started");
             return ErrorCodes::ServerAlreadyStarted;
         }
 
@@ -46,11 +51,54 @@ namespace tme
         return ErrorCodes::Success;
     }
 
+    ErrorCodes ServerCore::Stop()
+    {
+        if (!IsStarted())
+        {
+            return ErrorCodes::Success;
+        }
+
+        bool hadSuccess = false;
+        bool hadError = false;
+
+        ErrorCodes ecResult;
+        int lastSocketError;
+
+        ecResult = m_tcpSocket->Shutdown();
+        lastSocketError = m_tcpSocket->GetLastSocketError();
+        m_tcpSocket.reset();
+        if (ecResult != ErrorCodes::Success)
+        {
+            Utils::LogSocketError("ServerCore::Stop: Shutdown", ecResult, lastSocketError);
+            hadError = true;
+        }
+        else
+        {
+            hadSuccess = true;
+        }
+
+        ecResult = DisconnectAllClient();
+        if (ecResult != ErrorCodes::Success)
+        {
+            hadError = true;
+        }
+        else
+        {
+            hadSuccess = true;
+        }
+
+        m_receivedTcpThisTick.clear();
+        m_tcpPerClientSendQueue.clear();
+        m_tcpBroadcastSendQueue.clear();
+
+        return Utils::GetCombinedErrorCode(hadSuccess, hadError);
+    }
+
     ErrorCodes ServerCore::BeginUpdate()
     {
         if (!IsStarted())
         {
-            ServiceLocator::Logger().LogWarning("ServerCore::BeginUpdate called but server are not started");
+            ServiceLocator::Logger().LogWarning("ServerCore::BeginUpdate: Called but server are not started");
             return ErrorCodes::ServerNotStarted;
         }
 
@@ -113,6 +161,49 @@ namespace tme
     void ServerCore::AddMessageToTcpBroadcastSendQueue(const std::vector<uint8_t>& data)
     {
         m_tcpBroadcastSendQueue.push_back(data);
+    }
+
+    ErrorCodes ServerCore::DisconnectClient(uint32_t networkId)
+    {
+        if (m_clients.find(networkId) == m_clients.end())
+        {
+            ServiceLocator::Logger().LogError("ServerCore::DisconnectClient: No client found for networkId: " 
+                + std::to_string(networkId));
+            return ErrorCodes::ClientNotFound;
+        }
+
+        ErrorCodes ecResult = m_clients[networkId]->Shutdown();
+        int lastSocketError = m_clients[networkId]->GetLastSocketError();
+        if (ecResult != ErrorCodes::Success)
+        {
+            ServiceLocator::Logger().LogError("ServerCore::DisconnectClient: " 
+                + std::string("Failed to shut down the socket associated with network ID: ") 
+                + std::to_string(networkId) + " Socket error: " + std::to_string(lastSocketError));
+        }
+
+        m_clients.erase(networkId);
+        m_clientMessageIdGenerators.erase(networkId);
+
+        ServiceLocator::Logger().LogInfo("Client with id: " + std::to_string(networkId) + " disconnected");
+
+        return ErrorCodes::Success;
+    }
+
+    ErrorCodes ServerCore::DisconnectAllClient()
+    {
+        std::vector<uint32_t> networkIds;
+
+        for (std::pair<const uint32_t, std::unique_ptr<TcpSocket>>& clientPair : m_clients)
+        {
+            networkIds.push_back(clientPair.first);
+        }
+
+        for (uint32_t networkId : networkIds)
+        {
+            DisconnectClient(networkId);
+        }
+
+        return ErrorCodes::Success;
     }
 
     ErrorCodes ServerCore::Accept()

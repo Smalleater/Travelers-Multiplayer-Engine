@@ -41,6 +41,8 @@ namespace tme
         ~EngineCore() {}
 
         ErrorCodes StartServer(uint16_t port);
+        ErrorCodes StopServer();
+
         ErrorCodes ConnectClient(const std::string& address, uint16_t port);
 
         ErrorCodes BeginUpdate();

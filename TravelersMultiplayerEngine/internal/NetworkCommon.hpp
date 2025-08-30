@@ -23,6 +23,8 @@ namespace tme
     #define CLOSE_SOCKET closesocket
 
     constexpr socket_t INVALID_SOCKET_FD = INVALID_SOCKET;
+    constexpr int SHUTDOWN_BOTH = SD_BOTH;
+    constexpr int SOCKET_NOT_CONNACTED = WSAENOTCONN;
 }
 
 // POSIX Sockets
@@ -44,6 +46,8 @@ namespace tme
     #define CLOSE_SOCKET close
 
     constexpr socket_t INVALID_SOCKET_FD = -1;
+    constexpr int SHUTDOWN_BOTH = SHUT_RDWR;
+    constexpr int SOCKET_NOT_CONNACTED = ENOTCONN;
 }
 
 #endif

@@ -48,6 +48,27 @@ namespace tme
         return ErrorCodes::Success;
     }
 
+    ErrorCodes EngineCore::StopServer()
+    {
+        if (m_server == nullptr)
+        {
+            return ErrorCodes::Success;
+        }
+
+        ErrorCodes ecResult = ErrorCodes::Success;
+        if (m_server->IsStarted())
+        {
+            ecResult = m_server->Stop();
+        }
+
+        m_server.reset();
+        
+        ServiceLocator::Logger().LogInfo("EngineCore::StopServer: Server stopped with code: " 
+            + std::to_string(static_cast<int>(ecResult)));
+
+        return ecResult == ErrorCodes::Success ? ErrorCodes::Success : ErrorCodes::PartialSuccess;
+    }
+
     ErrorCodes EngineCore::ConnectClient(const std::string& address, uint16_t port)
     {
         if (m_client != nullptr)
