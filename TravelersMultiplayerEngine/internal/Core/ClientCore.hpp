@@ -26,12 +26,13 @@ namespace tme
 
     public:
         ClientCore() = default;
-        ~ClientCore() = default;
+        ~ClientCore();
 
         ClientCore(const ClientCore&) = delete;
         ClientCore& operator=(const ClientCore&) = delete;
 
         ErrorCodes ConnectTo(const std::string& address, uint16_t port);
+        ErrorCodes Disconnect();
         ErrorCodes BeginUpdate();
         ErrorCodes EndUpdate();
 

@@ -25,6 +25,7 @@ namespace tme
     constexpr socket_t INVALID_SOCKET_FD = INVALID_SOCKET;
     constexpr int SHUTDOWN_BOTH = SD_BOTH;
     constexpr int SOCKET_NOT_CONNACTED = WSAENOTCONN;
+    constexpr int SOCKET_CONNECTION_RESET = WSAECONNRESET;
 }
 
 // POSIX Sockets
@@ -48,6 +49,7 @@ namespace tme
     constexpr socket_t INVALID_SOCKET_FD = -1;
     constexpr int SHUTDOWN_BOTH = SHUT_RDWR;
     constexpr int SOCKET_NOT_CONNACTED = ENOTCONN;
+    constexpr int SOCKET_CONNECTION_RESET = ECONNRESET;
 }
 
 #endif

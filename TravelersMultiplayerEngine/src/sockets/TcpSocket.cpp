@@ -236,6 +236,11 @@ namespace tme
                 bytesReceived = 0;
                 return ErrorCodes::ReceiveWouldBlock;
             }
+            else if (err == SOCKET_CONNECTION_RESET)
+            {
+                bytesReceived = 0;
+                return ErrorCodes::ReceiveConnectionClosed;
+            }
 
             bytesReceived = 0;
             return ErrorCodes::ReceiveFailed;

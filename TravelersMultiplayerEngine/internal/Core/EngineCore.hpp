@@ -44,6 +44,7 @@ namespace tme
         ErrorCodes StopServer();
 
         ErrorCodes ConnectClient(const std::string& address, uint16_t port);
+        ErrorCodes DisconnectClient();
 
         ErrorCodes BeginUpdate();
         ErrorCodes EndUpdate();

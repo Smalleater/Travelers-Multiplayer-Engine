@@ -6,6 +6,11 @@
 
 namespace tme
 {
+    ClientCore::~ClientCore()
+    {
+        Disconnect();
+    }
+
     ErrorCodes ClientCore::ConnectTo(const std::string& address, uint16_t port)
     {
         if (IsConnected())
@@ -36,6 +41,28 @@ namespace tme
         }
 
         return ErrorCodes::Success;
+    }
+
+    ErrorCodes ClientCore::Disconnect()
+    {
+        if (!IsConnected())
+        {
+            return ErrorCodes::Success;
+        }
+
+        ErrorCodes ecResult = m_tcpSocket->Shutdown();
+        int lastSocketError = m_tcpSocket->GetLastSocketError();
+        m_tcpSocket.reset();
+        if (ecResult != ErrorCodes::Success)
+        {
+            Utils::LogSocketError("ClientCore::Disconnect: Shutdown client socket", ecResult, lastSocketError);
+        }
+
+        m_receiveBuffer.clear();
+        m_receivedTcpThisTick.clear();
+        m_tcpSendQueue.clear();
+
+        return ecResult;
     }
 
     ErrorCodes ClientCore::BeginUpdate()
@@ -119,8 +146,7 @@ namespace tme
                     m_tcpSocket.reset();
                     m_receiveBuffer.clear();
 
-                    ServiceLocator::Logger().LogInfo(
-                        "Disconnected from server (connection closed by remote host)");
+                    ServiceLocator::Logger().LogInfo("Disconnected from server (connection closed by remote host)");
 
                     return ErrorCodes::ReceiveConnectionClosed;
                 }

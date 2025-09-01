@@ -45,6 +45,7 @@ namespace tme
         {
         public:
             static TME_API ErrorCodes ConnectTo(const std::string& address, uint16_t port);
+            static TME_API ErrorCodes Disconnect();
 
             static TME_API bool IsConnected();
 

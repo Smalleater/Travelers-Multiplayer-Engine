@@ -112,6 +112,27 @@ namespace tme
         return ErrorCodes::Success;
     }
 
+    ErrorCodes EngineCore::DisconnectClient()
+    {
+        if (m_client == nullptr)
+        {
+            return ErrorCodes::Success;
+        }
+
+        ErrorCodes ecResult = ErrorCodes::Success;
+        if (m_client->IsConnected())
+        {
+            ecResult = m_client->Disconnect();
+        }
+
+        m_client.reset();
+
+        ServiceLocator::Logger().LogInfo("EngineCore::DisconnectClient: client disconnected with code: " 
+            + std::to_string(static_cast<int>(ecResult)));
+
+        return ecResult == ErrorCodes::Success ? ErrorCodes::Success : ErrorCodes::PartialSuccess;
+    }
+
     ErrorCodes EngineCore::BeginUpdate()
     {
         bool hadSuccess = false;

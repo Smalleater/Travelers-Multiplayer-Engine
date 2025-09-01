@@ -88,6 +88,7 @@ namespace tme
     {
         ErrorCodes ecResult;
 
+        Client::Disconnect();
         Server::Stop();
 
         ServiceLocator::ThreadManager().Shutdown();
@@ -148,16 +149,16 @@ namespace tme
 
     ErrorCodes Network::Server::Start(uint16_t port)
     {
-        if (IsStarted())
-        {
-            ServiceLocator::Logger().LogWarning("Server is already started");
-            return ErrorCodes::Success;
-        }
-
         ErrorCodes ecResult = ValidateEngineState();
         if (ecResult != ErrorCodes::Success)
         {
             return ecResult;
+        }
+
+        if (IsStarted())
+        {
+            ServiceLocator::Logger().LogWarning("Server is already started");
+            return ErrorCodes::Success;
         }
 
         return static_cast<EngineCore*>(m_engineCore)->StartServer(port);
@@ -165,11 +166,6 @@ namespace tme
 
     ErrorCodes Network::Server::Stop()
     {
-        if (!IsStarted())
-        {
-            return ErrorCodes::Success;
-        }
-
         ErrorCodes ecResult = ValidateEngineState();
         if (ecResult != ErrorCodes::Success)
         {
@@ -262,6 +258,17 @@ namespace tme
         }
 
         return static_cast<EngineCore*>(m_engineCore)->ConnectClient(address, port);
+    }
+
+    ErrorCodes Network::Client::Disconnect()
+    {
+        ErrorCodes ecResult = ValidateEngineState();
+        if (ecResult != ErrorCodes::Success)
+        {
+            return ecResult;
+        }
+
+         return static_cast<EngineCore*>(m_engineCore)->DisconnectClient();
     }
 
     bool Network::Client::IsConnected()

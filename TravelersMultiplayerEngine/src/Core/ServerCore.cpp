@@ -64,12 +64,9 @@ namespace tme
         ErrorCodes ecResult;
         int lastSocketError;
 
-        ecResult = m_tcpSocket->Shutdown();
-        lastSocketError = m_tcpSocket->GetLastSocketError();
-        m_tcpSocket.reset();
+        ecResult = DisconnectAllClient();
         if (ecResult != ErrorCodes::Success)
         {
-            Utils::LogSocketError("ServerCore::Stop: Shutdown", ecResult, lastSocketError);
             hadError = true;
         }
         else
@@ -77,9 +74,12 @@ namespace tme
             hadSuccess = true;
         }
 
-        ecResult = DisconnectAllClient();
+        ecResult = m_tcpSocket->Shutdown();
+        lastSocketError = m_tcpSocket->GetLastSocketError();
+        m_tcpSocket.reset();
         if (ecResult != ErrorCodes::Success)
         {
+            Utils::LogSocketError("ServerCore::Stop: Shutdown server socket", ecResult, lastSocketError);
             hadError = true;
         }
         else
@@ -317,6 +317,7 @@ namespace tme
                     if (ecResult == ErrorCodes::ReceiveConnectionClosed)
                     {
                         clientsToRemove.push_back(networkId);
+                        ServiceLocator::Logger().LogInfo("Disconnected from client (connection closed by remote host)");
                     }
                     else if (ecResult != ErrorCodes::ReceiveWouldBlock)
                     {
