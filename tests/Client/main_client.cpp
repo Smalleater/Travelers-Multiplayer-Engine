@@ -28,6 +28,7 @@ int main()
         std::cout << "TME client failed to start" << std::endl;
     }
 
+    //int test = 0;
     while (tme::Network::Client::IsConnected())
     {
         ecResult = tme::Network::Engine::BeginUpdate();
@@ -69,6 +70,8 @@ int main()
         }
 
         std::this_thread::sleep_for(std::chrono::seconds(1));
+
+        //test++;
     }
 
     ecResult = tme::Network::Engine::ShutDown();

@@ -18,8 +18,8 @@ namespace tme
         public:
             static TME_API ErrorCodes Init();
             static TME_API ErrorCodes ShutDown();
-            static TME_API bool IsInitialized();
 
+            static TME_API bool IsInitialized();
             static TME_API ErrorCodes EnsurInitialized();
 
             static TME_API ErrorCodes BeginUpdate();
@@ -29,9 +29,8 @@ namespace tme
         class Server
         {
         public:
-            static TME_API ErrorCodes Start(
-                uint16_t port
-            );
+            static TME_API ErrorCodes Start(uint16_t port);
+            static TME_API ErrorCodes Stop();
 
             static bool TME_API IsStarted();
 
@@ -46,6 +45,7 @@ namespace tme
         {
         public:
             static TME_API ErrorCodes ConnectTo(const std::string& address, uint16_t port);
+            static TME_API ErrorCodes Disconnect();
 
             static TME_API bool IsConnected();
 

@@ -14,7 +14,10 @@ namespace tme
         AlreadyInitialized,
 
         ServerAlreadyStarted,
+        ServerAlreadyStoped,
+
         ClientAlreadyConnected,
+        ClientAlreadyDisconnected,
 
         EngineNotInitialized,
         ServerNotStarted,
