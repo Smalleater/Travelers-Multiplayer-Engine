@@ -28,8 +28,8 @@ int main ()
     
     std::cout << "TME server started successfully" << std::endl;
 
-    int test = 0;
-    while (tme::Network::Server::IsStarted() && test < 30)
+    //int test = 0;
+    while (tme::Network::Server::IsStarted())
     {
         ecResult = tme::Network::Engine::BeginUpdate();
         if (ecResult != tme::ErrorCodes::Success)
@@ -82,7 +82,7 @@ int main ()
 
         std::this_thread::sleep_for(std::chrono::seconds(1));
         
-        test++;
+        //test++;
     }
 
     ecResult = tme::Network::Engine::ShutDown();
