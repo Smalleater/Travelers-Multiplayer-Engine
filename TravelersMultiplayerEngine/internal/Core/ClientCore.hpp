@@ -6,6 +6,7 @@
 #include "TME/ErrorCodes.hpp"
 
 #include "sockets/TcpSocket.hpp"
+#include "MessageIdGenerator.hpp"
 
 namespace tme
 {
@@ -13,9 +14,9 @@ namespace tme
     {
     private:
         std::unique_ptr<TcpSocket> m_tcpSocket;
+        std::unique_ptr<MessageIdGenerator> m_messageIdGenerator;
 
         std::vector<uint8_t> m_receiveBuffer;
-
         std::vector<std::vector<uint8_t>> m_receivedTcpThisTick;
 
         std::vector<std::vector<uint8_t>> m_tcpSendQueue;

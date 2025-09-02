@@ -183,6 +183,7 @@ namespace tme
 
         m_clients.erase(networkId);
         m_clientMessageIdGenerators.erase(networkId);
+        m_receiveBuffer.erase(networkId);
 
         ServiceLocator::Logger().LogInfo("Client with id: " + std::to_string(networkId) + " disconnected");
 
@@ -287,7 +288,7 @@ namespace tme
         uint8_t messagesReceivedThisFrame;
 
         int bytesReceived;
-        std::vector<uint8_t> buffer(4096);
+        std::vector<uint8_t> tempBuffer(4096);
 
         ErrorCodes ecResult;
         int lastSocketError;
@@ -308,9 +309,9 @@ namespace tme
             while (messagesReceivedThisFrame < maxMessagesPerClientPerFrame)
             {
                 bytesReceived = 0;
-                buffer.resize(4096);
+                tempBuffer.resize(4096);
 
-                ecResult = clientSocket->Receive(buffer.data(), buffer.size(), bytesReceived);
+                ecResult = clientSocket->Receive(tempBuffer.data(), tempBuffer.size(), bytesReceived);
                 lastSocketError = clientSocket->GetLastSocketError();
                 if (ecResult != ErrorCodes::Success)
                 {
@@ -333,21 +334,49 @@ namespace tme
                     hadSuccess = true;
                 }
 
-                buffer.resize(bytesReceived);
-                m_receivedTcpThisTick.emplace_back(networkId, std::move(buffer));
+                tempBuffer.resize(bytesReceived);
+                m_receiveBuffer[networkId].insert(m_receiveBuffer[networkId].end(), tempBuffer.begin(), tempBuffer.end());
 
-                messagesReceivedThisFrame++;
+                while (TcpMessage::HasCompleteHeader(m_receiveBuffer[networkId]) && messagesReceivedThisFrame < maxMessagesPerClientPerFrame)
+                {
+                    uint32_t payloadSize = TcpMessage::GetPayloadSizeFromHeader(m_receiveBuffer[networkId]);
+                    uint32_t messageSize = TcpMessage::HEADER_SIZE + payloadSize;
+
+                    if (!TcpMessage::HasCompleteMessage(m_receiveBuffer[networkId]))
+                    {
+                        break;
+                    }
+
+                    TcpMessage message(MessageType::UNKNOWN);
+                    if (message.Deserialize(m_receiveBuffer[networkId].data(), messageSize))
+                    {
+                        std::vector<uint8_t> payload = message.GetPayload();
+                        m_receivedTcpThisTick.emplace_back(networkId, std::move(payload));
+
+                        messagesReceivedThisFrame++;
+                    }
+                    else
+                    {
+                        ServiceLocator::Logger().LogError("ServerCore::ReceivedTcp: Failed to deserialize TCP message");
+                        m_receiveBuffer[networkId].clear();
+                        break;
+                    }
+
+                    m_receiveBuffer[networkId].erase(m_receiveBuffer[networkId].begin(), m_receiveBuffer[networkId].begin() + messageSize);
+                }
+
+                if (m_receiveBuffer[networkId].size() > 64 * 1024)
+                {
+                    ServiceLocator::Logger().LogWarning("ServerCore::ReceivedTcp: Receive buffer to large, clearing");
+                    m_receiveBuffer[networkId].clear();
+                    break;
+                }
             }
         }
 
         for (uint32_t networkId : clientsToRemove)
         {
-            m_clients[networkId]->Shutdown();
-            m_clients.erase(networkId);
-            m_clientMessageIdGenerators.erase(networkId);
-
-            ServiceLocator::Logger().LogInfo("Client with id: " + std::to_string(networkId) 
-                + " disconnected");
+            DisconnectClient(networkId);
         }
 
         return Utils::GetCombinedErrorCode(hadSuccess, hadError);
@@ -432,24 +461,6 @@ namespace tme
 
     ErrorCodes ServerCore::SendTcp(uint32_t networkId, const std::vector<uint8_t>& data)
     {
-        if (m_clients[networkId] == nullptr)
-        {
-            ServiceLocator::Logger().LogError("ServerCore::SendToAllTcp: TcpSocket* is nullptr for client with networkId: " 
-                    + std::to_string(networkId));
-
-            m_clients.erase(networkId);
-            m_clientMessageIdGenerators.erase(networkId);
-            
-            return ErrorCodes::NullSocket;
-        }
-
-        if (m_clientMessageIdGenerators[networkId] == nullptr)
-        {
-            ServiceLocator::Logger().LogWarning("ServerCore::SendTcp: MessageIdGenerator was nullptr for networkId: " 
-                + std::to_string(networkId) + "creating a new one");
-            m_clientMessageIdGenerators[networkId] = std::make_unique<MessageIdGenerator>();
-        }
-
         ErrorCodes ecResult;
         int lastSocketError;
 
@@ -464,26 +475,13 @@ namespace tme
         lastSocketError = m_clients[networkId]->GetLastSocketError();
         if (ecResult == ErrorCodes::SendConnectionClosed)
         {
-            m_clients[networkId]->Shutdown();
-            m_clients.erase(networkId);
-            m_clientMessageIdGenerators.erase(networkId);
-
-            ServiceLocator::Logger().LogInfo("Client with id: " + std::to_string(networkId) 
-                + " disconnected");
-
+            DisconnectClient(networkId);
             return ErrorCodes::SendConnectionClosed;
         }
         else if (ecResult != ErrorCodes::Success)
         {
             Utils::LogSocketError("ServerCore::SendTcp: Send", ecResult, lastSocketError);
-
-            m_clients[networkId]->Shutdown();
-            m_clients.erase(networkId);
-            m_clientMessageIdGenerators.erase(networkId);
-
-            ServiceLocator::Logger().LogInfo("Client with id: " + std::to_string(networkId) 
-                + " disconnected");
-
+            DisconnectClient(networkId);
             return ecResult;
         }
 

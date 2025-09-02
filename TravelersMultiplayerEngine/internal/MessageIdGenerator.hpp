@@ -1,5 +1,5 @@
 #ifndef TME_MESSAGE_ID_GENERATOR_HPP
-#define TME8MESSAGE_ID_GENERATOR_HPP
+#define TME_MESSAGE_ID_GENERATOR_HPP
 
 #include <atomic>
 #include <cstdint>

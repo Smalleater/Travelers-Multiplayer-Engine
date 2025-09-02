@@ -32,6 +32,8 @@ namespace tme
             return ecResult;
         }
 
+        m_messageIdGenerator = std::make_unique<MessageIdGenerator>();
+
         ecResult = m_tcpSocket->SetBlocking(false);
         lastSocketError = m_tcpSocket->GetLastSocketError();
         if (ecResult != ErrorCodes::Success)
@@ -52,11 +54,13 @@ namespace tme
 
         ErrorCodes ecResult = m_tcpSocket->Shutdown();
         int lastSocketError = m_tcpSocket->GetLastSocketError();
-        m_tcpSocket.reset();
         if (ecResult != ErrorCodes::Success)
         {
             Utils::LogSocketError("ClientCore::Disconnect: Shutdown client socket", ecResult, lastSocketError);
         }
+
+        m_tcpSocket.reset();
+        m_messageIdGenerator.reset();
 
         m_receiveBuffer.clear();
         m_receivedTcpThisTick.clear();
@@ -142,10 +146,7 @@ namespace tme
             {
                 if (ecResult == ErrorCodes::ReceiveConnectionClosed)
                 {
-                    m_tcpSocket->Shutdown();
-                    m_tcpSocket.reset();
-                    m_receiveBuffer.clear();
-
+                    Disconnect();
                     ServiceLocator::Logger().LogInfo("Disconnected from server (connection closed by remote host)");
 
                     return ErrorCodes::ReceiveConnectionClosed;
@@ -153,14 +154,11 @@ namespace tme
                 else if (ecResult != ErrorCodes::ReceiveWouldBlock)
                 {
                     Utils::LogSocketError("ReceiveFromClientTcp: Receive", ecResult, lastSocketError);
-                    
-                    m_tcpSocket->Shutdown();
-                    m_tcpSocket.reset();
-                    m_receiveBuffer.clear();
 
+                    Disconnect();
                     ServiceLocator::Logger().LogInfo(
                         "Disconnected from server (connection closed by remote host)");
-                    
+
                     return messagesReceivedThisFrame > 0 
                         ? ErrorCodes::PartialSuccess : ErrorCodes::ReceiveFailed;
                 }
@@ -216,31 +214,32 @@ namespace tme
         int lastSocketError;
 
         int bytesSent;
-
-        for (const std::vector<uint8_t>& message : m_tcpSendQueue)
+        
+        for (const std::vector<uint8_t>& data : m_tcpSendQueue)
         {
-            ecResult = m_tcpSocket->Send(message.data(), message.size(), bytesSent);
+            TcpMessage message(MessageType::GAME_DATA, m_messageIdGenerator->GetUniqueId());
+            message.SetPayload(data);
+
+            std::vector<uint8_t> serializedMessage = message.Serialize();
+
+            ecResult = m_tcpSocket->Send(serializedMessage.data(), serializedMessage.size(), bytesSent);
             lastSocketError = m_tcpSocket->GetLastSocketError();
             if (ecResult == ErrorCodes::SendConnectionClosed)
             {
-                m_tcpSocket->Shutdown();
-                m_tcpSocket.reset();
+                Disconnect();
                 ServiceLocator::Logger().LogInfo(
                     "Disconnected from server (connection closed by remote host)");
 
-                m_tcpSendQueue.clear();
                 return ErrorCodes::ReceiveConnectionClosed;
             }
             else if (ecResult != ErrorCodes::Success)
             {
                 Utils::LogSocketError("SendToServerTcp: Send", ecResult, lastSocketError);
 
-                m_tcpSocket->Shutdown();
-                m_tcpSocket.reset();
+                Disconnect();
                 ServiceLocator::Logger().LogInfo(
                     "Disconnected from server (connection closed by remote host)");
 
-                m_tcpSendQueue.clear();
                 return ecResult;
             }
         }
