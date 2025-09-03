@@ -49,6 +49,18 @@ int main ()
             std::cout << "New client connected with network id: " << networkId << std::endl;
         }
 
+        std::vector<uint32_t> disconnectedClients;
+        ecResult = tme::Network::Server::GetDisconnectedClientLastTick(disconnectedClients);
+        if (ecResult != tme::ErrorCodes::Success)
+        {
+            std::cout << "GetDisconnectedClientLastTick failed with code: " << std::to_string(static_cast<int>(ecResult)) << std::endl;
+        }
+
+        for (uint32_t networkId : disconnectedClients)
+        {
+            std::cout << "Client with network id: " << networkId << " disconnected" << std::endl;
+        }
+
         std::vector<std::pair<uint32_t, std::vector<uint8_t>>> outMessages;
 
         ecResult = tme::Network::Server::GetReceivedReliableThisTick(outMessages);
