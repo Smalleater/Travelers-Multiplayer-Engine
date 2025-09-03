@@ -107,6 +107,8 @@ namespace tme
 
         ErrorCodes ecResult;
 
+        m_disconnectedClientsLastTick = std::move(m_disconnectedClientsThisTick);
+
         ecResult = Accept();
         Utils::UpdateSuccessErrorFlags(ecResult, hadSuccess, hadError);
 
@@ -148,6 +150,11 @@ namespace tme
         return m_newClientsThisTick;
     }
 
+    const std::vector<uint32_t>& ServerCore::GetDisconnectedClientLastTick() const
+    {
+        return m_disconnectedClientsThisTick;
+    }
+
     const std::vector<std::pair<uint32_t, std::vector<uint8_t>>>& ServerCore::GetReceivedTcpThisTick() const
     {
         return m_receivedTcpThisTick;
@@ -184,6 +191,8 @@ namespace tme
         m_clients.erase(networkId);
         m_clientMessageIdGenerators.erase(networkId);
         m_receiveBuffer.erase(networkId);
+
+        m_disconnectedClientsThisTick.push_back(networkId);
 
         ServiceLocator::Logger().LogInfo("Client with id: " + std::to_string(networkId) + " disconnected");
 

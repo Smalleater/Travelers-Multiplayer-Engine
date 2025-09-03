@@ -213,6 +213,20 @@ namespace tme
         return ErrorCodes::Success;
     }
 
+    ErrorCodes Network::Server::GetDisconnectedClientLastTick(std::vector<uint32_t>& outNetworkIds)
+    {
+        ErrorCodes ecResult = ValidateServerState();
+        if (ecResult != ErrorCodes::Success)
+        {
+            return ecResult;
+        }
+
+        const std::unique_ptr<ServerCore>& server = static_cast<EngineCore*>(m_engineCore)->GetServer();
+        outNetworkIds = server->GetDisconnectedClientLastTick();
+
+        return ErrorCodes::Success;
+    }
+
     ErrorCodes Network::Server::SendReliableTo(uint32_t networkId, const std::vector<uint8_t>& message)
     {
         ErrorCodes ecResult = ValidateServerState();

@@ -35,6 +35,7 @@ namespace tme
             static bool TME_API IsStarted();
 
             static TME_API ErrorCodes GetNewClientThisTick(std::vector<uint32_t>& outNetworkIds);
+            static TME_API ErrorCodes GetDisconnectedClientLastTick(std::vector<uint32_t>& outNetworkIds);
             static TME_API ErrorCodes GetReceivedReliableThisTick(std::vector<std::pair<uint32_t, std::vector<uint8_t>>>& outMessages);
 
             static TME_API ErrorCodes SendReliableTo(uint32_t networkId, const std::vector<uint8_t>& message );

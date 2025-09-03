@@ -23,6 +23,9 @@ namespace tme
 
         std::vector<uint32_t> m_newClientsThisTick;
 
+        std::vector<uint32_t> m_disconnectedClientsThisTick;
+        std::vector<uint32_t> m_disconnectedClientsLastTick;
+
         std::unordered_map<uint32_t, std::vector<uint8_t>> m_receiveBuffer;
         std::vector<std::pair<uint32_t, std::vector<uint8_t>>> m_receivedTcpThisTick;
 
@@ -51,6 +54,7 @@ namespace tme
         bool IsStarted();
 
         const std::vector<uint32_t>& GetNewClientsThisTick() const;
+        const std::vector<uint32_t>& GetDisconnectedClientLastTick() const;
         const std::vector<std::pair<uint32_t, std::vector<uint8_t>>>& GetReceivedTcpThisTick() const;
 
         void AddMessageToTcpPerClientSendQueue(uint32_t networkId, const std::vector<uint8_t>& data);
