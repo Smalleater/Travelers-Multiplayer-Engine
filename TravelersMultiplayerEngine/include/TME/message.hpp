@@ -19,7 +19,6 @@ namespace tme
     public:
         virtual ~Message() = default;
         virtual std::string getType() const = 0;
-        virtual std::unordered_map<std::string, FieldValue> getFields() const = 0;
         virtual std::vector<uint8_t> serialize() const = 0;
     };
 
@@ -46,22 +45,21 @@ namespace tme
 
 #define DECLARE_MESSAGE(MessageType, ...) \
 namespace tme { \
-struct DECLARE_MESSAGE_API MessageType : public Message \
-{ \
-    __VA_ARGS__ \
-public: \
-    std::string getType() const override { return #MessageType; } \
-    std::unordered_map<std::string, FieldValue> getFields() const override; \
-    std::vector<uint8_t> serialize() const override; \
-    static std::unique_ptr<Message> createFromBytes(const std::vector<uint8_t>& payload); \
-private: \
-    struct Register \
+    struct DECLARE_MESSAGE_API MessageType : public Message \
     { \
-        Register() { tme::internal::registerMessageType(#MessageType, MessageType::createFromBytes); } \
+        __VA_ARGS__ \
+    public: \
+        std::string getType() const override { return #MessageType; } \
+        std::vector<uint8_t> serialize() const override; \
+        static std::unique_ptr<Message> createFromBytes(const std::vector<uint8_t>& payload); \
+    private: \
+        struct Register \
+        { \
+            Register() { tme::internal::registerMessageType(#MessageType, MessageType::createFromBytes); } \
+        }; \
+        static Register _register; \
     }; \
-    static Register _register; \
-}; \
-MessageType::Register MessageType::_register; \
+    MessageType::Register MessageType::_register; \
 }
 
 #endif

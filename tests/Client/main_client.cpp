@@ -1,6 +1,4 @@
 #include <iostream>
-#include <thread>
-#include <chrono>
 
 #include "TME/message.hpp"
 
@@ -10,4 +8,6 @@ int main()
 {
     tme::MessageTest message;
     message.str = "Hello world";
+
+    std::cout << message.getType() << std::endl;
 }
