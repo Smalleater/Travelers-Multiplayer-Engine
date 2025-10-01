@@ -37,15 +37,9 @@ namespace tme
     }
 }
 
-#ifdef TME_EXPORTS
-    #define DECLARE_MESSAGE_API TME_API
-#else
-    #define DECLARE_MESSAGE_API
-#endif
-
 #define DECLARE_MESSAGE(MessageType, ...) \
 namespace tme { \
-    struct DECLARE_MESSAGE_API MessageType : public Message \
+    struct TME_API MessageType : public Message \
     { \
         __VA_ARGS__ \
     public: \
