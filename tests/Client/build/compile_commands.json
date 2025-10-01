@@ -1,8 +1,0 @@
-[
-{
-  "directory": "C:/Users/Etudiant1/Desktop/git/Travelers-Multiplayer-Engine/tests/Client/build",
-  "command": "C:\\mingw64\\bin\\g++.exe  @CMakeFiles/client.dir/includes_CXX.rsp -g -std=gnu++17 -o CMakeFiles\\client.dir\\main_client.cpp.obj -c C:\\Users\\Etudiant1\\Desktop\\git\\Travelers-Multiplayer-Engine\\tests\\Client\\main_client.cpp",
-  "file": "C:/Users/Etudiant1/Desktop/git/Travelers-Multiplayer-Engine/tests/Client/main_client.cpp",
-  "output": "CMakeFiles/client.dir/main_client.cpp.obj"
-}
-]

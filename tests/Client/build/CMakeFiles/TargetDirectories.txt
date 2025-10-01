@@ -1,3 +1,0 @@
-C:/Users/Etudiant1/Desktop/git/Travelers-Multiplayer-Engine/tests/Client/build/CMakeFiles/client.dir
-C:/Users/Etudiant1/Desktop/git/Travelers-Multiplayer-Engine/tests/Client/build/CMakeFiles/edit_cache.dir
-C:/Users/Etudiant1/Desktop/git/Travelers-Multiplayer-Engine/tests/Client/build/CMakeFiles/rebuild_cache.dir

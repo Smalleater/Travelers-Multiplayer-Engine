@@ -1,1 +1,0 @@
-  -L"C:/Users/Etudiant1/Desktop/git/Travelers-Multiplayer-Engine/tests/Client/../lib"  "C:/Users/Etudiant1/Desktop/git/Travelers-Multiplayer-Engine/tests/Client/../lib/libtme.dll.a" -lkernel32 -luser32 -lgdi32 -lwinspool -lshell32 -lole32 -loleaut32 -luuid -lcomdlg32 -ladvapi32 
