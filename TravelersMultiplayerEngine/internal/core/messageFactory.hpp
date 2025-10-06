@@ -20,8 +20,8 @@ namespace tme::core
 
     public:
         static void registerMessage(const std::string& type, Creator creator);
-        static std::unique_ptr<Message> deserialize(const std::vector<uint8_t>& payload);
         static std::vector<uint8_t> serialize(const Message& message);
+        static std::unique_ptr<Message> deserialize(const std::vector<uint8_t>& payload);
     };
 }
 

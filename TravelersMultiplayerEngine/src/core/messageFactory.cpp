@@ -11,6 +11,11 @@ namespace tme::core
         m_registry[type] = std::move(creator);
     }
 
+    std::vector<uint8_t> MessageFactory::serialize(const Message& message)
+    {
+        return message.serialize();
+    }
+
     std::unique_ptr<Message> MessageFactory::deserialize(const std::vector<uint8_t>& payload)
     {
         if (payload.empty())
@@ -31,10 +36,5 @@ namespace tme::core
 
         std::vector<uint8_t> data(payload.begin() + offset, payload.end());
         return it->second(data);
-    }
-
-    std::vector<uint8_t> MessageFactory::serialize(const Message& message)
-    {
-        return message.serialize();
     }
 }
