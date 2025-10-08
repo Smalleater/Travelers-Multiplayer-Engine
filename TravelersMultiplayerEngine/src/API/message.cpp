@@ -59,7 +59,7 @@ namespace tme
         {
             uint32_t size = *reinterpret_cast<const uint32_t*>(&data[offset]);
             offset += sizeof(uint32_t);
-            value = *reinterpret_cast<const char*>(&data[offset]);
+            value.assign(reinterpret_cast<const char*>(&data[offset]), size);
             offset += size;
         }
     }

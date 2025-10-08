@@ -31,12 +31,12 @@ namespace tme
 
     namespace internal 
     {
-        void registerMessageType(const std::string& type,
+        TME_API void registerMessageType(const std::string& type,
             std::unique_ptr<Message>(*creator)(const std::vector<uint8_t>&));
         
-        void serializeField(std::vector<uint8_t>& data, int value);
-        void serializeField(std::vector<uint8_t>& data, float value);
-        void serializeField(std::vector<uint8_t>& data, const std::string& value);
+        TME_API void serializeField(std::vector<uint8_t>& data, int value);
+        TME_API void serializeField(std::vector<uint8_t>& data, float value);
+        TME_API void serializeField(std::vector<uint8_t>& data, const std::string& value);
 
         template<typename T>
         void registerSerializer(const std::string& messageType, const std::string& fieldName, size_t fieldOffset)
@@ -48,9 +48,9 @@ namespace tme
             }));
         }
 
-        void deserializeField(const std::vector<uint8_t>& data, size_t& offset, int& value);
-        void deserializeField(const std::vector<uint8_t>& data, size_t& offset, float& value);
-        void deserializeField(const std::vector<uint8_t>& data, size_t& offset, std::string& value);
+        TME_API void deserializeField(const std::vector<uint8_t>& data, size_t& offset, int& value);
+        TME_API void deserializeField(const std::vector<uint8_t>& data, size_t& offset, float& value);
+        TME_API void deserializeField(const std::vector<uint8_t>& data, size_t& offset, std::string& value);
 
         template<typename T>
         void registerDeserializer(const std::string& messageType, const std::string& fieldName, size_t fieldOffset)
@@ -67,7 +67,7 @@ namespace tme
 
 #define DECLARE_MESSAGE_BEGIN(MessageType) \
 namespace tme { \
-    struct TME_API MessageType : public Message \
+    struct MessageType : public Message \
     { \
     public: \
         static constexpr const char* MESSAGE_TYPE_NAME = #MessageType; \
@@ -79,8 +79,9 @@ namespace tme { \
     { \
         name##_Registrar() \
         { \
-            tme::internal::registerSerializer<type>(MESSAGE_TYPE_NAME, #name, offsetof(CurrentMessageType, name)); \
-            tme::internal::registerDeserializer<type>(MESSAGE_TYPE_NAME, #name, offsetof(CurrentMessageType, name)); \
+            const auto offset = reinterpret_cast<size_t>(&(static_cast<CurrentMessageType*>(nullptr)->name)); \
+            tme::internal::registerSerializer<type>(MESSAGE_TYPE_NAME, #name, offset); \
+            tme::internal::registerDeserializer<type>(MESSAGE_TYPE_NAME, #name, offset); \
         } \
     }; \
     inline static name##_Registrar name##_reg;
