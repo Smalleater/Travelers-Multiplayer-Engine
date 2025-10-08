@@ -57,6 +57,14 @@
         "stop_token": "cpp",
         "string": "cpp",
         "thread": "cpp",
-        "vector": "cpp"
+        "vector": "cpp",
+        "algorithm": "cpp",
+        "functional": "cpp",
+        "list": "cpp",
+        "map": "cpp",
+        "unordered_map": "cpp",
+        "variant": "cpp",
+        "xhash": "cpp",
+        "xtree": "cpp"
     }
 }

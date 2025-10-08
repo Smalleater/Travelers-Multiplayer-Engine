@@ -10,6 +10,12 @@ namespace tme
         return serializers;
     }
 
+    std::map<std::string, std::vector<std::pair<std::string, std::pair<size_t, DeserializerFunc>>>>& Message::getDeserializers()
+    {
+        static std::map<std::string, std::vector<std::pair<std::string, std::pair<size_t, DeserializerFunc>>>> deserializers;
+        return deserializers;
+    }
+
     namespace internal
     {
         void registerMessageType(const std::string& type, std::unique_ptr<Message>(*creator)(const std::vector<uint8_t>&))
@@ -35,6 +41,26 @@ namespace tme
             data.insert(data.end(), reinterpret_cast<const uint8_t*>(&size),
                 reinterpret_cast<const uint8_t*>(&size) + sizeof(size));
             data.insert(data.end(), value.begin(), value.end());
+        }
+
+        void deserializeField(const std::vector<uint8_t>& data, size_t& offset, int& value)
+        {
+            value = *reinterpret_cast<const int*>(&data[offset]);
+            offset += sizeof(int);
+        }
+
+        void deserializeField(const std::vector<uint8_t>& data, size_t& offset, float& value)
+        {
+            value = *reinterpret_cast<const float*>(&data[offset]);
+            offset += sizeof(float);
+        }
+
+        void deserializeField(const std::vector<uint8_t>& data, size_t& offset, std::string& value)
+        {
+            uint32_t size = *reinterpret_cast<const uint32_t*>(&data[offset]);
+            offset += sizeof(uint32_t);
+            value = *reinterpret_cast<const char*>(&data[offset]);
+            offset += size;
         }
     }
 }
