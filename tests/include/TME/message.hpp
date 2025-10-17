@@ -75,16 +75,18 @@ namespace tme { \
 
 #define FIELD(type, name) \
     type name; \
-    struct name##_Registrar \
-    { \
-        name##_Registrar() \
+    private: \
+        struct name##_Registrar \
         { \
-            const auto offset = reinterpret_cast<size_t>(&(static_cast<CurrentMessageType*>(nullptr)->name)); \
-            tme::internal::registerSerializer<type>(MESSAGE_TYPE_NAME, #name, offset); \
-            tme::internal::registerDeserializer<type>(MESSAGE_TYPE_NAME, #name, offset); \
-        } \
-    }; \
-    inline static name##_Registrar name##_reg;
+            name##_Registrar() \
+            { \
+                const auto offset = reinterpret_cast<size_t>(&(static_cast<CurrentMessageType*>(nullptr)->name)); \
+                tme::internal::registerSerializer<type>(MESSAGE_TYPE_NAME, #name, offset); \
+                tme::internal::registerDeserializer<type>(MESSAGE_TYPE_NAME, #name, offset); \
+            } \
+        }; \
+        inline static name##_Registrar name##_reg; \
+    public: \
 
 #define DECLARE_MESSAGE_END() \
         std::string getType() const override { return MESSAGE_TYPE_NAME; } \
