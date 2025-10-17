@@ -25,13 +25,15 @@ namespace tme
         virtual std::string getType() const = 0;
         virtual std::vector<uint8_t> serialize() const = 0;
 
-        static std::map<std::string, std::vector<std::pair<std::string, std::pair<size_t, SerializerFunc>>>>& getSerializers();
-        static std::map<std::string, std::vector<std::pair<std::string, std::pair<size_t, DeserializerFunc>>>>& getDeserializers();
+        static std::map<uint32_t, std::vector<std::pair<std::string, std::pair<size_t, SerializerFunc>>>>& getSerializers();
+        static std::map<uint32_t, std::vector<std::pair<std::string, std::pair<size_t, DeserializerFunc>>>>& getDeserializers();
     };
 
     namespace internal 
     {
-        TME_API void registerMessageType(const std::string& type,
+        TME_API uint32_t hashTypeName(const char* str);
+
+        TME_API void registerMessageType(const uint32_t id,
             std::unique_ptr<Message>(*creator)(const std::vector<uint8_t>&));
         
         TME_API void serializeField(std::vector<uint8_t>& data, int value);
@@ -39,10 +41,10 @@ namespace tme
         TME_API void serializeField(std::vector<uint8_t>& data, const std::string& value);
 
         template<typename T>
-        void registerSerializer(const std::string& messageType, const std::string& fieldName, size_t fieldOffset)
+        void registerSerializer(const uint32_t messageId, const std::string& fieldName, size_t fieldOffset)
         {
             auto& serializers = Message::getSerializers();
-            serializers[messageType].emplace_back(fieldName, std::make_pair(fieldOffset, [fieldOffset](const void* base, std::vector<uint8_t>& data) {
+            serializers[messageId].emplace_back(fieldName, std::make_pair(fieldOffset, [fieldOffset](const void* base, std::vector<uint8_t>& data) {
                 const T* field = reinterpret_cast<const T*>(static_cast<const char*>(base) + fieldOffset);
                 serializeField(data, *field);
             }));
@@ -53,10 +55,10 @@ namespace tme
         TME_API void deserializeField(const std::vector<uint8_t>& data, size_t& offset, std::string& value);
 
         template<typename T>
-        void registerDeserializer(const std::string& messageType, const std::string& fieldName, size_t fieldOffset)
+        void registerDeserializer(const uint32_t messageId, const std::string& fieldName, size_t fieldOffset)
         {
             auto& deserializers = Message::getDeserializers();
-            deserializers[messageType].emplace_back(fieldName, std::make_pair(fieldOffset, 
+            deserializers[messageId].emplace_back(fieldName, std::make_pair(fieldOffset, 
                 [fieldOffset](const void* base, const std::vector<uint8_t>& data, size_t& offset) {
                     T* field = reinterpret_cast<T*>(static_cast<char*>(const_cast<void*>(base)) + fieldOffset);
                     deserializeField(data, offset, *field);
@@ -71,6 +73,7 @@ namespace tme { \
     { \
     public: \
         static constexpr const char* MESSAGE_TYPE_NAME = #MessageType; \
+        inline static uint32_t MESSAGE_TYPE_ID = tme::internal::hashTypeName(MESSAGE_TYPE_NAME); \
         using CurrentMessageType = MessageType;
 
 #define FIELD(type, name) \
@@ -81,8 +84,8 @@ namespace tme { \
             name##_Registrar() \
             { \
                 const auto offset = reinterpret_cast<size_t>(&(static_cast<CurrentMessageType*>(nullptr)->name)); \
-                tme::internal::registerSerializer<type>(MESSAGE_TYPE_NAME, #name, offset); \
-                tme::internal::registerDeserializer<type>(MESSAGE_TYPE_NAME, #name, offset); \
+                tme::internal::registerSerializer<type>(MESSAGE_TYPE_ID, #name, offset); \
+                tme::internal::registerDeserializer<type>(MESSAGE_TYPE_ID, #name, offset); \
             } \
         }; \
         inline static name##_Registrar name##_reg; \
@@ -93,12 +96,12 @@ namespace tme { \
         std::vector<uint8_t> serialize() const override \
         { \
             std::vector<uint8_t> data; \
-            std::string type = getType(); \
-            uint8_t typeSize = static_cast<uint8_t>(type.size()); \
-            data.push_back(typeSize); \
-            data.insert(data.end(), type.begin(), type.end()); \
+            uint32_t typeId = MESSAGE_TYPE_ID; \
+            data.insert(data.end(), \
+                reinterpret_cast<const uint8_t*>(&typeId), \
+                reinterpret_cast<const uint8_t*>(&typeId) + sizeof(typeId)); \
             auto& serializers = getSerializers(); \
-            auto it = serializers.find(MESSAGE_TYPE_NAME); \
+            auto it = serializers.find(MESSAGE_TYPE_ID); \
             if (it != serializers.end()) \
             { \
                 for (const auto& [fieldName, fieldData] : it->second) \
@@ -111,10 +114,9 @@ namespace tme { \
         static std::unique_ptr<Message> createFromBytes(const std::vector<uint8_t>& payload) \
         { \
             std::unique_ptr<CurrentMessageType> message = std::make_unique<CurrentMessageType>(); \
-            uint8_t typeSize = payload[0]; \
-            size_t offset = 1 + typeSize; \
+            size_t offset = sizeof(uint32_t); \
             auto& deserializers = getDeserializers(); \
-            auto it = deserializers.find(MESSAGE_TYPE_NAME); \
+            auto it = deserializers.find(MESSAGE_TYPE_ID); \
             if (it != deserializers.end()) \
             { \
                 for (const auto& [fieldName, fieldData] : it->second) \
@@ -127,7 +129,7 @@ namespace tme { \
     private: \
         struct Register \
         { \
-            Register() { tme::internal::registerMessageType(MESSAGE_TYPE_NAME, CurrentMessageType::createFromBytes); } \
+            Register() { tme::internal::registerMessageType(MESSAGE_TYPE_ID, CurrentMessageType::createFromBytes); } \
         }; \
         inline static Register _register{}; \
     }; \

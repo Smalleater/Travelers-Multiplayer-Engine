@@ -4,23 +4,35 @@
 
 namespace tme
 {
-    std::map<std::string, std::vector<std::pair<std::string, std::pair<size_t, SerializerFunc>>>>& Message::getSerializers()
+    std::map<uint32_t, std::vector<std::pair<std::string, std::pair<size_t, SerializerFunc>>>>& Message::getSerializers()
     {
-        static std::map<std::string, std::vector<std::pair<std::string, std::pair<size_t, SerializerFunc>>>> serializers;
+        static std::map<uint32_t, std::vector<std::pair<std::string, std::pair<size_t, SerializerFunc>>>> serializers;
         return serializers;
     }
 
-    std::map<std::string, std::vector<std::pair<std::string, std::pair<size_t, DeserializerFunc>>>>& Message::getDeserializers()
+    std::map<uint32_t, std::vector<std::pair<std::string, std::pair<size_t, DeserializerFunc>>>>& Message::getDeserializers()
     {
-        static std::map<std::string, std::vector<std::pair<std::string, std::pair<size_t, DeserializerFunc>>>> deserializers;
+        static std::map<uint32_t, std::vector<std::pair<std::string, std::pair<size_t, DeserializerFunc>>>> deserializers;
         return deserializers;
     }
 
     namespace internal
     {
-        void registerMessageType(const std::string& type, std::unique_ptr<Message>(*creator)(const std::vector<uint8_t>&))
+        uint32_t hashTypeName(const char* str)
         {
-            tme::core::MessageFactory::registerMessage(type, creator);
+            uint32_t hash = 2166136261u;
+            while (* str)
+            {
+                hash ^= static_cast<uint32_t>(*str++);
+                hash *= 16777619u;
+            }
+            
+            return hash;
+        }
+
+        void registerMessageType(const uint32_t id, std::unique_ptr<Message>(*creator)(const std::vector<uint8_t>&))
+        {
+            tme::core::MessageFactory::registerMessage(id, creator);
         }
 
         void serializeField(std::vector<uint8_t>& data, int value)
