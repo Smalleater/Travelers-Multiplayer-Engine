@@ -5,7 +5,10 @@ namespace tme
 {
     enum class ErrorCode
     {
-        Success = 0
+        Success = 0,
+
+        // Socket Error
+        SocketShutdownFailed
     };
 }
 

@@ -15,7 +15,7 @@ namespace tme::core
     public:
         ~ISocket() = default;
 
-        virtual ErrorCode Shutdown() = 0;
+        virtual std::pair<ErrorCode, int> Shutdown() = 0;
         virtual ErrorCode Connect(const char* address, uint16_t port) = 0;
         virtual ErrorCode Bind(uint16_t port) = 0;
         virtual ErrorCode Listen(int backlog = SOMAXCONN) = 0;

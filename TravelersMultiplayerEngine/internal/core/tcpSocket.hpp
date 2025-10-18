@@ -11,7 +11,7 @@ namespace tme::core
         TcpSocket() = default;
         ~TcpSocket();
 
-        ErrorCode Shutdown() override;
+        std::pair<ErrorCode, int> Shutdown() override;
         ErrorCode Connect(const char* adress, uint16_t) override;
         ErrorCode Bind(uint16_t port) override;
         ErrorCode Listen(int backlog = SOMAXCONN) override;
@@ -20,6 +20,9 @@ namespace tme::core
         ErrorCode Receive(void* buffer, size_t size) override;
         ErrorCode SetBlocking(bool blocking) override;
         bool IsConnected() const override;
+
+    private:
+        socket_t m_socket = INVALID_SOCKET_FD;
     };
 }
 
