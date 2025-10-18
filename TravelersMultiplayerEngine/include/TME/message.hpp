@@ -31,17 +31,17 @@ namespace tme
 
     namespace internal 
     {
-        TME_API uint32_t hashTypeName(const char* str);
+        TME_API uint32_t hashTypeName(const char* _str);
 
-        TME_API void registerMessageType(const uint32_t id,
+        TME_API void registerMessageType(const uint32_t _id,
             std::unique_ptr<Message>(*creator)(const std::vector<uint8_t>&));
         
-        TME_API void serializeField(std::vector<uint8_t>& data, int value);
-        TME_API void serializeField(std::vector<uint8_t>& data, float value);
-        TME_API void serializeField(std::vector<uint8_t>& data, const std::string& value);
+        TME_API void serializeField(std::vector<uint8_t>& _data, int _value);
+        TME_API void serializeField(std::vector<uint8_t>& _data, float _value);
+        TME_API void serializeField(std::vector<uint8_t>& _data, const std::string& _value);
 
         template<typename T>
-        void registerSerializer(const uint32_t messageId, const std::string& fieldName, size_t fieldOffset)
+        void registerSerializer(const uint32_t _messageId, const std::string& _fieldName, size_t _fieldOffset)
         {
             auto& serializers = Message::getSerializers();
             serializers[messageId].emplace_back(fieldName, std::make_pair(fieldOffset, [fieldOffset](const void* base, std::vector<uint8_t>& data) {
