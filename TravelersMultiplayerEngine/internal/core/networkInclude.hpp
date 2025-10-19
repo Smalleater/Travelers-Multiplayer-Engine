@@ -23,6 +23,7 @@ namespace tme::core
     constexpr socket_t INVALID_SOCKET_FD = INVALID_SOCKET;
     constexpr int SHUTDOWN_BOTH = SD_BOTH;
     constexpr int SOCKET_NOT_CONNECTED = WSAENOTCONN;
+    constexpr int SOCKET_CONNECTION_RESET = WSAECONNRESET;
 }
 
 #elif defined(__unix__) || defined(__APPLE__)
@@ -45,6 +46,7 @@ namespace tme::core
     constexpr socket_t INVALID_SOCKET_FD = -1;
     constexpr int SHUTDOWN_BOTH = SHUT_RDWR;
     constexpr int SOCKET_NOT_CONNECTED = ENOTCONN;
+    constexpr int SOCKET_CONNECTION_RESET = ECONNRESET;
 }
 
 #endif

@@ -1,25 +1,30 @@
 #ifndef TME_CORE_TCP_SOCKET_HPP
 #define TME_CORE_TCP_SOCKET_HPP
 
-#include "core/iSocket.hpp"
+#include <utility>
+#include <memory>
+#include <cstdint>
+
+#include "TME/errorCode.hpp"
+#include "core/networkInclude.hpp"
 
 namespace tme::core
 {
-    class TcpSocket : public ISocket
+    class TcpSocket
     {
     public:
-        TcpSocket() = default;
+        TcpSocket();
         ~TcpSocket();
 
-        std::pair<ErrorCode, int> Shutdown() override;
-        ErrorCode Connect(const char* adress, uint16_t) override;
-        ErrorCode Bind(uint16_t port) override;
-        ErrorCode Listen(int backlog = SOMAXCONN) override;
-        ErrorCode Accept(std::unique_ptr<ISocket>& outClient) override;
-        ErrorCode Send(const void* data, size_t size) override;
-        ErrorCode Receive(void* buffer, size_t size) override;
-        ErrorCode SetBlocking(bool blocking) override;
-        bool IsConnected() const override;
+        std::pair<ErrorCode, int> Shutdown();
+        std::pair<ErrorCode, int> Connect(const char* adress, const uint16_t);
+        std::pair<ErrorCode, int> Bind(const uint16_t port);
+        std::pair<ErrorCode, int> Listen(int backlog = SOMAXCONN);
+        std::pair<ErrorCode, int> Accept(std::unique_ptr<TcpSocket>& outClient);
+        std::pair<ErrorCode, int> Send(const void* data, size_t size);
+        std::pair<ErrorCode, int> Receive(void* buffer, size_t size);
+        std::pair<ErrorCode, int> SetBlocking(bool blocking);
+        bool IsConnected() const;
 
     private:
         socket_t m_socket = INVALID_SOCKET_FD;

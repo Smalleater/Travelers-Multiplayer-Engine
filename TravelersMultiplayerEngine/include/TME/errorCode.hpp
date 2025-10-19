@@ -8,7 +8,21 @@ namespace tme
         Success = 0,
 
         // Socket Error
-        SocketShutdownFailed
+        SocketAlreadyOpen,
+        SocketNotOpen,
+        SocketConnectionClosed,
+        SocketWouldBlock,
+        SocketShutdownFailed,
+        SocketGetaddrinfoFailed,
+        SocketConnectFailed,
+        SocketBindFailed,
+        SocketListenFailed,
+        SocketAcceptFailed,
+        SocketSendSizeTooLarge,
+        SocketSendFailed,
+        SocketReceiveSizeTooLarge,
+        SocketReceiveFailed,
+        SocketSetBlockingFailed,
     };
 }
 
