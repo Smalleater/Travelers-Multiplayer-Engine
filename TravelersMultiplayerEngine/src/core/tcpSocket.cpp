@@ -25,6 +25,8 @@ namespace tme::core
 
     std::pair<ErrorCode, int> TcpSocket::Shutdown()
     {
+        std::lock_guard<std::mutex> lock(m_mutex);
+
         if (m_socket == INVALID_SOCKET_FD)
         {
             return { ErrorCode::Success, 0 };
@@ -42,6 +44,8 @@ namespace tme::core
 
     std::pair<ErrorCode, int> TcpSocket::Connect(const char* address, uint16_t port)
     {
+        std::lock_guard<std::mutex> lock(m_mutex);
+
         if (m_socket != INVALID_SOCKET_FD)
         {
             return { ErrorCode::SocketAlreadyOpen, 0 };
@@ -89,6 +93,8 @@ namespace tme::core
 
     std::pair<ErrorCode, int> TcpSocket::Bind(uint16_t port)
     {
+        std::lock_guard<std::mutex> lock(m_mutex);
+
         if (m_socket != INVALID_SOCKET_FD)
         {
             return { ErrorCode::SocketAlreadyOpen, 0 };
@@ -137,6 +143,8 @@ namespace tme::core
 
     std::pair<ErrorCode, int> TcpSocket::Listen(int backlog)
     {
+        std::lock_guard<std::mutex> lock(m_mutex);
+
         if (m_socket == INVALID_SOCKET_FD)
         {
             return { ErrorCode::SocketNotOpen, 0 };
@@ -156,6 +164,8 @@ namespace tme::core
 
     std::pair<ErrorCode, int> TcpSocket::Accept(std::unique_ptr<TcpSocket>& outClient)
     {
+        std::lock_guard<std::mutex> lock(m_mutex);
+
         if (m_socket == INVALID_SOCKET_FD)
         {
             return { ErrorCode::SocketNotOpen, 0 };
@@ -182,6 +192,8 @@ namespace tme::core
 
     std::pair<ErrorCode, int> TcpSocket::Send(const void* data, size_t size)
     {
+        std::lock_guard<std::mutex> lock(m_mutex);
+
         if (m_socket == INVALID_SOCKET_FD)
         {
             return { ErrorCode::SocketNotOpen, 0 };
@@ -208,6 +220,8 @@ namespace tme::core
 
     std::pair<ErrorCode, int> TcpSocket::Receive(void* buffer, size_t size)
     {
+        std::lock_guard<std::mutex> lock(m_mutex);
+
         if (m_socket == INVALID_SOCKET_FD)
         {
             return { ErrorCode::SocketNotOpen, 0 };
@@ -243,6 +257,8 @@ namespace tme::core
 
     std::pair<ErrorCode, int> TcpSocket::SetBlocking(bool blocking)
     {
+        std::lock_guard<std::mutex> lock(m_mutex);
+
         #ifdef _WIN32
             u_long mode = blocking ? 0 : 1;
 
@@ -282,6 +298,8 @@ namespace tme::core
 
     bool TcpSocket::IsConnected() const
     {
+        std::lock_guard<std::mutex> lock(m_mutex);
+
         sockaddr_storage addr;
         socklen_t addrLen = sizeof(addr);
 

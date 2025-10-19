@@ -4,6 +4,7 @@
 #include <utility>
 #include <memory>
 #include <cstdint>
+#include <mutex>
 
 #include "TME/errorCode.hpp"
 #include "core/networkInclude.hpp"
@@ -28,6 +29,7 @@ namespace tme::core
 
     private:
         socket_t m_socket = INVALID_SOCKET_FD;
+        mutable std::mutex m_mutex;
     };
 }
 
