@@ -1,5 +1,7 @@
 #include "core/udpSocket.hpp"
 
+#include <cstdio>
+
 #include "core/socketUtils.hpp"
 
 #undef max
@@ -17,6 +19,16 @@ namespace tme::core
         {
             CLOSE_SOCKET(m_socket);
         }
+    }
+
+    sockaddr* UdpSocket::createSockAddr(const char* address, uint16_t port)
+    {
+        sockaddr_in addr;
+        addr.sin_family = AF_INET;
+        addr.sin_port = htons(port);
+
+        inet_pton(AF_INET, address, &addr.sin_addr);
+        return (sockaddr*)&addr;
     }
 
     void UdpSocket::closeSocket()
@@ -79,7 +91,7 @@ namespace tme::core
         return { ErrorCode::SocketBindFailed, 0 };
     }
 
-    std::pair<ErrorCode, int> UdpSocket::sendDataTo(const void* data, size_t size, const char* address, const uint16_t port)
+    std::pair<ErrorCode, int> UdpSocket::sendDataTo(const void* data, size_t size, const sockaddr* destAddr)
     {
         std::lock_guard<std::mutex> lock(m_mutex);
 
@@ -93,17 +105,44 @@ namespace tme::core
             return { ErrorCode::SocketSendSizeTooLarge, 0 };
         }
 
-        sockaddr_in addr;
-        addr.sin_family = AF_INET;
-        addr.sin_port = htons(port);
+        socklen_t addrLen = sizeof(sockaddr_in);
 
-        inet_pton(AF_INET, address, &addr.sin_addr);
-
-        int iResult = sendto(m_socket, static_cast<const char*>(data), static_cast<int>(size), 0, (const sockaddr*)&addr, sizeof(addr));
+        int iResult = sendto(m_socket, static_cast<const char*>(data), static_cast<int>(size), 0, destAddr, addrLen);
         int lastSocketError = SocketUtils::GetLastSocketError();
         if (iResult < 0)
         {
             return { ErrorCode::SocketSendFailed, lastSocketError };
+        }
+
+        return { ErrorCode::Success, 0 };
+    }
+
+    std::pair<ErrorCode, int> UdpSocket::receiveDataFrom(void* buffer, size_t size, sockaddr* srcAddr)
+    {
+        std::lock_guard<std::mutex> lock(m_mutex);
+
+        if (m_socket == INVALID_SOCKET_FD)
+        {
+            return { ErrorCode::SocketNotOpen, 0 };
+        }
+
+        if (size > static_cast<size_t>(std::numeric_limits<int>::max()))
+        {
+            return { ErrorCode::SocketReceiveSizeTooLarge, 0 };
+        }
+
+        socklen_t addrLen = sizeof(sockaddr_in);
+
+        int iResult = recvfrom(m_socket, static_cast<char*>(buffer), static_cast<int>(size), 0, srcAddr, &addrLen);
+        int lastSocketError = SocketUtils::GetLastSocketError();
+        if (iResult < 0)
+        {
+            if (SocketUtils::IsWouldBlockError(lastSocketError))
+            {
+                return { ErrorCode::SocketWouldBlock, 0 };
+            }
+
+            return { ErrorCode::SocketReceiveFailed, lastSocketError };
         }
 
         return { ErrorCode::Success, 0 };

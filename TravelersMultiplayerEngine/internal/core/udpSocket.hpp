@@ -15,10 +15,12 @@ namespace tme::core
         UdpSocket();
         ~UdpSocket();
 
+        static sockaddr* createSockAddr(const char* address, uint16_t port);
+
         void closeSocket();
         std::pair<ErrorCode, int> bindSocket(const uint16_t port);
-        std::pair<ErrorCode, int> sendDataTo(const void* data, size_t size, const char* address, const uint16_t port);
-        std::pair<ErrorCode, int> receiveDataFrom(void* buffer, size_t size);
+        std::pair<ErrorCode, int> sendDataTo(const void* data, size_t size, const sockaddr* destAddr);
+        std::pair<ErrorCode, int> receiveDataFrom(void* buffer, size_t size, sockaddr* srcAddr);
         std::pair<ErrorCode, int> setBlocking(bool blocking);
         bool isOpen() const;
 
