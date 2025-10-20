@@ -16,14 +16,11 @@ namespace tme::core
 
     TcpSocket::~TcpSocket()
     {
-        if (m_socket != INVALID_SOCKET_FD)
-        {
-            Shutdown();
-            CLOSE_SOCKET(m_socket);
-        }
+        shutdownSocket();
+        closeSocket();
     }
 
-    std::pair<ErrorCode, int> TcpSocket::Shutdown()
+    std::pair<ErrorCode, int> TcpSocket::shutdownSocket()
     {
         std::lock_guard<std::mutex> lock(m_mutex);
 
@@ -42,7 +39,18 @@ namespace tme::core
         return { ErrorCode::Success, 0 };
     }
 
-    std::pair<ErrorCode, int> TcpSocket::Connect(const char* address, uint16_t port)
+    void TcpSocket::closeSocket()
+    {
+        std::lock_guard<std::mutex> lock(m_mutex);
+
+        if (m_socket != INVALID_SOCKET_FD)
+        {
+            CLOSE_SOCKET(m_socket);
+            m_socket == INVALID_SOCKET_FD;
+        }
+    }
+
+    std::pair<ErrorCode, int> TcpSocket::connectTo(const char* address, uint16_t port)
     {
         std::lock_guard<std::mutex> lock(m_mutex);
 
@@ -83,15 +91,14 @@ namespace tme::core
                 return { ErrorCode::Success, 0 };
             }
 
-            CLOSE_SOCKET(m_socket);
-            m_socket = INVALID_SOCKET_FD;
+            closeSocket();
         }
 
         freeaddrinfo(result);
         return { ErrorCode::SocketConnectFailed, 0 };
     }
 
-    std::pair<ErrorCode, int> TcpSocket::Bind(uint16_t port)
+    std::pair<ErrorCode, int> TcpSocket::bindSocket(uint16_t port)
     {
         std::lock_guard<std::mutex> lock(m_mutex);
 
@@ -133,15 +140,14 @@ namespace tme::core
                 return { ErrorCode::Success, 0 };
             }
 
-            CLOSE_SOCKET(m_socket);
-            m_socket = INVALID_SOCKET_FD;
+            closeSocket();
         }
 
         freeaddrinfo(result);
         return { ErrorCode::SocketBindFailed, 0 };
     }
 
-    std::pair<ErrorCode, int> TcpSocket::Listen(int backlog)
+    std::pair<ErrorCode, int> TcpSocket::listenSocket(int backlog)
     {
         std::lock_guard<std::mutex> lock(m_mutex);
 
@@ -154,15 +160,14 @@ namespace tme::core
         int lastSocketError = SocketUtils::GetLastSocketError();
         if ( iResult < 0)
         {
-            CLOSE_SOCKET(m_socket);
-            m_socket = INVALID_SOCKET_FD;
+            closeSocket();
             return { ErrorCode::SocketListenFailed, lastSocketError };
         }
 
         return { ErrorCode::Success, 0 };
     }
 
-    std::pair<ErrorCode, int> TcpSocket::Accept(std::unique_ptr<TcpSocket>& outClient)
+    std::pair<ErrorCode, int> TcpSocket::acceptSocket(std::unique_ptr<TcpSocket>& outClient)
     {
         std::lock_guard<std::mutex> lock(m_mutex);
 
@@ -190,7 +195,7 @@ namespace tme::core
         return { ErrorCode::Success, 0 };
     }
 
-    std::pair<ErrorCode, int> TcpSocket::Send(const void* data, size_t size)
+    std::pair<ErrorCode, int> TcpSocket::sendData(const void* data, size_t size)
     {
         std::lock_guard<std::mutex> lock(m_mutex);
 
@@ -218,7 +223,7 @@ namespace tme::core
         return { ErrorCode::Success, 0 };
     }
 
-    std::pair<ErrorCode, int> TcpSocket::Receive(void* buffer, size_t size)
+    std::pair<ErrorCode, int> TcpSocket::receiveData(void* buffer, size_t size)
     {
         std::lock_guard<std::mutex> lock(m_mutex);
 
@@ -255,7 +260,7 @@ namespace tme::core
         return { ErrorCode::Success, 0 };
     }
 
-    std::pair<ErrorCode, int> TcpSocket::SetBlocking(bool blocking)
+    std::pair<ErrorCode, int> TcpSocket::setBlocking(bool blocking)
     {
         std::lock_guard<std::mutex> lock(m_mutex);
 
@@ -296,7 +301,7 @@ namespace tme::core
         return { ErrorCode::Success, 0 };
     }
 
-    bool TcpSocket::IsConnected() const
+    bool TcpSocket::isConnected() const
     {
         std::lock_guard<std::mutex> lock(m_mutex);
 
