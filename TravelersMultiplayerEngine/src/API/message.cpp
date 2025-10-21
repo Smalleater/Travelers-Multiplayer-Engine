@@ -18,61 +18,61 @@ namespace tme
 
     namespace internal
     {
-        uint32_t hashTypeName(const char* str)
+        uint32_t hashTypeName(const char* _str)
         {
             uint32_t hash = 2166136261u;
-            while (* str)
+            while (* _str)
             {
-                hash ^= static_cast<uint32_t>(*str++);
+                hash ^= static_cast<uint32_t>(*_str++);
                 hash *= 16777619u;
             }
             
             return hash;
         }
 
-        void registerMessageType(const uint32_t id, std::unique_ptr<Message>(*creator)(const std::vector<uint8_t>&))
+        void registerMessageType(const uint32_t _id, std::unique_ptr<Message>(*_creator)(const std::vector<uint8_t>&))
         {
-            tme::core::MessageFactory::registerMessage(id, creator);
+            tme::core::MessageFactory::registerMessage(_id, _creator);
         }
 
-        void serializeField(std::vector<uint8_t>& data, int value)
+        void serializeField(std::vector<uint8_t>& _data, int _value)
         {
-            data.insert(data.end(), reinterpret_cast<const uint8_t*>(&value),
-                reinterpret_cast<const uint8_t*>(&value) + sizeof(value));
+            _data.insert(_data.end(), reinterpret_cast<const uint8_t*>(&_value),
+                reinterpret_cast<const uint8_t*>(&_value) + sizeof(_value));
         }
 
-        void serializeField(std::vector<uint8_t>& data, float value)
+        void serializeField(std::vector<uint8_t>& _data, float _value)
         {
-            data.insert(data.end(), reinterpret_cast<const uint8_t*>(&value),
-                reinterpret_cast<const uint8_t*>(&value) + sizeof(value));
+            _data.insert(_data.end(), reinterpret_cast<const uint8_t*>(&_value),
+                reinterpret_cast<const uint8_t*>(&_value) + sizeof(_value));
         }
 
-        void serializeField(std::vector<uint8_t>& data, const std::string& value)
+        void serializeField(std::vector<uint8_t>& _data, const std::string& _value)
         {
-            uint32_t size = static_cast<uint32_t>(value.size());
-            data.insert(data.end(), reinterpret_cast<const uint8_t*>(&size),
+            uint32_t size = static_cast<uint32_t>(_value.size());
+            _data.insert(_data.end(), reinterpret_cast<const uint8_t*>(&size),
                 reinterpret_cast<const uint8_t*>(&size) + sizeof(size));
-            data.insert(data.end(), value.begin(), value.end());
+            _data.insert(_data.end(), _value.begin(), _value.end());
         }
 
-        void deserializeField(const std::vector<uint8_t>& data, size_t& offset, int& value)
+        void deserializeField(const std::vector<uint8_t>& _data, size_t& _offset, int& _value)
         {
-            value = *reinterpret_cast<const int*>(&data[offset]);
-            offset += sizeof(int);
+            _value = *reinterpret_cast<const int*>(&_data[_offset]);
+            _offset += sizeof(int);
         }
 
-        void deserializeField(const std::vector<uint8_t>& data, size_t& offset, float& value)
+        void deserializeField(const std::vector<uint8_t>& _data, size_t& _offset, float& _value)
         {
-            value = *reinterpret_cast<const float*>(&data[offset]);
-            offset += sizeof(float);
+            _value = *reinterpret_cast<const float*>(&_data[_offset]);
+            _offset += sizeof(float);
         }
 
-        void deserializeField(const std::vector<uint8_t>& data, size_t& offset, std::string& value)
+        void deserializeField(const std::vector<uint8_t>& _data, size_t& _offset, std::string& _value)
         {
-            uint32_t size = *reinterpret_cast<const uint32_t*>(&data[offset]);
-            offset += sizeof(uint32_t);
-            value.assign(reinterpret_cast<const char*>(&data[offset]), size);
-            offset += size;
+            uint32_t size = *reinterpret_cast<const uint32_t*>(&_data[_offset]);
+            _offset += sizeof(uint32_t);
+            _value.assign(reinterpret_cast<const char*>(&_data[_offset]), size);
+            _offset += size;
         }
     }
 }

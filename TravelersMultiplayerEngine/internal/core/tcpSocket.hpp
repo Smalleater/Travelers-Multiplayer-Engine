@@ -19,13 +19,13 @@ namespace tme::core
 
         std::pair<ErrorCode, int> shutdownSocket();
         void closeSocket();
-        std::pair<ErrorCode, int> connectTo(const char* adress, const uint16_t);
-        std::pair<ErrorCode, int> bindSocket(const uint16_t port);
-        std::pair<ErrorCode, int> listenSocket(int backlog = SOMAXCONN);
-        std::pair<ErrorCode, int> acceptSocket(std::unique_ptr<TcpSocket>& outClient);
-        std::pair<ErrorCode, int> sendData(const void* data, size_t size);
-        std::pair<ErrorCode, int> receiveData(void* buffer, size_t size);
-        std::pair<ErrorCode, int> setBlocking(bool blocking);
+        std::pair<ErrorCode, int> connectTo(const char* _adress, const uint16_t _port);
+        std::pair<ErrorCode, int> bindSocket(const uint16_t _port);
+        std::pair<ErrorCode, int> listenSocket(int _backlog = SOMAXCONN);
+        std::pair<ErrorCode, int> acceptSocket(std::unique_ptr<TcpSocket>& _outClient);
+        std::pair<ErrorCode, int> sendData(const void* _data, size_t _size);
+        std::pair<ErrorCode, int> receiveData(void* _buffer, size_t _size);
+        std::pair<ErrorCode, int> setBlocking(bool _blocking);
         bool isConnected() const;
 
     private:

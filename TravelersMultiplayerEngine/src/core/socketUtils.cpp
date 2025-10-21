@@ -13,12 +13,12 @@ namespace tme::core
         #endif
     }
 
-    bool SocketUtils::IsWouldBlockError(int err)
+    bool SocketUtils::IsWouldBlockError(int _err)
     {
         #ifdef _WIN32
-            return err == WSAEWOULDBLOCK;
+            return _err == WSAEWOULDBLOCK;
         #else
-            return err == EWOULDBLOCK || err == EAGAIN;
+            return _err == EWOULDBLOCK || _err == EAGAIN;
         #endif
     }
 }

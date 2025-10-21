@@ -10,7 +10,7 @@ namespace tme::core
     namespace SocketUtils
     {
         int GetLastSocketError();
-        bool IsWouldBlockError(int err);
+        bool IsWouldBlockError(int _err);
     }
 }
 

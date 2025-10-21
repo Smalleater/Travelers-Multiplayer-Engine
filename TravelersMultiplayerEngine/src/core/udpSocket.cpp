@@ -21,13 +21,13 @@ namespace tme::core
         }
     }
 
-    sockaddr* UdpSocket::createSockAddr(const char* address, uint16_t port)
+    sockaddr* UdpSocket::createSockAddr(const char* _address, uint16_t _port)
     {
         sockaddr_in addr;
         addr.sin_family = AF_INET;
-        addr.sin_port = htons(port);
+        addr.sin_port = htons(_port);
 
-        inet_pton(AF_INET, address, &addr.sin_addr);
+        inet_pton(AF_INET, _address, &addr.sin_addr);
         return (sockaddr*)&addr;
     }
 
@@ -42,7 +42,7 @@ namespace tme::core
         }
     }
 
-    std::pair<ErrorCode, int> UdpSocket::bindSocket(const uint16_t port)
+    std::pair<ErrorCode, int> UdpSocket::bindSocket(const uint16_t _port)
     {
         std::lock_guard<std::mutex> lock(m_mutex);
 
@@ -60,7 +60,7 @@ namespace tme::core
         addrinfo* result = nullptr;
         
         char portStr[6];
-        snprintf(portStr, sizeof(portStr), "%u", port);
+        snprintf(portStr, sizeof(portStr), "%u", _port);
 
         int iResult = getaddrinfo(NULL, portStr, &hints, &result);
         int lastSocketError = SocketUtils::GetLastSocketError();
@@ -91,7 +91,7 @@ namespace tme::core
         return { ErrorCode::SocketBindFailed, 0 };
     }
 
-    std::pair<ErrorCode, int> UdpSocket::sendDataTo(const void* data, size_t size, const sockaddr* destAddr)
+    std::pair<ErrorCode, int> UdpSocket::sendDataTo(const void* _data, size_t _size, const sockaddr* _destAddr)
     {
         std::lock_guard<std::mutex> lock(m_mutex);
 
@@ -100,14 +100,14 @@ namespace tme::core
             return { ErrorCode::SocketNotOpen, 0 };
         }
 
-        if (size > static_cast<size_t>(std::numeric_limits<int>::max()))
+        if (_size > static_cast<size_t>(std::numeric_limits<int>::max()))
         {
             return { ErrorCode::SocketSendSizeTooLarge, 0 };
         }
 
         socklen_t addrLen = sizeof(sockaddr_in);
 
-        int iResult = sendto(m_socket, static_cast<const char*>(data), static_cast<int>(size), 0, destAddr, addrLen);
+        int iResult = sendto(m_socket, static_cast<const char*>(_data), static_cast<int>(_size), 0, _destAddr, addrLen);
         int lastSocketError = SocketUtils::GetLastSocketError();
         if (iResult < 0)
         {
@@ -117,7 +117,7 @@ namespace tme::core
         return { ErrorCode::Success, 0 };
     }
 
-    std::pair<ErrorCode, int> UdpSocket::receiveDataFrom(void* buffer, size_t size, sockaddr* srcAddr)
+    std::pair<ErrorCode, int> UdpSocket::receiveDataFrom(void* _buffer, size_t _size, sockaddr* _srcAddr)
     {
         std::lock_guard<std::mutex> lock(m_mutex);
 
@@ -126,14 +126,14 @@ namespace tme::core
             return { ErrorCode::SocketNotOpen, 0 };
         }
 
-        if (size > static_cast<size_t>(std::numeric_limits<int>::max()))
+        if (_size > static_cast<size_t>(std::numeric_limits<int>::max()))
         {
             return { ErrorCode::SocketReceiveSizeTooLarge, 0 };
         }
 
         socklen_t addrLen = sizeof(sockaddr_in);
 
-        int iResult = recvfrom(m_socket, static_cast<char*>(buffer), static_cast<int>(size), 0, srcAddr, &addrLen);
+        int iResult = recvfrom(m_socket, static_cast<char*>(_buffer), static_cast<int>(_size), 0, _srcAddr, &addrLen);
         int lastSocketError = SocketUtils::GetLastSocketError();
         if (iResult < 0)
         {
