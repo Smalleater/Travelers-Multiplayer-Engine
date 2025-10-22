@@ -5,12 +5,15 @@
 
 #include "TME/errorCode.hpp"
 
+#include "core/networkInclude.hpp"
+
 namespace tme::core
 {
     namespace SocketUtils
     {
         int GetLastSocketError();
         bool IsWouldBlockError(int _err);
+        std::pair<ErrorCode, int> setBlocking(socket_t& _socket, bool _blocking);
     }
 }
 

@@ -18,7 +18,7 @@ namespace tme
     using SerializerFunc = std::function<void(const void*, std::vector<uint8_t>&)>;
     using DeserializerFunc = std::function<void(const void*, const std::vector<uint8_t>&, size_t&)>;
 
-    class TME_API Message
+    struct TME_API Message
     {
     public:
         virtual ~Message() = default;

@@ -263,42 +263,7 @@ namespace tme::core
     std::pair<ErrorCode, int> TcpSocket::setBlocking(bool _blocking)
     {
         std::lock_guard<std::mutex> lock(m_mutex);
-
-        #ifdef _WIN32
-            u_long mode = _blocking ? 0 : 1;
-
-            int iResult = ioctlsocket(m_socket, FIONBIO, &mode);
-            int lastSocketError = SocketUtils::GetLastSocketError();
-            if (iResult != 0)
-            {
-                return { ErrorCode::SocketSetBlockingFailed, lastSocketError };
-            }
-        #else
-            int flags = fcntl(m_socket, F_GETFL, 0);
-            int lastSocketError = SocketUtils::GetLastSocketError();
-            if (flags == -1)
-            {
-                return { ErrorCode::SocketSetBlockingFailed, lastSocketError };
-            }
-
-            if (_blocking)
-            {
-                flags &= ~O_NONBLOCK;
-            }
-            else
-            {
-                flags |= O_NONBLOCK;
-            }
-
-            int iResult = fcntl(m_socket, F_SETFL, flags);
-            lastSocketError = SocketUtils::GetLastSocketError();
-            if (iResult == -1)
-            {
-                return { ErrorCode::SocketSetBlockingFailed, lastSocketError };
-            }
-        #endif
-
-        return { ErrorCode::Success, 0 };
+        return SocketUtils::setBlocking(m_socket, _blocking);
     }
 
     bool TcpSocket::isConnected() const

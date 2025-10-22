@@ -18,7 +18,7 @@ namespace tme
     using SerializerFunc = std::function<void(const void*, std::vector<uint8_t>&)>;
     using DeserializerFunc = std::function<void(const void*, const std::vector<uint8_t>&, size_t&)>;
 
-    class TME_API Message
+    struct TME_API Message
     {
     public:
         virtual ~Message() = default;
@@ -31,36 +31,36 @@ namespace tme
 
     namespace internal 
     {
-        TME_API uint32_t hashTypeName(const char* str);
+        TME_API uint32_t hashTypeName(const char* _str);
 
-        TME_API void registerMessageType(const uint32_t id,
-            std::unique_ptr<Message>(*creator)(const std::vector<uint8_t>&));
+        TME_API void registerMessageType(const uint32_t _id,
+            std::unique_ptr<Message>(*_creator)(const std::vector<uint8_t>&));
         
-        TME_API void serializeField(std::vector<uint8_t>& data, int value);
-        TME_API void serializeField(std::vector<uint8_t>& data, float value);
-        TME_API void serializeField(std::vector<uint8_t>& data, const std::string& value);
+        TME_API void serializeField(std::vector<uint8_t>& _data, int _value);
+        TME_API void serializeField(std::vector<uint8_t>& _data, float _value);
+        TME_API void serializeField(std::vector<uint8_t>& _data, const std::string& _value);
 
         template<typename T>
-        void registerSerializer(const uint32_t messageId, const std::string& fieldName, size_t fieldOffset)
+        void registerSerializer(const uint32_t _messageId, const std::string& _fieldName, size_t _fieldOffset)
         {
             auto& serializers = Message::getSerializers();
-            serializers[messageId].emplace_back(fieldName, std::make_pair(fieldOffset, [fieldOffset](const void* base, std::vector<uint8_t>& data) {
-                const T* field = reinterpret_cast<const T*>(static_cast<const char*>(base) + fieldOffset);
+            serializers[_messageId].emplace_back(_fieldName, std::make_pair(_fieldOffset, [_fieldOffset](const void* base, std::vector<uint8_t>& data) {
+                const T* field = reinterpret_cast<const T*>(static_cast<const char*>(base) + _fieldOffset);
                 serializeField(data, *field);
             }));
         }
 
-        TME_API void deserializeField(const std::vector<uint8_t>& data, size_t& offset, int& value);
-        TME_API void deserializeField(const std::vector<uint8_t>& data, size_t& offset, float& value);
-        TME_API void deserializeField(const std::vector<uint8_t>& data, size_t& offset, std::string& value);
+        TME_API void deserializeField(const std::vector<uint8_t>& _data, size_t& _offset, int& _value);
+        TME_API void deserializeField(const std::vector<uint8_t>& _data, size_t& _offset, float& _value);
+        TME_API void deserializeField(const std::vector<uint8_t>& _data, size_t& _offset, std::string& _value);
 
         template<typename T>
-        void registerDeserializer(const uint32_t messageId, const std::string& fieldName, size_t fieldOffset)
+        void registerDeserializer(const uint32_t _messageId, const std::string& _fieldName, size_t _fieldOffset)
         {
             auto& deserializers = Message::getDeserializers();
-            deserializers[messageId].emplace_back(fieldName, std::make_pair(fieldOffset, 
-                [fieldOffset](const void* base, const std::vector<uint8_t>& data, size_t& offset) {
-                    T* field = reinterpret_cast<T*>(static_cast<char*>(const_cast<void*>(base)) + fieldOffset);
+            deserializers[_messageId].emplace_back(_fieldName, std::make_pair(_fieldOffset, 
+                [_fieldOffset](const void* base, const std::vector<uint8_t>& data, size_t& offset) {
+                    T* field = reinterpret_cast<T*>(static_cast<char*>(const_cast<void*>(base)) + _fieldOffset);
                     deserializeField(data, offset, *field);
                 }));
         }
@@ -111,7 +111,7 @@ namespace tme { \
             } \
             return data; \
         } \
-        static std::unique_ptr<Message> createFromBytes(const std::vector<uint8_t>& payload) \
+        static std::unique_ptr<Message> createFromBytes(const std::vector<uint8_t>& _payload) \
         { \
             std::unique_ptr<CurrentMessageType> message = std::make_unique<CurrentMessageType>(); \
             size_t offset = sizeof(uint32_t); \
@@ -121,7 +121,7 @@ namespace tme { \
             { \
                 for (const auto& [fieldName, fieldData] : it->second) \
                 { \
-                    fieldData.second(message.get(), payload, offset); \
+                    fieldData.second(message.get(), _payload, offset); \
                 } \
             } \
             return message; \
