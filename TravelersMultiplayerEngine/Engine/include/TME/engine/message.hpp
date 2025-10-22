@@ -1,5 +1,5 @@
-#ifndef TME_API_MESSAGE_HPP
-#define TME_API_MESSAGE_HPP
+#ifndef TME_ENGINE_MESSAGE_HPP
+#define TME_ENGINE_MESSAGE_HPP
 
 #include "TME/export.hpp"
 
@@ -12,7 +12,7 @@
 #include <functional>
 #include <algorithm>
 
-namespace tme
+namespace tme::engine
 {
     using FieldValue = std::variant<int, float, std::string>;
     using SerializerFunc = std::function<void(const void*, std::vector<uint8_t>&)>;

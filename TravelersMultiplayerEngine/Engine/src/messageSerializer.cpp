@@ -3,7 +3,7 @@
 #include <stdexcept>
 #include <cstring>
 
-namespace tme::core
+namespace tme::engine
 {
     std::vector<uint8_t> MessageSerializer::serializePayload(const Message& _message)
     {

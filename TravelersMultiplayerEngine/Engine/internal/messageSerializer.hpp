@@ -1,9 +1,9 @@
-#ifndef TME_CORE_MESSAGE_SERIALIZER_HPP
-#define TME_CORE_MESSAGE_SERIALIZER_HPP
+#ifndef TME_ENGINE_MESSAGE_SERIALIZER_HPP
+#define TME_ENGINE_MESSAGE_SERIALIZER_HPP
 
 #include "messageFactory.hpp"
 
-namespace tme::core
+namespace tme::engine
 {
     class MessageSerializer
     {

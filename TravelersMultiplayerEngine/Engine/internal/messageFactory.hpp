@@ -1,5 +1,5 @@
-#ifndef TME_CORE_MESSAGE_FACTORY_HPP
-#define TME_CORE_MESSAGE_FACTORY_HPP
+#ifndef TME_ENGINE_MESSAGE_FACTORY_HPP
+#define TME_ENGINE_MESSAGE_FACTORY_HPP
 
 #include <functional>
 #include <memory>
@@ -8,7 +8,7 @@
 #include "TME/engine/message.hpp"
 #include "messageHeader.hpp"
 
-namespace tme::core
+namespace tme::engine
 {
     class MessageFactory
     {

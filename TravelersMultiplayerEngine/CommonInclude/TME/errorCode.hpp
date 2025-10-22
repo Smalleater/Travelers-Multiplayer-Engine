@@ -7,6 +7,10 @@ namespace tme
     {
         Success = 0,
 
+        //Server Error
+        ServerAlreadyExists,
+        ServerNotFound,
+
         // Socket Error
         SocketAlreadyOpen,
         SocketNotOpen,

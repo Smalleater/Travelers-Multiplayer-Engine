@@ -2,7 +2,7 @@
 
 #include "messageFactory.hpp"
 
-namespace tme
+namespace tme::engine
 {
     std::map<uint32_t, std::vector<std::pair<std::string, std::pair<size_t, SerializerFunc>>>>& Message::getSerializers()
     {
@@ -32,7 +32,7 @@ namespace tme
 
         void registerMessageType(const uint32_t _id, std::unique_ptr<Message>(*_creator)(const std::vector<uint8_t>&))
         {
-            tme::core::MessageFactory::registerMessage(_id, _creator);
+            MessageFactory::registerMessage(_id, _creator);
         }
 
         void serializeField(std::vector<uint8_t>& _data, int _value)
