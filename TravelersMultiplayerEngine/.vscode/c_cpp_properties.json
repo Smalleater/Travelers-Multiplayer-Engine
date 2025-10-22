@@ -3,9 +3,17 @@
         {
             "name": "Win32",
             "includePath": [
-                "${workspaceFolder}/include",
-                "${workspaceFolder}/internal"
+                "${workspaceFolder}/Core/include",
+                "${workspaceFolder}/Core/internal",
+                "${workspaceFolder}/Engine/include",
+                "${workspaceFolder}/Engine/internal",
+                "${workspaceFolder}/Client/include",
+                "${workspaceFolder}/Client/internal",
+                "${workspaceFolder}/Server/include",
+                "${workspaceFolder}/Server/internal",
+                "${workspaceFolder}/CommonInclude"
             ],
+            "compileCommands": "${workspaceFolder}/build/compile_commands.json",
             "cStandard": "c17",
             "cppStandard": "c++17"
         }

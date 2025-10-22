@@ -1,4 +1,4 @@
-#include "core/messageSerializer.hpp"
+#include "messageSerializer.hpp"
 
 #include <stdexcept>
 #include <cstring>

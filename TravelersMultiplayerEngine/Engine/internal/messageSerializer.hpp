@@ -1,7 +1,7 @@
 #ifndef TME_CORE_MESSAGE_SERIALIZER_HPP
 #define TME_CORE_MESSAGE_SERIALIZER_HPP
 
-#include "core/messageFactory.hpp"
+#include "messageFactory.hpp"
 
 namespace tme::core
 {

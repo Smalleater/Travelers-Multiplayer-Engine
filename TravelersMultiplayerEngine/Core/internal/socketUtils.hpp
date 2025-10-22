@@ -4,8 +4,7 @@
 #include <utility>
 
 #include "TME/errorCode.hpp"
-
-#include "core/networkInclude.hpp"
+#include "TME/core/networkInclude.hpp"
 
 namespace tme::core
 {

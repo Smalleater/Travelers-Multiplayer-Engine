@@ -1,4 +1,4 @@
-#include "core/messageFactory.hpp"
+#include "messageFactory.hpp"
 
 #include <stdexcept>
 #include <cstring>

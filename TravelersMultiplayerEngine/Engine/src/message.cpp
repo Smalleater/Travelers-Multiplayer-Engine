@@ -1,6 +1,6 @@
-#include "TME/message.hpp"
+#include "TME/engine/message.hpp"
 
-#include "core/messageFactory.hpp"
+#include "messageFactory.hpp"
 
 namespace tme
 {

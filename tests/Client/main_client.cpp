@@ -1,6 +1,6 @@
 #include <iostream>
 
-#include "TME/message.hpp"
+#include "TME/engine/message.hpp"
 
 DECLARE_MESSAGE_BEGIN(PlayerMove)
     FIELD(int, playerId)

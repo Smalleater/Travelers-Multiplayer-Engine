@@ -1,7 +1,7 @@
 #ifndef TME_API_MESSAGE_HPP
 #define TME_API_MESSAGE_HPP
 
-#include "export.hpp"
+#include "TME/export.hpp"
 
 #include <string>
 #include <map>

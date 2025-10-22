@@ -5,7 +5,7 @@
 #include <mutex>
 
 #include "TME/errorCode.hpp"
-#include "core/networkInclude.hpp"
+#include "networkInclude.hpp"
 
 namespace tme::core
 {

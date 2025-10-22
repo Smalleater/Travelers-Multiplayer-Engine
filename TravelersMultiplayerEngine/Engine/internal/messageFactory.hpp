@@ -5,8 +5,8 @@
 #include <memory>
 #include <cstdint>
 
-#include "TME/message.hpp"
-#include "core/messageHeader.hpp"
+#include "TME/engine/message.hpp"
+#include "messageHeader.hpp"
 
 namespace tme::core
 {

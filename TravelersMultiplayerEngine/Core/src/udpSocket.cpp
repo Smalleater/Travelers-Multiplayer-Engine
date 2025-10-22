@@ -1,8 +1,8 @@
-#include "core/udpSocket.hpp"
+#include "TME/core/udpSocket.hpp"
 
 #include <cstdio>
 
-#include "core/socketUtils.hpp"
+#include "socketUtils.hpp"
 
 #undef max
 

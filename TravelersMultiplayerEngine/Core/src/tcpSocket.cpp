@@ -1,9 +1,9 @@
-#include "core/tcpSocket.hpp"
+#include "TME/core/tcpSocket.hpp"
 
 #include <limits>
 #include <cstdio>
 
-#include "core/socketUtils.hpp"
+#include "socketUtils.hpp"
 
 #undef max
 
