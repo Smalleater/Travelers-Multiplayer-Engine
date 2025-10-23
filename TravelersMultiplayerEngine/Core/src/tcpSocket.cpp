@@ -46,7 +46,7 @@ namespace tme::core
         if (m_socket != INVALID_SOCKET_FD)
         {
             CLOSE_SOCKET(m_socket);
-            m_socket == INVALID_SOCKET_FD;
+            m_socket = INVALID_SOCKET_FD;
         }
     }
 
@@ -84,7 +84,7 @@ namespace tme::core
                 continue;
             }
 
-            iResult = connect(m_socket, rp->ai_addr, rp->ai_addrlen);
+            iResult = connect(m_socket, rp->ai_addr, static_cast<int>(rp->ai_addrlen));
             if (iResult == 0)
             {
                 freeaddrinfo(result);
@@ -133,7 +133,7 @@ namespace tme::core
                 continue;
             }
 
-            iResult = bind(m_socket, rp->ai_addr, rp->ai_addrlen);
+            iResult = bind(m_socket, rp->ai_addr, static_cast<int>(rp->ai_addrlen));
             if (iResult == 0)
             {
                 freeaddrinfo(result);

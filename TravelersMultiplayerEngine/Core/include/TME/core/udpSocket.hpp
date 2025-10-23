@@ -1,6 +1,8 @@
 #ifndef TME_CORE_UDP_SOCKET_HPP
 #define TME_CORE_UPD_SOCKET_HPP
 
+#include "TME/export.hpp"
+
 #include <utility>
 #include <mutex>
 
@@ -12,17 +14,17 @@ namespace tme::core
     class UdpSocket
     {
     public:
-        UdpSocket();
-        ~UdpSocket();
+        TME_API UdpSocket();
+        TME_API ~UdpSocket();
 
-        static sockaddr* createSockAddr(const char* _address, uint16_t _port);
+        TME_API static sockaddr* createSockAddr(const char* _address, uint16_t _port);
 
-        void closeSocket();
-        std::pair<ErrorCode, int> bindSocket(const uint16_t _port);
-        std::pair<ErrorCode, int> sendDataTo(const void* _data, size_t _size, const sockaddr* _destAddr);
-        std::pair<ErrorCode, int> receiveDataFrom(void* _buffer, size_t _size, sockaddr* _srcAddr);
-        std::pair<ErrorCode, int> setBlocking(bool _blocking);
-        bool isOpen() const;
+        TME_API void closeSocket();
+        TME_API std::pair<ErrorCode, int> bindSocket(const uint16_t _port);
+        TME_API std::pair<ErrorCode, int> sendDataTo(const void* _data, size_t _size, const sockaddr* _destAddr);
+        TME_API std::pair<ErrorCode, int> receiveDataFrom(void* _buffer, size_t _size, sockaddr* _srcAddr);
+        TME_API std::pair<ErrorCode, int> setBlocking(bool _blocking);
+        TME_API bool isOpen() const;
 
     private:
         socket_t m_socket;

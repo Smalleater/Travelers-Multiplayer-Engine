@@ -6,6 +6,8 @@
 #include <cstdint>
 #include <mutex>
 
+#include "TME/export.hpp"
+
 #include "TME/errorCode.hpp"
 #include "networkInclude.hpp"
 
@@ -14,19 +16,19 @@ namespace tme::core
     class TcpSocket
     {
     public:
-        TcpSocket();
-        ~TcpSocket();
+        TME_API TcpSocket();
+        TME_API ~TcpSocket();
 
-        std::pair<ErrorCode, int> shutdownSocket();
-        void closeSocket();
-        std::pair<ErrorCode, int> connectTo(const char* _adress, const uint16_t _port);
-        std::pair<ErrorCode, int> bindSocket(const uint16_t _port);
-        std::pair<ErrorCode, int> listenSocket(int _backlog = SOMAXCONN);
-        std::pair<ErrorCode, int> acceptSocket(std::unique_ptr<TcpSocket>& _outClient);
-        std::pair<ErrorCode, int> sendData(const void* _data, size_t _size);
-        std::pair<ErrorCode, int> receiveData(void* _buffer, size_t _size);
-        std::pair<ErrorCode, int> setBlocking(bool _blocking);
-        bool isConnected() const;
+        TME_API std::pair<ErrorCode, int> shutdownSocket();
+        TME_API void closeSocket();
+        TME_API std::pair<ErrorCode, int> connectTo(const char* _adress, const uint16_t _port);
+        TME_API std::pair<ErrorCode, int> bindSocket(const uint16_t _port);
+        TME_API std::pair<ErrorCode, int> listenSocket(int _backlog = SOMAXCONN);
+        TME_API std::pair<ErrorCode, int> acceptSocket(std::unique_ptr<TcpSocket>& _outClient);
+        TME_API std::pair<ErrorCode, int> sendData(const void* _data, size_t _size);
+        TME_API std::pair<ErrorCode, int> receiveData(void* _buffer, size_t _size);
+        TME_API std::pair<ErrorCode, int> setBlocking(bool _blocking);
+        TME_API bool isConnected() const;
 
     private:
         socket_t m_socket;

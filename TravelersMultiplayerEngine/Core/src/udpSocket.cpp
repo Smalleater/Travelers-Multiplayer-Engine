@@ -23,7 +23,7 @@ namespace tme::core
 
     sockaddr* UdpSocket::createSockAddr(const char* _address, uint16_t _port)
     {
-        sockaddr_in* addr;
+        sockaddr_in* addr = new sockaddr_in;
         addr->sin_family = AF_INET;
         addr->sin_port = htons(_port);
 
@@ -77,7 +77,7 @@ namespace tme::core
                 continue;
             }
 
-            iResult = bind(m_socket, rp->ai_addr, rp->ai_addrlen);
+            iResult = bind(m_socket, rp->ai_addr, static_cast<int>(rp->ai_addrlen));
             if (iResult == 0)
             {
                 freeaddrinfo(result);
