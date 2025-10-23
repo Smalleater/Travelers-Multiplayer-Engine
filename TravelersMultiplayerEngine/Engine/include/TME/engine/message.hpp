@@ -14,57 +14,57 @@
 
 namespace tme::engine
 {
-    using FieldValue = std::variant<int, float, std::string>;
-    using SerializerFunc = std::function<void(const void*, std::vector<uint8_t>&)>;
-    using DeserializerFunc = std::function<void(const void*, const std::vector<uint8_t>&, size_t&)>;
+	using FieldValue = std::variant<int, float, std::string>;
+	using SerializerFunc = std::function<void(const void*, std::vector<uint8_t>&)>;
+	using DeserializerFunc = std::function<void(const void*, const std::vector<uint8_t>&, size_t&)>;
 
-    struct TME_API Message
-    {
-    public:
-        virtual ~Message() = default;
-        virtual std::string getType() const = 0;
-        virtual std::vector<uint8_t> serialize() const = 0;
+	struct TME_API Message
+	{
+	public:
+		virtual ~Message() = default;
+		virtual std::string getType() const = 0;
+		virtual std::vector<uint8_t> serialize() const = 0;
 
-        static std::map<uint32_t, std::vector<std::pair<std::string, std::pair<size_t, SerializerFunc>>>>& getSerializers();
-        static std::map<uint32_t, std::vector<std::pair<std::string, std::pair<size_t, DeserializerFunc>>>>& getDeserializers();
-    };
+		static std::map<uint32_t, std::vector<std::pair<std::string, std::pair<size_t, SerializerFunc>>>>& getSerializers();
+		static std::map<uint32_t, std::vector<std::pair<std::string, std::pair<size_t, DeserializerFunc>>>>& getDeserializers();
+	};
 
-    namespace internal 
-    {
-        TME_API uint32_t hashTypeName(const char* _str);
+	namespace internal
+	{
+		TME_API uint32_t hashTypeName(const char* _str);
 
-        TME_API void registerMessageType(const uint32_t _id,
-            std::unique_ptr<Message>(*_creator)(const std::vector<uint8_t>&));
-        
-        TME_API void serializeField(std::vector<uint8_t>& _data, int _value);
-        TME_API void serializeField(std::vector<uint8_t>& _data, float _value);
-        TME_API void serializeField(std::vector<uint8_t>& _data, const std::string& _value);
+		TME_API void registerMessageType(const uint32_t _id,
+			std::unique_ptr<Message>(*_creator)(const std::vector<uint8_t>&));
 
-        template<typename T>
-        void registerSerializer(const uint32_t _messageId, const std::string& _fieldName, size_t _fieldOffset)
-        {
-            auto& serializers = Message::getSerializers();
-            serializers[_messageId].emplace_back(_fieldName, std::make_pair(_fieldOffset, [_fieldOffset](const void* base, std::vector<uint8_t>& data) {
-                const T* field = reinterpret_cast<const T*>(static_cast<const char*>(base) + _fieldOffset);
-                serializeField(data, *field);
-            }));
-        }
+		TME_API void serializeField(std::vector<uint8_t>& _data, int _value);
+		TME_API void serializeField(std::vector<uint8_t>& _data, float _value);
+		TME_API void serializeField(std::vector<uint8_t>& _data, const std::string& _value);
 
-        TME_API void deserializeField(const std::vector<uint8_t>& _data, size_t& _offset, int& _value);
-        TME_API void deserializeField(const std::vector<uint8_t>& _data, size_t& _offset, float& _value);
-        TME_API void deserializeField(const std::vector<uint8_t>& _data, size_t& _offset, std::string& _value);
+		template<typename T>
+		void registerSerializer(const uint32_t _messageId, const std::string& _fieldName, size_t _fieldOffset)
+		{
+			auto& serializers = Message::getSerializers();
+			serializers[_messageId].emplace_back(_fieldName, std::make_pair(_fieldOffset, [_fieldOffset](const void* base, std::vector<uint8_t>& data) {
+				const T* field = reinterpret_cast<const T*>(static_cast<const char*>(base) + _fieldOffset);
+				serializeField(data, *field);
+				}));
+		}
 
-        template<typename T>
-        void registerDeserializer(const uint32_t _messageId, const std::string& _fieldName, size_t _fieldOffset)
-        {
-            auto& deserializers = Message::getDeserializers();
-            deserializers[_messageId].emplace_back(_fieldName, std::make_pair(_fieldOffset, 
-                [_fieldOffset](const void* base, const std::vector<uint8_t>& data, size_t& offset) {
-                    T* field = reinterpret_cast<T*>(static_cast<char*>(const_cast<void*>(base)) + _fieldOffset);
-                    deserializeField(data, offset, *field);
-                }));
-        }
-    }
+		TME_API void deserializeField(const std::vector<uint8_t>& _data, size_t& _offset, int& _value);
+		TME_API void deserializeField(const std::vector<uint8_t>& _data, size_t& _offset, float& _value);
+		TME_API void deserializeField(const std::vector<uint8_t>& _data, size_t& _offset, std::string& _value);
+
+		template<typename T>
+		void registerDeserializer(const uint32_t _messageId, const std::string& _fieldName, size_t _fieldOffset)
+		{
+			auto& deserializers = Message::getDeserializers();
+			deserializers[_messageId].emplace_back(_fieldName, std::make_pair(_fieldOffset,
+				[_fieldOffset](const void* base, const std::vector<uint8_t>& data, size_t& offset) {
+					T* field = reinterpret_cast<T*>(static_cast<char*>(const_cast<void*>(base)) + _fieldOffset);
+					deserializeField(data, offset, *field);
+				}));
+		}
+	}
 }
 
 #define DECLARE_MESSAGE_BEGIN(MessageType) \

@@ -25,7 +25,7 @@ namespace tme::core
         TME_API std::pair<ErrorCode, int> connectTo(const std::string& _adress, const uint16_t _port);
         TME_API std::pair<ErrorCode, int> bindSocket(const uint16_t _port);
         TME_API std::pair<ErrorCode, int> listenSocket(int _backlog = SOMAXCONN);
-        TME_API std::pair<ErrorCode, int> acceptSocket(std::unique_ptr<TcpSocket>& _outClient);
+        TME_API std::pair<ErrorCode, int> acceptSocket(TcpSocket** _outClient);
         TME_API std::pair<ErrorCode, int> sendData(const void* _data, size_t _size);
         TME_API std::pair<ErrorCode, int> receiveData(void* _buffer, size_t _size);
         TME_API std::pair<ErrorCode, int> setBlocking(bool _blocking);
