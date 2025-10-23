@@ -2,6 +2,7 @@
 #define TME_ENGINE_MESSAGE_HPP
 
 #include "TME/export.hpp"
+#include "TME/debugUtils.hpp"
 
 #include <string>
 #include <map>

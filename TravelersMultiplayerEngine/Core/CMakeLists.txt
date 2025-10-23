@@ -29,6 +29,12 @@ if(WIN32)
     target_link_libraries(tme_core PRIVATE ws2_32)
 endif()
 
+target_compile_definitions(tme_core
+    PUBLIC
+        $<$<CONFIG:Debug>:_DEBUG>
+        $<$<CONFIG:Release>:NDEBUG>
+)
+
 add_custom_command(TARGET tme_core POST_BUILD 
     COMMAND ${CMAKE_COMMAND} -E copy_if_different 
     $<TARGET_FILE:tme_core> ${COMMON_EXPORT_LIB_DIR}/)

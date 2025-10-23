@@ -3,20 +3,28 @@
 #include <stdexcept>
 #include <cstring>
 
+#include "TME/debugUtils.hpp"
+
 namespace tme::engine
 {
     std::vector<uint8_t> MessageSerializer::serializePayload(const Message& _message)
     {
+        TME_ASSERT_REF_PTR_OR_COPIABLE(_message);
+
         return MessageFactory::serialize(_message);
     }
 
     std::unique_ptr<Message> MessageSerializer::deserializePayload(const std::vector<uint8_t>& _payload)
     {
+        TME_ASSERT_REF_PTR_OR_COPIABLE(_payload);
+
         return MessageFactory::deserialize(_payload);
     }
 
     std::vector<uint8_t> MessageSerializer::serializeForNetwork(const std::vector<uint8_t>& _payload, bool _internal)
     {
+        TME_ASSERT_REF_PTR_OR_COPIABLE(_payload);
+
         MessageHeader header;
         header.size = static_cast<uint32_t>(_payload.size());
         header.typeFlag = _internal ? INTERNAL_MESSAGE : USER_MESSAGE;
@@ -30,6 +38,8 @@ namespace tme::engine
 
     std::pair<MessageHeader, std::vector<uint8_t>> MessageSerializer::deserializeFromNetwork(const std::vector<uint8_t>& _data)
     {
+        TME_ASSERT_REF_PTR_OR_COPIABLE(_data);
+
         if(_data.size() < sizeof(MessageHeader))
         {
             throw std::runtime_error("Data too small");
