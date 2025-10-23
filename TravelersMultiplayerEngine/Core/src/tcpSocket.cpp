@@ -50,7 +50,7 @@ namespace tme::core
         }
     }
 
-    std::pair<ErrorCode, int> TcpSocket::connectTo(const char* _address, uint16_t _port)
+    std::pair<ErrorCode, int> TcpSocket::connectTo(const std::string& _address, uint16_t _port)
     {
         std::lock_guard<std::mutex> lock(m_mutex);
 
@@ -66,10 +66,7 @@ namespace tme::core
 
         addrinfo* result = nullptr;
 
-        char portStr[6];
-        snprintf(portStr, sizeof(portStr), "%u", _port);
-
-        int iResult = getaddrinfo(_address, portStr, &hints, &result);
+        int iResult = getaddrinfo(_address.c_str(), std::to_string(_port).c_str(), &hints, &result);
         int lastSocketError = SocketUtils::GetLastSocketError();
         if (iResult != 0 || result == nullptr)
         {

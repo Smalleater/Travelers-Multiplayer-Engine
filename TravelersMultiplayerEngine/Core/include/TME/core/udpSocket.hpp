@@ -17,7 +17,7 @@ namespace tme::core
         TME_API UdpSocket();
         TME_API ~UdpSocket();
 
-        TME_API static sockaddr* createSockAddr(const char* _address, uint16_t _port);
+        TME_API static sockaddr* createSockAddr(const std::string& _address, uint16_t _port);
 
         TME_API void closeSocket();
         TME_API std::pair<ErrorCode, int> bindSocket(const uint16_t _port);

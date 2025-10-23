@@ -21,13 +21,13 @@ namespace tme::core
         }
     }
 
-    sockaddr* UdpSocket::createSockAddr(const char* _address, uint16_t _port)
+    sockaddr* UdpSocket::createSockAddr(const std::string& _address, uint16_t _port)
     {
         sockaddr_in* addr = new sockaddr_in;
         addr->sin_family = AF_INET;
         addr->sin_port = htons(_port);
 
-        inet_pton(AF_INET, _address, &addr->sin_addr);
+        inet_pton(AF_INET, _address.c_str(), &addr->sin_addr);
         return (sockaddr*)addr;
     }
 

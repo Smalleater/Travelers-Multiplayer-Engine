@@ -5,6 +5,7 @@
 #include <memory>
 #include <cstdint>
 #include <mutex>
+#include <string>
 
 #include "TME/export.hpp"
 
@@ -21,7 +22,7 @@ namespace tme::core
 
         TME_API std::pair<ErrorCode, int> shutdownSocket();
         TME_API void closeSocket();
-        TME_API std::pair<ErrorCode, int> connectTo(const char* _adress, const uint16_t _port);
+        TME_API std::pair<ErrorCode, int> connectTo(const std::string& _adress, const uint16_t _port);
         TME_API std::pair<ErrorCode, int> bindSocket(const uint16_t _port);
         TME_API std::pair<ErrorCode, int> listenSocket(int _backlog = SOMAXCONN);
         TME_API std::pair<ErrorCode, int> acceptSocket(std::unique_ptr<TcpSocket>& _outClient);
