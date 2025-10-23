@@ -2,6 +2,7 @@
 #define TME_DEBUG_UTILS_HPP
 
 #include <cassert>
+#include <type_traits>
 
 namespace tme
 {

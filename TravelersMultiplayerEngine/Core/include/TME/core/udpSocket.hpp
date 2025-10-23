@@ -5,6 +5,7 @@
 
 #include <utility>
 #include <mutex>
+#include <string>
 
 #include "TME/errorCode.hpp"
 #include "networkInclude.hpp"
