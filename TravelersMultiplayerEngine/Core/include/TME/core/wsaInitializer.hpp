@@ -8,7 +8,7 @@
 
 #include <WinSock2.h>
 
-namespace tme::Core
+namespace tme::core
 {
 	class WSAInitializer
 	{

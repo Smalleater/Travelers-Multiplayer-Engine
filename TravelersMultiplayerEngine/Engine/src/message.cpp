@@ -2,7 +2,7 @@
 
 #include "messageFactory.hpp"
 
-namespace tme::Engine
+namespace tme::engine
 {
     std::map<uint32_t, std::vector<std::pair<std::string, std::pair<size_t, SerializerFunc>>>>& Message::getSerializers()
     {

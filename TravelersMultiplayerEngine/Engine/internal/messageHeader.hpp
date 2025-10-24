@@ -5,7 +5,7 @@
 #include <string>
 #include <unordered_map>
 
-namespace tme::Engine
+namespace tme::engine
 {
     constexpr uint8_t USER_MESSAGE = 0;
     constexpr uint8_t INTERNAL_MESSAGE = 1;

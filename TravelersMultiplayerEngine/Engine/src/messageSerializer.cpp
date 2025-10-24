@@ -5,7 +5,7 @@
 
 #include "TME/debugUtils.hpp"
 
-namespace tme::Engine
+namespace tme::engine
 {
 	std::vector<uint8_t> MessageSerializer::serializePayload(const Message& _message)
 	{

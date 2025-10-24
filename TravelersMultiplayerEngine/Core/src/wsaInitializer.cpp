@@ -2,7 +2,7 @@
 
 #ifdef _WIN32
 
-namespace tme::Core
+namespace tme::core
 {
 	WSAInitializer* WSAInitializer::m_singleton = nullptr;
 

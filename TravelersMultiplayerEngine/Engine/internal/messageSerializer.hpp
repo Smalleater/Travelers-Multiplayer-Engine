@@ -3,7 +3,7 @@
 
 #include "messageFactory.hpp"
 
-namespace tme::Engine
+namespace tme::engine
 {
     class MessageSerializer
     {

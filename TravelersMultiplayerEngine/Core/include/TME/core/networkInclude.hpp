@@ -14,7 +14,7 @@
 
 #pragma comment(lib, "Ws2_32.lib")
 
-namespace tme::Core
+namespace tme::core
 {
     using socket_t = SOCKET;
 
@@ -37,7 +37,7 @@ namespace tme::Core
 #include <errno.h>
 #include <fcntl.h>
 
-namespace tme::Core
+namespace tme::core
 {
     using socket_t = int;
 

@@ -3,7 +3,7 @@
 #include <stdexcept>
 #include <cstring>
 
-namespace tme::Engine
+namespace tme::engine
 {
     std::unordered_map<uint32_t, MessageFactory::Creator> MessageFactory::m_registry;
 

@@ -13,7 +13,7 @@
 #include <functional>
 #include <algorithm>
 
-namespace tme::Engine
+namespace tme::engine
 {
 	using FieldValue = std::variant<int, float, std::string>;
 	using SerializerFunc = std::function<void(const void*, std::vector<uint8_t>&)>;
