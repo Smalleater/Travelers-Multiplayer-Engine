@@ -27,6 +27,9 @@ namespace tme
 		SocketReceiveSizeTooLarge,
 		SocketReceiveFailed,
 		SocketSetBlockingFailed,
+
+		// WSA Error
+		WSAStartupFailed
 	};
 }
 
