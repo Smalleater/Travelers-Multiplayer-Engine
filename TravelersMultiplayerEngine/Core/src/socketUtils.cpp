@@ -2,7 +2,7 @@
 
 #include "TME/debugUtils.hpp"
 
-namespace tme::core
+namespace tme::Core
 {
 	int SocketUtils::GetLastSocketError()
 	{
@@ -22,7 +22,7 @@ namespace tme::core
 #endif
 	}
 
-	std::pair<ErrorCode, int> SocketUtils::setBlocking(core::socket_t& _socket, bool _blocking)
+	std::pair<ErrorCode, int> SocketUtils::setBlocking(Core::socket_t& _socket, bool _blocking)
 	{
 #ifdef _WIN32
 		u_long mode = _blocking ? 0 : 1;

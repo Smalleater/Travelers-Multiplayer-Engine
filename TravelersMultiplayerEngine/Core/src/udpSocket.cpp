@@ -7,7 +7,7 @@
 
 #undef max
 
-namespace tme::core
+namespace tme::Core
 {
     UdpSocket::UdpSocket()
     {

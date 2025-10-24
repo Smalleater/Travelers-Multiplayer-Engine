@@ -8,7 +8,7 @@
 
 #undef max
 
-namespace tme::core
+namespace tme::Core
 {
 	TcpSocket::TcpSocket()
 	{

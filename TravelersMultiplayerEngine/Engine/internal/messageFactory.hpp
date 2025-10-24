@@ -8,7 +8,7 @@
 #include "TME/engine/message.hpp"
 #include "messageHeader.hpp"
 
-namespace tme::engine
+namespace tme::Engine
 {
     class MessageFactory
     {

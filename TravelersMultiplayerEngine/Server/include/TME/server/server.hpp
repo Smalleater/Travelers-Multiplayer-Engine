@@ -1,25 +1,14 @@
 #ifndef TME_SERVER_SERVER_HPP
 #define TME_SERVER_SERVER_HPP
 
-namespace tme::server
+#include "TME/export.hpp"
+
+#include <cstdint>
+
+namespace tme::Server
 {
-    class ServerHandler;
-
-    class Server
-    {
-    private:
-        friend  ServerHandler;
-
-    public:
-        void Start();
-        void Stop();
-
-    private:
-        Server();
-        ~Server();
-
-
-    };
+	TME_API static void Start(uint16_t _port);
+	TME_API static void Stop();
 }
 
 #endif

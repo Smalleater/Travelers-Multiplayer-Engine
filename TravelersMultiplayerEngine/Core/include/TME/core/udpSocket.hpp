@@ -10,7 +10,7 @@
 #include "TME/errorCode.hpp"
 #include "networkInclude.hpp"
 
-namespace tme::core
+namespace tme::Core
 {
     class UdpSocket
     {

@@ -6,7 +6,7 @@
 #include "TME/errorCode.hpp"
 #include "TME/core/networkInclude.hpp"
 
-namespace tme::core
+namespace tme::Core
 {
     namespace SocketUtils
     {

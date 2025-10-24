@@ -1,18 +1,18 @@
 #ifndef TME_CORE_TCP_SOCKET_HPP
 #define TME_CORE_TCP_SOCKET_HPP
 
+#include "TME/export.hpp"
+
 #include <utility>
 #include <memory>
 #include <cstdint>
 #include <mutex>
 #include <string>
 
-#include "TME/export.hpp"
-
 #include "TME/errorCode.hpp"
 #include "networkInclude.hpp"
 
-namespace tme::core
+namespace tme::Core
 {
     class TcpSocket
     {
