@@ -24,11 +24,11 @@ namespace tme::core
 	private:
 		static WSAInitializer* m_singleton;
 
-		WSAInitializer();
-		~WSAInitializer();
-
 		WSADATA m_wsaData;
 		bool m_isInitialized;
+
+		WSAInitializer();
+		~WSAInitializer();
 	};
 }
 

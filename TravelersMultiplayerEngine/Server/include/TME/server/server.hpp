@@ -5,6 +5,10 @@
 
 #include <cstdint>
 
+#include "TME/errorCode.hpp"
+#include "TME/core/tcpSocket.hpp"
+#include "TME/core/udpSocket.hpp"
+
 namespace tme::server
 {
 	class Server
@@ -15,11 +19,15 @@ namespace tme::server
 
 		TME_API static Server* Get();
 
-		TME_API void Start(uint16_t _port);
-		TME_API void Stop();
+		TME_API ErrorCode Start(uint16_t _port);
+		TME_API ErrorCode Stop();
 
 	private:
-		static Server m_singleton;
+		static Server* m_singleton;
+
+		core::TcpSocket* m_tcpSocket;
+		core::UdpSocket* m_udpSocket;
+		bool m_isStarted;
 
 		Server();
 		~Server();

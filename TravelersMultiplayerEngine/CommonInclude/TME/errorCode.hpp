@@ -8,8 +8,7 @@ namespace tme
 		Success = 0,
 
 		//Server Error
-		ServerAlreadyExists,
-		ServerNotFound,
+		ServerAlreadyStarted,
 
 		// Socket Error
 		SocketAlreadyOpen,

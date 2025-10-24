@@ -25,9 +25,8 @@ target_include_directories(tme_engine
 # Define export macro for DLL/SO symbol visibility
 target_compile_definitions(tme_engine PRIVATE TME_EXPORTS)
 
-# Link with ws2_32 (Windows Sockets library) only on Windows
 if(WIN32)
-    target_link_libraries(tme_engine PRIVATE ws2_32)
+    target_link_libraries(tme_engine PUBLIC COMMON_EXPORT_LIB_DIR/libtme_core.lib)
 endif()
 
 target_compile_definitions(tme_engine
