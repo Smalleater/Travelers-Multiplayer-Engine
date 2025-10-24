@@ -16,10 +16,10 @@ namespace tme::Core
 		WSAInitializer(WSAInitializer& other) = delete;
 		void operator=(const WSAInitializer&) = delete;
 
-		static WSAInitializer* Get();
+		TME_API static WSAInitializer* Get();
 
-		ErrorCode Init();
-		void CleanUp();
+		TME_API ErrorCode Init();
+		TME_API void CleanUp();
 
 	private:
 		static WSAInitializer* m_singleton;
