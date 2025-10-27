@@ -1,5 +1,5 @@
 #ifndef TME_CORE_UDP_SOCKET_HPP
-#define TME_CORE_UPD_SOCKET_HPP
+#define TME_CORE_UDP_SOCKET_HPP
 
 #include "TME/export.hpp"
 

@@ -15,8 +15,8 @@ add_library(tme_core SHARED ${SOURCES})
 # Set include directories (public headers and internal headers)
 target_include_directories(tme_core
     PUBLIC 
-        ${CMAKE_CURRENT_SOURCE_DIR}/include
         ${COMMON_INCLUDE_DIR}
+        ${CMAKE_CURRENT_SOURCE_DIR}/include
     PRIVATE 
         ${CMAKE_CURRENT_SOURCE_DIR}/internal
 )

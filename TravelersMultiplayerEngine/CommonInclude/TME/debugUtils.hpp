@@ -5,25 +5,45 @@
 #include <type_traits>
 #include <iostream>
 #include <mutex>
+#include <sstream>
 
 namespace tme
 {
-	inline std::mutex m_logMutex;
 
 #ifdef NDEBUG
 #define TME_ASSERT_REF_PTR_OR_COPIABLE(obj) ((void)0)
-#define TME_LOG_DEBUG(fmt, ...) ((void)0)
+#define TME_DEBUG_LOG(fmt, ...) ((void)0)
 
 #else
 #define TME_ASSERT_REF_PTR_OR_COPIABLE(obj) \
 	static_assert(RefPtrOrTriviallyCopiable<decltype(obj)>().m_value && #obj " is not a reference, a pointer, or copyable")
-#define TME_LOG_DEBUG(fmt, ...) \
+#define TME_DEBUG_LOG(fmt, ...) \
 	{ \
-		std::lock_guard<std::mutex> lock(m_logMutex); \
-		std::cout << "[DEBUG] " << printf(fmt, ##__VA_ARGS__) << std::endl; \
-	}\
-
+		char buffer[512]; \
+		snprintf(buffer, sizeof(buffer), fmt, ##__VA_ARGS__); \
+		std::stringstream ss; \
+		ss << "[DEBUG] " << buffer << "\n"; \
+		std::cout << ss.str(); \
+	}
 #endif
+
+#define TME_INFO_LOG(fmt, ...) \
+	{ \
+		char buffer[512]; \
+		snprintf(buffer, sizeof(buffer), fmt, ##__VA_ARGS__); \
+		std::stringstream ss; \
+		ss << "[INFO] " << buffer << "\n"; \
+		std::cerr << ss.str(); \
+	}
+
+#define TME_ERROR_LOG(fmt, ...) \
+	{ \
+		char buffer[512]; \
+		snprintf(buffer, sizeof(buffer), fmt, ##__VA_ARGS__); \
+		std::stringstream ss; \
+		ss << "[ERROR] " << buffer << "\n"; \
+		std::cerr << ss.str(); \
+	}
 
 	template<typename T>
 	struct RefPtrOrTriviallyCopiable

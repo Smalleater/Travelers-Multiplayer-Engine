@@ -16,8 +16,6 @@ add_library(tme_server SHARED ${SOURCES})
 target_include_directories(tme_server
     PUBLIC 
         ${CMAKE_CURRENT_SOURCE_DIR}/include
-        ${COMMON_INCLUDE_DIR}
-        ${COMMON_CORE_INCLUDE_DIR}
     PRIVATE 
         ${CMAKE_CURRENT_SOURCE_DIR}/internal
 )
@@ -25,10 +23,13 @@ target_include_directories(tme_server
 # Define export macro for DLL/SO symbol visibility
 target_compile_definitions(tme_server PRIVATE TME_EXPORTS)
 
-# Link with ws2_32 (Windows Sockets library) only on Windows
 if(WIN32)
-    target_link_libraries(tme_server PRIVATE ws2_32)
+    target_link_libraries(tme_server PUBLIC ${COMMON_EXPORT_LIB_DIR}/tme_engine.lib)
+else()
+    target_link_libraries(tme_server PUBLIC ${COMMON_EXPORT_LIB_DIR}/libtme_engine.so)
 endif()
+
+target_link_libraries(tme_server PUBLIC tme_core)
 
 target_compile_definitions(tme_server
     PUBLIC
@@ -38,16 +39,16 @@ target_compile_definitions(tme_server
 
 add_custom_command(TARGET tme_server POST_BUILD 
     COMMAND ${CMAKE_COMMAND} -E copy_if_different 
-    $<TARGET_FILE:tme_core> ${COMMON_EXPORT_LIB_DIR}/)
+    $<TARGET_FILE:tme_server> ${COMMON_EXPORT_LIB_DIR}/)
 
 add_custom_command(TARGET tme_server POST_BUILD 
     COMMAND ${CMAKE_COMMAND} -E copy_if_different 
-    $<TARGET_LINKER_FILE:tme_core> ${COMMON_EXPORT_LIB_DIR}/)
+    $<TARGET_LINKER_FILE:tme_server> ${COMMON_EXPORT_LIB_DIR}/)
 
 file(GLOB HEADER_FILES "${CMAKE_CURRENT_SOURCE_DIR}/include/TME/server/*")
 add_custom_command(TARGET tme_server POST_BUILD
     COMMAND ${CMAKE_COMMAND} -E copy_if_different
-    ${HEADER_FILES} ${COMMON_EXPORT_INCLUDE_DIR}/core/)
+    ${HEADER_FILES} ${COMMON_EXPORT_INCLUDE_DIR}/server/)
 
 file(GLOB HEADER_FILES "${COMMON_INCLUDE_DIR}/TME/*")
 add_custom_command(TARGET tme_server POST_BUILD

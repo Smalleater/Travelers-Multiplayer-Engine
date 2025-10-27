@@ -16,8 +16,6 @@ add_library(tme_engine SHARED ${SOURCES})
 target_include_directories(tme_engine
     PUBLIC 
         ${CMAKE_CURRENT_SOURCE_DIR}/include
-        ${COMMON_INCLUDE_DIR}
-        ${COMMON_CORE_INCLUDE_DIR}
     PRIVATE 
         ${CMAKE_CURRENT_SOURCE_DIR}/internal
 )
@@ -26,8 +24,12 @@ target_include_directories(tme_engine
 target_compile_definitions(tme_engine PRIVATE TME_EXPORTS)
 
 if(WIN32)
-    target_link_libraries(tme_engine PUBLIC COMMON_EXPORT_LIB_DIR/libtme_core.lib)
+    target_link_libraries(tme_engine PUBLIC ${COMMON_EXPORT_LIB_DIR}/tme_core.lib)
+else()
+    target_link_libraries(tme_engine PUBLIC ${COMMON_EXPORT_LIB_DIR}/libtme_core.so)
 endif()
+
+target_link_libraries(tme_engine PUBLIC tme_core)
 
 target_compile_definitions(tme_engine
     PUBLIC

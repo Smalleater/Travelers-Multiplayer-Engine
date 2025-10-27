@@ -23,3 +23,6 @@ file(MAKE_DIRECTORY ${COMMON_EXPORT_INCLUDE_DIR}/server)
 add_subdirectory(Core)
 add_subdirectory(Engine)
 add_subdirectory(Server)
+
+add_subdirectory(TestClient)
+add_subdirectory(TestServer)
