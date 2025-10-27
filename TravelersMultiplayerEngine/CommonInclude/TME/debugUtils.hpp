@@ -22,7 +22,7 @@ namespace tme
 		char buffer[512]; \
 		snprintf(buffer, sizeof(buffer), fmt, ##__VA_ARGS__); \
 		std::stringstream ss; \
-		ss << "[DEBUG] " << buffer << "\n"; \
+		ss << "\033[34m[DEBUG]\033[0m " << buffer << "\n"; \
 		std::cout << ss.str(); \
 	}
 #endif
@@ -32,7 +32,7 @@ namespace tme
 		char buffer[512]; \
 		snprintf(buffer, sizeof(buffer), fmt, ##__VA_ARGS__); \
 		std::stringstream ss; \
-		ss << "[INFO] " << buffer << "\n"; \
+		ss << "\033[32m[INFO]\033[0m " << buffer << "\n"; \
 		std::cerr << ss.str(); \
 	}
 
@@ -41,7 +41,7 @@ namespace tme
 		char buffer[512]; \
 		snprintf(buffer, sizeof(buffer), fmt, ##__VA_ARGS__); \
 		std::stringstream ss; \
-		ss << "[ERROR] " << buffer << "\n"; \
+		ss << "\033[31m[ERROR]\033[0m " << buffer << "\n"; \
 		std::cerr << ss.str(); \
 	}
 

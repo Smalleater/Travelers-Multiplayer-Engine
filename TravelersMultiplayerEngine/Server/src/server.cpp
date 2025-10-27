@@ -45,7 +45,6 @@ namespace tme::server
         {
 			return errorCode;
         }
-
 		TME_DEBUG_LOG("WSA initialized successfully.");
 #endif
 
@@ -63,9 +62,9 @@ namespace tme::server
             return errorCode;
 		}
 
-		TME_INFO_LOG("Server started successfully on port %d.", m_port);
+        m_isRunning = true;
 
-		m_isRunning = true;
+		TME_INFO_LOG("Server started successfully on port %d.", m_port);
         return ErrorCode::Success;
     }
 
@@ -83,7 +82,6 @@ namespace tme::server
             delete m_tcpSocket;
             m_tcpSocket = nullptr;
         }
-
 		TME_DEBUG_LOG("TCP socket closed.");
 
         if (m_udpSocket)
@@ -92,11 +90,14 @@ namespace tme::server
             delete m_udpSocket;
             m_udpSocket = nullptr;
 		}
-
 		TME_DEBUG_LOG("UDP socket closed.");
 
-        TME_INFO_LOG("Server stopped successfully.");
+#ifdef _WIN32
+        core::WSAInitializer::Get()->CleanUp();
+		TME_DEBUG_LOG("WSA cleaned up successfully.");
+#endif
 
+        TME_INFO_LOG("Server stopped successfully.");
 		return ErrorCode::Success;
     }
 
@@ -139,7 +140,6 @@ namespace tme::server
         }
 
 		TME_DEBUG_LOG("Server::Start successfully started TCP socket on port %d.", m_port);
-
 		return ErrorCode::Success;
     }
 
@@ -168,7 +168,6 @@ namespace tme::server
         }
 
 		TME_DEBUG_LOG("Server::Start successfully started UDP socket on port %d.", m_port);
-
 		return ErrorCode::Success;
     }
 }
