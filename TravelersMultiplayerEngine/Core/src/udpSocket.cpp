@@ -66,7 +66,7 @@ namespace tme::core
         snprintf(portStr, sizeof(portStr), "%u", _port);
 
         int iResult = getaddrinfo(NULL, portStr, &hints, &result);
-        int lastSocketError = SocketUtils::GetLastSocketError();
+        int lastSocketError = SocketUtils::getLastSocketError();
         if (iResult != 0 || result == nullptr)
         {
             return { ErrorCode::SocketGetaddrinfoFailed, lastSocketError };
@@ -87,7 +87,8 @@ namespace tme::core
                 return { ErrorCode::Success, 0 };
             }
 
-            closeSocket();
+            CLOSE_SOCKET(m_socket);
+            m_socket = INVALID_SOCKET_FD;
         }
 
         freeaddrinfo(result);
@@ -111,7 +112,7 @@ namespace tme::core
         socklen_t addrLen = sizeof(sockaddr_in);
 
         int iResult = sendto(m_socket, static_cast<const char*>(_data), static_cast<int>(_size), 0, _destAddr, addrLen);
-        int lastSocketError = SocketUtils::GetLastSocketError();
+        int lastSocketError = SocketUtils::getLastSocketError();
         if (iResult < 0)
         {
             return { ErrorCode::SocketSendFailed, lastSocketError };
@@ -137,10 +138,10 @@ namespace tme::core
         socklen_t addrLen = sizeof(sockaddr_in);
 
         int iResult = recvfrom(m_socket, static_cast<char*>(_buffer), static_cast<int>(_size), 0, _srcAddr, &addrLen);
-        int lastSocketError = SocketUtils::GetLastSocketError();
+        int lastSocketError = SocketUtils::getLastSocketError();
         if (iResult < 0)
         {
-            if (SocketUtils::IsWouldBlockError(lastSocketError))
+            if (SocketUtils::isWouldBlockError(lastSocketError))
             {
                 return { ErrorCode::SocketWouldBlock, 0 };
             }

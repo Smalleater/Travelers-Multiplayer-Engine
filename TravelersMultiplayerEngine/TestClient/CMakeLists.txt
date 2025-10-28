@@ -18,6 +18,8 @@ target_include_directories(tme_testClient
 		${CMAKE_SOURCE_DIR}/include
 )
 
+target_link_libraries(tme_testClient PUBLIC tme_client)
+
 target_compile_definitions(tme_testClient
     PUBLIC
         $<$<CONFIG:Debug>:_DEBUG>
@@ -32,5 +34,5 @@ endif()
 
 add_custom_command(TARGET tme_testClient POST_BUILD
     COMMAND ${CMAKE_COMMAND} -E copy_if_different
-    ${DLL} $<TARGET_FILE_DIR:tme_testServer>
+    ${DLL} $<TARGET_FILE_DIR:tme_testClient>
 )

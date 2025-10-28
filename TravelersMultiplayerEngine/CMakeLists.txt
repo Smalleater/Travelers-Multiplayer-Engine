@@ -19,10 +19,12 @@ file(MAKE_DIRECTORY ${COMMON_EXPORT_INCLUDE_DIR})
 file(MAKE_DIRECTORY ${COMMON_EXPORT_INCLUDE_DIR}/core)
 file(MAKE_DIRECTORY ${COMMON_EXPORT_INCLUDE_DIR}/engine)
 file(MAKE_DIRECTORY ${COMMON_EXPORT_INCLUDE_DIR}/server)
+file(MAKE_DIRECTORY ${COMMON_EXPORT_INCLUDE_DIR}/client)
 
 add_subdirectory(Core)
 add_subdirectory(Engine)
 add_subdirectory(Server)
+add_subdirectory(Client)
 
 add_subdirectory(TestClient)
 add_subdirectory(TestServer)

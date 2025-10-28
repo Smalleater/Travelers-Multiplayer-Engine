@@ -38,7 +38,7 @@ namespace tme::server
 	{
 		if (m_isRunning)
 		{
-			TME_DEBUG_LOG("Server::Start called but server is already running.");
+			TME_DEBUG_LOG("Server: Start called but server is already running.");
 			return ErrorCode::ServerAlreadyStarted;
 		}
 
@@ -50,7 +50,7 @@ namespace tme::server
 		{
 			return errorCode;
 		}
-		TME_DEBUG_LOG("WSA initialized successfully.");
+		TME_DEBUG_LOG("Server: WSA initialized successfully.");
 #endif
 
 		m_port = _port;
@@ -64,12 +64,15 @@ namespace tme::server
 		errorCode = startUdpSocket();
 		if (errorCode != ErrorCode::Success)
 		{
+			m_tcpSocket->closeSocket();
+			delete m_tcpSocket;
+			m_tcpSocket = nullptr;
 			return errorCode;
 		}
 
 		m_isRunning = true;
 
-		TME_INFO_LOG("Server started successfully on port %d.", m_port);
+		TME_INFO_LOG("Server: Started successfully on port %d.", m_port);
 		return ErrorCode::Success;
 	}
 
@@ -77,7 +80,7 @@ namespace tme::server
 	{
 		if (!m_isRunning)
 		{
-			TME_DEBUG_LOG("Server::Stop called but server is not running.");
+			TME_DEBUG_LOG("Server: Stop called but server is not running.");
 			return ErrorCode::Success;
 		}
 
@@ -87,7 +90,7 @@ namespace tme::server
 			delete m_tcpSocket;
 			m_tcpSocket = nullptr;
 		}
-		TME_DEBUG_LOG("TCP socket closed.");
+		TME_DEBUG_LOG("Server: TCP socket closed.");
 
 		if (m_udpSocket)
 		{
@@ -95,14 +98,14 @@ namespace tme::server
 			delete m_udpSocket;
 			m_udpSocket = nullptr;
 		}
-		TME_DEBUG_LOG("UDP socket closed.");
+		TME_DEBUG_LOG("Server: UDP socket closed.");
 
 #ifdef _WIN32
 		core::WSAInitializer::Get()->CleanUp();
-		TME_DEBUG_LOG("WSA cleaned up successfully.");
+		TME_DEBUG_LOG("Server: WSA cleaned up successfully.");
 #endif
 
-		TME_INFO_LOG("Server stopped successfully.");
+		TME_INFO_LOG("Server: Stopped successfully.");
 		return ErrorCode::Success;
 	}
 
@@ -120,7 +123,7 @@ namespace tme::server
 		pairResult = m_tcpSocket->bindSocket(m_port);
 		if (pairResult.first != ErrorCode::Success)
 		{
-			TME_ERROR_LOG("Server::Start failed to bind TCP socket on port %d. ErrorCode: %d", m_port, static_cast<int>(pairResult.first));
+			TME_ERROR_LOG("Server: Failed to bind TCP socket on port %d. ErrorCode: %d", m_port, static_cast<int>(pairResult.first));
 			delete m_tcpSocket;
 			m_tcpSocket = nullptr;
 			return pairResult.first;
@@ -129,7 +132,7 @@ namespace tme::server
 		pairResult = m_tcpSocket->listenSocket();
 		if (pairResult.first != ErrorCode::Success)
 		{
-			TME_ERROR_LOG("Server::Start failed to listen on TCP socket. ErrorCode: %d", static_cast<int>(pairResult.first));
+			TME_ERROR_LOG("Server: Failed to listen on TCP socket. ErrorCode: %d", static_cast<int>(pairResult.first));
 			delete m_tcpSocket;
 			m_tcpSocket = nullptr;
 			return pairResult.first;
@@ -138,13 +141,13 @@ namespace tme::server
 		pairResult = m_tcpSocket->setBlocking(false);
 		if (pairResult.first != ErrorCode::Success)
 		{
-			TME_ERROR_LOG("Server::Start failed to set TCP socket to non-blocking mode. ErrorCode: %d", static_cast<int>(pairResult.first));
+			TME_ERROR_LOG("Server: Failed to set TCP socket to non-blocking mode. ErrorCode: %d", static_cast<int>(pairResult.first));
 			delete m_tcpSocket;
 			m_tcpSocket = nullptr;
 			return pairResult.first;
 		}
 
-		TME_DEBUG_LOG("Server::Start successfully started TCP socket on port %d.", m_port);
+		TME_DEBUG_LOG("Server: Successfully started TCP socket on port %d.", m_port);
 		return ErrorCode::Success;
 	}
 
@@ -157,7 +160,7 @@ namespace tme::server
 		pairResult = m_udpSocket->bindSocket(m_port);
 		if (pairResult.first != ErrorCode::Success)
 		{
-			TME_ERROR_LOG("Server::Start failed to bind UDP socket on port %d. ErrorCode: %d", m_port, static_cast<int>(pairResult.first));
+			TME_ERROR_LOG("Server: Failed to bind UDP socket on port %d. ErrorCode: %d", m_port, static_cast<int>(pairResult.first));
 			delete m_udpSocket;
 			m_udpSocket = nullptr;
 			return pairResult.first;
@@ -166,13 +169,13 @@ namespace tme::server
 		pairResult = m_udpSocket->setBlocking(false);
 		if (pairResult.first != ErrorCode::Success)
 		{
-			TME_ERROR_LOG("Server::Start failed to set UDP socket to non-blocking mode. ErrorCode: %d", static_cast<int>(pairResult.first));
+			TME_ERROR_LOG("Server: Failed to set UDP socket to non-blocking mode. ErrorCode: %d", static_cast<int>(pairResult.first));
 			delete m_udpSocket;
 			m_udpSocket = nullptr;
 			return pairResult.first;
 		}
 
-		TME_DEBUG_LOG("Server::Start successfully started UDP socket on port %d.", m_port);
+		TME_DEBUG_LOG("Server: Successfully started UDP socket on port %d.", m_port);
 		return ErrorCode::Success;
 	}
 }

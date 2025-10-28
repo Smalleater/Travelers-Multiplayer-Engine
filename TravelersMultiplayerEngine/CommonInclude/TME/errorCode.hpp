@@ -10,6 +10,9 @@ namespace tme
 		//Server Error
 		ServerAlreadyStarted,
 
+		//Client Error
+		ClientAlreadyConnected,
+
 		// Socket Error
 		SocketAlreadyOpen,
 		SocketNotOpen,
@@ -26,6 +29,7 @@ namespace tme
 		SocketReceiveSizeTooLarge,
 		SocketReceiveFailed,
 		SocketSetBlockingFailed,
+		SocketGetPortFailed,
 
 		// WSA Error
 		WSAStartupFailed

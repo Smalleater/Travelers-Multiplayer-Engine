@@ -4,7 +4,7 @@
 
 namespace tme::core
 {
-	int SocketUtils::GetLastSocketError()
+	int SocketUtils::getLastSocketError()
 	{
 #ifdef _WIN32
 		return WSAGetLastError();
@@ -13,7 +13,7 @@ namespace tme::core
 #endif
 	}
 
-	bool SocketUtils::IsWouldBlockError(int _err)
+	bool SocketUtils::isWouldBlockError(int _err)
 	{
 #ifdef _WIN32
 		return _err == WSAEWOULDBLOCK;
@@ -28,14 +28,14 @@ namespace tme::core
 		u_long mode = _blocking ? 0 : 1;
 
 		int iResult = ioctlsocket(_socket, FIONBIO, &mode);
-		int lastSocketError = SocketUtils::GetLastSocketError();
+		int lastSocketError = SocketUtils::getLastSocketError();
 		if (iResult != 0)
 		{
 			return { ErrorCode::SocketSetBlockingFailed, lastSocketError };
 		}
 #else
 		int flags = fcntl(_socket, F_GETFL, 0);
-		int lastSocketError = SocketUtils::GetLastSocketError();
+		int lastSocketError = SocketUtils::getLastSocketError();
 		if (flags == -1)
 		{
 			return { ErrorCode::SocketSetBlockingFailed, lastSocketError };
@@ -51,7 +51,7 @@ namespace tme::core
 		}
 
 		int iResult = fcntl(_socket, F_SETFL, flags);
-		lastSocketError = SocketUtils::GetLastSocketError();
+		lastSocketError = SocketUtils::getLastSocketError();
 		if (iResult == -1)
 		{
 			return { ErrorCode::SocketSetBlockingFailed, lastSocketError };
@@ -59,5 +59,19 @@ namespace tme::core
 #endif
 
 		return { ErrorCode::Success, 0 };
+	}
+
+	std::pair<ErrorCode, uint16_t> SocketUtils::getSocketPort(core::socket_t& _socket)
+	{
+		sockaddr_in addr = {};
+		socklen_t addrLen = sizeof(addr);
+		
+		if (getsockname(_socket, (sockaddr*)&addr, &addrLen) == 0)
+		{
+			uint16_t port = ntohs(addr.sin_port);
+			return { ErrorCode::Success, port };
+		}
+
+		return { ErrorCode::SocketGetPortFailed, 0 };
 	}
 }
