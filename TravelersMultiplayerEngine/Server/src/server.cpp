@@ -84,14 +84,6 @@ namespace tme::server
 			return ErrorCode::Success;
 		}
 
-		if (m_tcpSocket)
-		{
-			m_tcpSocket->closeSocket();
-			delete m_tcpSocket;
-			m_tcpSocket = nullptr;
-		}
-		TME_DEBUG_LOG("Server: TCP socket closed.");
-
 		if (m_udpSocket)
 		{
 			m_udpSocket->closeSocket();
@@ -100,12 +92,22 @@ namespace tme::server
 		}
 		TME_DEBUG_LOG("Server: UDP socket closed.");
 
+		if (m_tcpSocket)
+		{
+			m_tcpSocket->closeSocket();
+			delete m_tcpSocket;
+			m_tcpSocket = nullptr;
+		}
+		TME_DEBUG_LOG("Server: TCP socket closed.");
+
 #ifdef _WIN32
 		core::WSAInitializer::Get()->CleanUp();
 		TME_DEBUG_LOG("Server: WSA cleaned up successfully.");
 #endif
 
+		m_isRunning = false;
 		TME_INFO_LOG("Server: Stopped successfully.");
+
 		return ErrorCode::Success;
 	}
 

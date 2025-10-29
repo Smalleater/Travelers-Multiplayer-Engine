@@ -25,7 +25,6 @@ namespace tme::core
 		static WSAInitializer* m_singleton;
 
 		WSADATA m_wsaData;
-		bool m_isInitialized;
 
 		WSAInitializer();
 		~WSAInitializer();

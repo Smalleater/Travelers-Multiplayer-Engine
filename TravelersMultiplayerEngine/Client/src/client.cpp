@@ -94,6 +94,36 @@ namespace tme::client
 
 	ErrorCode Client::Disconnect()
 	{
+		if (!m_isConnected)
+		{
+			TME_DEBUG_LOG("Client: Disconnect called but client is not connected.");
+			return ErrorCode::Success;
+		}
+
+		if (m_udpSocket)
+		{
+			m_udpSocket->closeSocket();
+			delete m_udpSocket;
+			m_udpSocket = nullptr;
+		}
+		TME_DEBUG_LOG("Client: UDP socket closed.");
+
+		if (m_tcpSocket)
+		{
+			m_tcpSocket->closeSocket();
+			delete m_tcpSocket;
+			m_tcpSocket = nullptr;
+		}
+		TME_DEBUG_LOG("Client: TCP socket closed.");
+
+#if _WIN32
+		core::WSAInitializer::Get()->CleanUp();
+		TME_DEBUG_LOG("Client: WSA cleaned up successfully.");
+#endif
+
+		m_isConnected = false;
+		TME_INFO_LOG("Client: Disconnected successfully.");
+
 		return ErrorCode::Success;
 	}
 
