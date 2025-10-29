@@ -29,6 +29,7 @@ namespace tme::core
         TME_API std::pair<ErrorCode, int> sendData(const void* _data, size_t _size);
         TME_API std::pair<ErrorCode, int> receiveData(void* _buffer, size_t _size);
         TME_API std::pair<ErrorCode, int> setBlocking(bool _blocking);
+        TME_API std::pair<ErrorCode, uint16_t> getPort();
         TME_API bool isConnected() const;
 
     private:

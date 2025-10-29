@@ -4,7 +4,7 @@
 #include <cstdio>
 
 #include "TME/debugUtils.hpp"
-#include "socketUtils.hpp"
+#include "TME/core/socketUtils.hpp"
 
 #undef max
 
@@ -267,7 +267,25 @@ namespace tme::core
 	std::pair<ErrorCode, int> TcpSocket::setBlocking(bool _blocking)
 	{
 		std::lock_guard<std::mutex> lock(m_mutex);
+
+		if (m_socket == INVALID_SOCKET_FD)
+		{
+			return { ErrorCode::SocketNotOpen, 0 };
+		}
+
 		return SocketUtils::setBlocking(m_socket, _blocking);
+	}
+
+	std::pair<ErrorCode, uint16_t> TcpSocket::getPort()
+	{
+		std::lock_guard<std::mutex> lock(m_mutex);
+
+		if (m_socket == INVALID_SOCKET_FD)
+		{
+			return { ErrorCode::SocketNotOpen, 0 };
+		}
+
+		return SocketUtils::getSocketPort(m_socket);
 	}
 
 	bool TcpSocket::isConnected() const

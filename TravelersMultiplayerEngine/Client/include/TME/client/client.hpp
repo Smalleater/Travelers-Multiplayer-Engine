@@ -37,8 +37,6 @@ namespace tme::client
 		Client();
 		~Client();
 
-		static bool isServerLocal(const std::string& _address);
-
 		ErrorCode connectTcpSocket();
 		ErrorCode startUdpSocket();
 	};

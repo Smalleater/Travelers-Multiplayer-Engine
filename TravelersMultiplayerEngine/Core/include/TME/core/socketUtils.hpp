@@ -4,6 +4,7 @@
 #include "TME/export.hpp"
 
 #include <utility>
+#include <string>
 
 #include "TME/errorCode.hpp"
 #include "TME/core/networkInclude.hpp"
@@ -12,11 +13,12 @@ namespace tme::core
 {
     namespace SocketUtils
     {
-        TME_API std::pair<ErrorCode, uint16_t> getSocketPort(core::socket_t& _socket);
+        TME_API bool isLocalAddress(const std::string& _address);
 
         int getLastSocketError();
         bool isWouldBlockError(int _err);
         std::pair<ErrorCode, int> setBlocking(socket_t& _socket, bool _blocking);
+        std::pair<ErrorCode, uint16_t> getSocketPort(core::socket_t& _socket);
     }
 }
 

@@ -1,6 +1,7 @@
 #include "TME/client/client.hpp"
 
 #include "TME/debugUtils.hpp"
+#include "TME/core/socketUtils.hpp"
 
 #ifdef _WIN32
 #include "TME/core/wsaInitializer.hpp"
@@ -59,7 +60,7 @@ namespace tme::client
 		m_address = _address;
 		m_tcpPort = _port;
 
-		if (isServerLocal(_address))
+		if (core::SocketUtils::isLocalAddress(_address))
 		{
 			m_udpPort = 0;
 			TME_DEBUG_LOG("Client: Server is local, UDP port set to 0 for automatic assignment.");
@@ -87,51 +88,13 @@ namespace tme::client
 		m_isConnected = true;
 
 		TME_INFO_LOG("Client: Successfully connected to server at %s:%d.", m_address.c_str(), m_tcpPort);
+		TME_INFO_LOG("Client: UDP socket is using port %d.", m_udpPort);
 		return ErrorCode::Success;
 	}
 
 	ErrorCode Client::Disconnect()
 	{
 		return ErrorCode::Success;
-	}
-
-	bool Client::isServerLocal(const std::string& _address)
-	{
-		char hostname[256];
-		if (gethostname(hostname, sizeof(hostname)))
-		{
-			return false;
-		}
-
-		addrinfo hints = {};
-		hints.ai_family = AF_INET;
-		hints.ai_socktype = SOCK_STREAM;
-		hints.ai_flags = AI_PASSIVE;
-
-		addrinfo* result = nullptr;
-		if (getaddrinfo(hostname, nullptr, &hints, &result))
-		{
-			return false;
-		}
-
-		bool found = false;
-		for (addrinfo* ptr = result; ptr != nullptr; ptr = ptr->ai_next)
-		{
-			char ipstr[INET_ADDRSTRLEN] = {};
-			sockaddr_in* sockaddr_ipv4 = reinterpret_cast<sockaddr_in*>(ptr->ai_addr);
-			if (inet_ntop(AF_INET, &(sockaddr_ipv4->sin_addr), ipstr, sizeof(ipstr)))
-			{
-				std::string localIp(ipstr);
-				if (localIp == _address || _address == "127.0.0.1" || _address == "localhost")
-				{
-					found = true;
-					break;
-				}
-			}
-		}
-
-		freeaddrinfo(result);
-		return found;
 	}
 
 	ErrorCode Client::connectTcpSocket()
@@ -166,24 +129,35 @@ namespace tme::client
 	{
 		m_udpSocket = new core::UdpSocket;
 
-		std::pair<ErrorCode, int> pairResult;
+		std::pair<ErrorCode, int> iPairResult;
 
-		pairResult = m_udpSocket->bindSocket(m_udpPort);
-		if (pairResult.first != ErrorCode::Success)
+		iPairResult = m_udpSocket->bindSocket(m_udpPort);
+		if (iPairResult.first != ErrorCode::Success)
 		{
-			TME_ERROR_LOG("Client: Failed to bind UDP socket on port %d. ErrorCode: %d", m_udpPort, static_cast<int>(pairResult.first));
+			TME_ERROR_LOG("Client: Failed to bind UDP socket on port %d. ErrorCode: %d", m_udpPort, static_cast<int>(iPairResult.first));
 			delete m_udpSocket;
 			m_udpSocket = nullptr;
-			return pairResult.first;
+			return iPairResult.first;
 		}
 
-		pairResult = m_udpSocket->setBlocking(false);
-		if (pairResult.first != ErrorCode::Success)
+		std::pair<ErrorCode, uint16_t> uiPairResult;
+		uiPairResult = m_udpSocket->getPort();
+		if (uiPairResult.first != ErrorCode::Success)
 		{
-			TME_ERROR_LOG("Client: Failed to set UDP socket to non-blocking mode. ErrorCode: %d", static_cast<int>(pairResult.first));
+			TME_ERROR_LOG("Client: Failed to get UDP socket port. ErrorCode: %d", static_cast<int>(uiPairResult.first));
 			delete m_udpSocket;
 			m_udpSocket = nullptr;
-			return pairResult.first;
+			return uiPairResult.first;
+		}
+		m_udpPort = uiPairResult.second;
+
+		iPairResult = m_udpSocket->setBlocking(false);
+		if (iPairResult.first != ErrorCode::Success)
+		{
+			TME_ERROR_LOG("Client: Failed to set UDP socket to non-blocking mode. ErrorCode: %d", static_cast<int>(iPairResult.first));
+			delete m_udpSocket;
+			m_udpSocket = nullptr;
+			return iPairResult.first;
 		}
 
 		TME_DEBUG_LOG("Client: Successfully started UDP socket on port %d.", m_udpPort);
