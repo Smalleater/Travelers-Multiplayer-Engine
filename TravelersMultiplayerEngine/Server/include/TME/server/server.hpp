@@ -7,8 +7,7 @@
 #include <unordered_map>
 
 #include "TME/errorCode.hpp"
-#include "TME/core/tcpSocket.hpp"
-#include "TME/core/udpSocket.hpp"
+#include "TME/engine/networkEngine.hpp"
 
 namespace tme::server
 {
@@ -32,12 +31,10 @@ namespace tme::server
 	private:
 		static Server* m_singleton;
 
-		core::TcpSocket* m_tcpSocket;
-		core::UdpSocket* m_udpSocket;
+		engine::NetworkEngine* m_networkEngine;
 
 		ClientMap clients;
 
-		uint16_t m_port;
 		bool m_isRunning;
 
 		Server();

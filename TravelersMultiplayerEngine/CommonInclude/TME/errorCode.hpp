@@ -13,6 +13,9 @@ namespace tme
 		//Client Error
 		ClientAlreadyConnected,
 
+		//Engine Error
+		NetworkEngineNotInitialized,
+
 		// Socket Error
 		SocketAlreadyOpen,
 		SocketNotOpen,

@@ -10,7 +10,7 @@ set(CMAKE_CXX_STANDARD_REQUIRED True)
 file(GLOB_RECURSE SOURCES "src/*.cpp")
 
 # Build as a shared library (.dll on Windows, .so on Linux)
-add_library(tme_engine SHARED ${SOURCES})
+add_library(tme_engine SHARED ${SOURCES} "src/networkEngine.cpp")
 
 # Set include directories (public headers and internal headers)
 target_include_directories(tme_engine
