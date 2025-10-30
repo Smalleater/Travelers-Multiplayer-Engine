@@ -12,7 +12,10 @@ int main() {
 	ec = Server::Get()->Start(2025);
 	if (ec != ErrorCode::Success) return -1;
 
-	std::this_thread::sleep_for(std::chrono::seconds(1));
+	while (Server::Get()->isRunning())
+	{
+
+	}
 
 	ec = Server::Get()->Stop();
 	if (ec != ErrorCode::Success) return -1;

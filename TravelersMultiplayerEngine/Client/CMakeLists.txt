@@ -29,7 +29,7 @@ else()
     target_link_libraries(tme_client PUBLIC ${COMMON_EXPORT_LIB_DIR}/libtme_engine.so)
 endif()
 
-target_link_libraries(tme_client PUBLIC tme_core)
+target_link_libraries(tme_client PUBLIC tme_engine)
 
 target_compile_definitions(tme_client
     PUBLIC

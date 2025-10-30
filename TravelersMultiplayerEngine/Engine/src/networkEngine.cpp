@@ -26,23 +26,8 @@ namespace tme::engine
 	{
 		if (m_tcpLisentSocket)
 		{
-			std::pair<ErrorCode, uint16_t> portResult = m_tcpLisentSocket->getPort();
-			if (portResult.first != ErrorCode::Success)
-			{
-				TME_ERROR_LOG("NetworkEngine: Failed to get port of existing TCP listen socket. ErrorCode: %d", static_cast<int>(portResult.first));
-				return portResult.first;
-			}
-
-			if ( portResult.second == _port)
-			{
-				TME_DEBUG_LOG("NetworkEngine: TCP listen socket is already open on port %d.", _port);
-				return ErrorCode::Success;
-			}
-			else
-			{
-				TME_ERROR_LOG("NetworkEngine: TCP listen socket is already open on a different port.");
-				return ErrorCode::SocketAlreadyOpen;
-			}
+			TME_ERROR_LOG("NetworkEngine: TCP listen socket is already open.");
+			return ErrorCode::SocketAlreadyOpen;
 		}
 
 #ifdef _WIN32
@@ -89,6 +74,50 @@ namespace tme::engine
 		return ErrorCode::Success;
 	}
 
+	ErrorCode NetworkEngine::startTcpConnectToAddress(const std::string& _address, uint16_t _port, bool _blocking)
+	{
+		if (m_tcpConnectSocket)
+		{
+			TME_ERROR_LOG("NetworkEngine: TCP connect socket is already open.");
+			return ErrorCode::SocketAlreadyOpen;
+		}
+
+#ifdef _WIN32
+		ErrorCode errorCode = core::WSAInitializer::Get()->Init();
+		if (errorCode != ErrorCode::Success)
+		{
+			return errorCode;
+		}
+
+		TME_DEBUG_LOG("NetworkEngine: WSA initialized successfully.");
+#endif
+
+		m_tcpConnectSocket = new core::TcpSocket();
+
+		std::pair<ErrorCode, int> intPairResult;
+
+		intPairResult = m_tcpConnectSocket->connectTo(_address, _port);
+		if (intPairResult.first != ErrorCode::Success)
+		{
+			TME_ERROR_LOG("NetworkEngine: Failed to connect TCP socket to %s:%d. ErrorCode: %d", _address.c_str(), _port, static_cast<int>(intPairResult.first));
+			delete m_tcpConnectSocket;
+			m_tcpConnectSocket = nullptr;
+			return intPairResult.first;
+		}
+
+		intPairResult = m_tcpConnectSocket->setBlocking(_blocking);
+		if (intPairResult.first != ErrorCode::Success)
+		{
+			TME_ERROR_LOG("NetworkEngine: Failed to set TCP connect socket blocking mode. ErrorCode: %d", static_cast<int>(intPairResult.first));
+			delete m_tcpConnectSocket;
+			m_tcpConnectSocket = nullptr;
+			return intPairResult.first;
+		}
+
+		TME_DEBUG_LOG("NetworkEngine: TCP connect socket connected to %s:%d.", _address.c_str(), _port);
+		return ErrorCode::Success;
+	}
+
 	ErrorCode NetworkEngine::stopTcpListen()
 	{
 		if (!m_tcpLisentSocket)
@@ -107,6 +136,27 @@ namespace tme::engine
 #endif
 
 		TME_DEBUG_LOG("NetworkEngine: TCP listen socket stopped.");
+		return ErrorCode::Success;
+	}
+
+	ErrorCode NetworkEngine::stopTcpConnect()
+	{
+		if (!m_tcpConnectSocket)
+		{
+			TME_DEBUG_LOG("NetworkEngine: TCP connect socket is not open.");
+			return ErrorCode::Success;
+		}
+
+		m_tcpConnectSocket->closeSocket();
+		delete m_tcpConnectSocket;
+		m_tcpConnectSocket = nullptr;
+
+#ifdef _WIN32
+		core::WSAInitializer::Get()->CleanUp();
+		TME_DEBUG_LOG("NetworkEngine: WSA cleaned up successfully.");
+#endif
+
+		TME_DEBUG_LOG("NetworkEngine: TCP connect socket stopped.");
 		return ErrorCode::Success;
 	}
 }

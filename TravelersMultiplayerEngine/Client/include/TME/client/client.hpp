@@ -7,8 +7,7 @@
 #include <cstdint>
 
 #include "TME/errorCode.hpp"
-#include "TME/core/tcpSocket.hpp"
-#include "TME/core/udpSocket.hpp"
+#include "TME/engine/networkEngine.hpp"
 
 namespace tme::client
 {
@@ -26,19 +25,12 @@ namespace tme::client
 	private:
 		static Client* m_singleton;
 
-		core::TcpSocket* m_tcpSocket;
-		core::UdpSocket* m_udpSocket;
+		engine::NetworkEngine* m_networkEngine;
 
-		std::string m_address;
-		uint16_t m_tcpPort;
-		uint16_t m_udpPort;
 		bool m_isConnected;
 
 		Client();
 		~Client();
-
-		ErrorCode connectTcpSocket();
-		ErrorCode startUdpSocket();
 	};
 }
 
