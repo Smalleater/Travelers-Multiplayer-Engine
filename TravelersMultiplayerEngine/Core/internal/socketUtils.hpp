@@ -1,8 +1,6 @@
 #ifndef TME_CORE_SOCKET_UTILS_HPP
 #define TME_CORE_SOCKET_UTILS_HPP
 
-#include "TME/export.hpp"
-
 #include <utility>
 #include <string>
 
@@ -13,8 +11,6 @@ namespace tme::core
 {
     namespace SocketUtils
     {
-        TME_API bool isLocalAddress(const std::string& _address);
-
         int getLastSocketError();
         bool isWouldBlockError(int _err);
         std::pair<ErrorCode, int> setBlocking(socket_t& _socket, bool _blocking);

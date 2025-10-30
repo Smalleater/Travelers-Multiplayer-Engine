@@ -4,7 +4,7 @@
 #include <cstdio>
 
 #include "TME/debugUtils.hpp"
-#include "TME/core/socketUtils.hpp"
+#include "socketUtils.hpp"
 
 #undef max
 
