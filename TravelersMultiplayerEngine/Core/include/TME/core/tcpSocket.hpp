@@ -30,11 +30,15 @@ namespace tme::core
         TME_API std::pair<ErrorCode, int> receiveData(void* _buffer, size_t _size);
         TME_API std::pair<ErrorCode, int> setBlocking(bool _blocking);
         TME_API std::pair<ErrorCode, uint16_t> getPort();
+        TME_API bool isBlocking() const;
+        TME_API bool isOpen() const;
         TME_API bool isConnected() const;
 
     private:
         socket_t m_socket;
         mutable std::mutex m_mutex;
+		uint16_t m_port;
+		bool m_isBlocking;
     };
 }
 

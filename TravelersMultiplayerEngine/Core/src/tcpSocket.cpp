@@ -13,6 +13,8 @@ namespace tme::core
 	TcpSocket::TcpSocket()
 	{
 		m_socket = INVALID_SOCKET_FD;
+		m_port = 0;
+		m_isBlocking = true;
 	}
 
 	TcpSocket::~TcpSocket()
@@ -143,10 +145,22 @@ namespace tme::core
 				return { ErrorCode::Success, 0 };
 			}
 
-			closeSocket();
+			CLOSE_SOCKET(m_socket);
+			m_socket = INVALID_SOCKET_FD;
 		}
 
 		freeaddrinfo(result);
+
+		std::pair<ErrorCode, uint16_t> portResult = SocketUtils::getSocketPort(m_socket);
+		if (portResult.first != ErrorCode::Success)
+		{
+			CLOSE_SOCKET(m_socket);
+			m_socket = INVALID_SOCKET_FD;
+			return portResult;
+		}
+
+		m_port = portResult.second;
+
 		return { ErrorCode::SocketBindFailed, 0 };
 	}
 
@@ -273,7 +287,13 @@ namespace tme::core
 			return { ErrorCode::SocketNotOpen, 0 };
 		}
 
-		return SocketUtils::setBlocking(m_socket, _blocking);
+		std::pair<ErrorCode, int> pairResult = SocketUtils::setBlocking(m_socket, _blocking);
+		if (pairResult.first == ErrorCode::Success)
+		{
+			m_isBlocking = _blocking;
+		}
+
+		return pairResult;
 	}
 
 	std::pair<ErrorCode, uint16_t> TcpSocket::getPort()
@@ -285,16 +305,31 @@ namespace tme::core
 			return { ErrorCode::SocketNotOpen, 0 };
 		}
 
-		return SocketUtils::getSocketPort(m_socket);
+		return { ErrorCode::Success, m_port };
+	}
+
+	bool TcpSocket::isBlocking() const
+	{
+		return m_isBlocking;
+	}
+
+	bool TcpSocket::isOpen() const
+	{
+		return m_socket != INVALID_SOCKET_FD;
 	}
 
 	bool TcpSocket::isConnected() const
 	{
 		std::lock_guard<std::mutex> lock(m_mutex);
 
+		if (m_socket == INVALID_SOCKET_FD)
+		{
+			return false;
+		}
+
 		sockaddr_storage addr;
 		socklen_t addrLen = sizeof(addr);
 
-		return m_socket != INVALID_SOCKET_FD && getpeername(m_socket, (sockaddr*)&addr, &addrLen) == 0;
+		return getpeername(m_socket, (sockaddr*)&addr, &addrLen) == 0;
 	}
 }

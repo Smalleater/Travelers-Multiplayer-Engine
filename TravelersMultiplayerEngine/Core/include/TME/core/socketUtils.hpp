@@ -18,7 +18,7 @@ namespace tme::core
         int getLastSocketError();
         bool isWouldBlockError(int _err);
         std::pair<ErrorCode, int> setBlocking(socket_t& _socket, bool _blocking);
-        std::pair<ErrorCode, uint16_t> getSocketPort(core::socket_t& _socket);
+        std::pair<ErrorCode, uint16_t> getSocketPort(socket_t& _socket);
     }
 }
 

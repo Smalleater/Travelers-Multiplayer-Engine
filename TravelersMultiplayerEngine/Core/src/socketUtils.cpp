@@ -107,7 +107,7 @@ namespace tme::core
 		return { ErrorCode::Success, 0 };
 	}
 
-	std::pair<ErrorCode, uint16_t> SocketUtils::getSocketPort(core::socket_t& _socket)
+	std::pair<ErrorCode, uint16_t> SocketUtils::getSocketPort(socket_t& _socket)
 	{
 		sockaddr_in addr = {};
 		socklen_t addrLen = sizeof(addr);

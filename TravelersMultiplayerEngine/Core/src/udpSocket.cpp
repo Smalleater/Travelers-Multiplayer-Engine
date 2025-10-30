@@ -12,6 +12,8 @@ namespace tme::core
     UdpSocket::UdpSocket()
     {
         m_socket = INVALID_SOCKET_FD;
+		m_port = 0;
+		m_isBlocking = true;
     }
 
     UdpSocket::~UdpSocket()
@@ -92,6 +94,17 @@ namespace tme::core
         }
 
         freeaddrinfo(result);
+
+        std::pair<ErrorCode, uint16_t> portResult = SocketUtils::getSocketPort(m_socket);
+        if (portResult.first != ErrorCode::Success)
+        {
+            CLOSE_SOCKET(m_socket);
+            m_socket = INVALID_SOCKET_FD;
+            return portResult;
+        }
+
+        m_port = portResult.second;
+
         return { ErrorCode::SocketBindFailed, 0 };
     }
 
@@ -173,7 +186,19 @@ namespace tme::core
             return { ErrorCode::SocketNotOpen, 0 };
         }
 
-        return SocketUtils::getSocketPort(m_socket);
+        return { ErrorCode::Success, m_port };
+    }
+
+    bool UdpSocket::isBlocking()
+    {
+        std::lock_guard<std::mutex> lock(m_mutex);
+
+        if (m_socket == INVALID_SOCKET_FD)
+        {
+            return false;
+        }
+
+        return m_isBlocking;
     }
 
     bool UdpSocket::isOpen() const
