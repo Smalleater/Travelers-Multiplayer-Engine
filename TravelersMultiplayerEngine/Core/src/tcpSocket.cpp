@@ -19,10 +19,7 @@ namespace tme::core
 
 	TcpSocket::~TcpSocket()
 	{
-		if (m_socket != INVALID_SOCKET_FD)
-		{
-			CLOSE_SOCKET(m_socket);
-		}
+		closeSocket();
 	}
 
 	std::pair<ErrorCode, int> TcpSocket::shutdownSocket()

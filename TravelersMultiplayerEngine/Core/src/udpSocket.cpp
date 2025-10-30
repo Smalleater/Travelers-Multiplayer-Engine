@@ -18,10 +18,7 @@ namespace tme::core
 
     UdpSocket::~UdpSocket()
     {
-        if (m_socket != INVALID_SOCKET_FD)
-        {
-            CLOSE_SOCKET(m_socket);
-        }
+        closeSocket();
     }
 
     sockaddr* UdpSocket::createSockAddr(const std::string& _address, uint16_t _port)
