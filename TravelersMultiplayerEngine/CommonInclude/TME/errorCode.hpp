@@ -7,15 +7,16 @@ namespace tme
 	{
 		Success = 0,
 
+		// Client/Server Error
+		DisconnectWithErrors,
 
-
-		//Server Error
+		// Server Error
 		ServerAlreadyStarted,
 
-		//Client Error
+		// Client Error
 		ClientAlreadyConnected,
 
-		//Engine Error
+		// Engine Error
 		NetworkEngineNotInitialized,
 		InvalidIpAddress,
 		InvalidPortNumber,

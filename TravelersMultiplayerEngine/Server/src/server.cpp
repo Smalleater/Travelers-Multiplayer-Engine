@@ -2,10 +2,6 @@
 
 #include "TME/debugUtils.hpp"
 
-#ifdef _WIN32
-#include "TME/core/wsaInitializer.hpp"
-#endif
-
 namespace tme::server
 {
 	Server* Server::m_singleton = nullptr;
@@ -50,14 +46,12 @@ namespace tme::server
 		ec = m_networkEngine->startTcpListenOnPort(_port, false);
 		if (ec != ErrorCode::Success)
 		{
-			TME_ERROR_LOG("Server: Failed to start TCP listen on port %d. ErrorCode: %d", _port, static_cast<int>(ec));
 			return ec;
 		}
 
 		ec = m_networkEngine->startUdpOnPort(_port, false);
 		if (ec != ErrorCode::Success)
 		{
-			TME_ERROR_LOG("Server: Failed to start UDP on port %d. ErrorCode: %d", _port, static_cast<int>(ec));
 			m_networkEngine->stopTcpListen();
 			return ec;
 		}
@@ -79,20 +73,25 @@ namespace tme::server
 		if (!m_networkEngine)
 		{
 			TME_ERROR_LOG("Server: Network engine is not initialized.");
+			m_isRunning = false;
 			return ErrorCode::NetworkEngineNotInitialized;
 		}
 
-		ErrorCode ec = m_networkEngine->stopTcpListen();
-		if (ec != ErrorCode::Success)
-		{
-			TME_ERROR_LOG("Server: Failed to stop TCP listen. ErrorCode: %d", static_cast<int>(ec));
-			return ec;
-		}
+		ErrorCode ecTcp = m_networkEngine->stopTcpListen();
+		ErrorCode ecUdp = m_networkEngine->stopUdp();
 
 		m_isRunning = false;
 
-		TME_INFO_LOG("Server: Stopped successfully.");
-		return ErrorCode::Success;
+		if (ecTcp != ErrorCode::Success || ecUdp != ErrorCode::Success)
+		{
+			TME_ERROR_LOG("Server: Failed to stop server sockets properly. TCP ErrorCode: %d, UDP ErrorCode: %d", static_cast<int>(ecTcp), static_cast<int>(ecUdp));
+			return ErrorCode::DisconnectWithErrors;
+		}
+		else
+		{
+			TME_INFO_LOG("Server: Stopped successfully.");
+			return ErrorCode::Success;
+		}
 	}
 
 	bool Server::isRunning() const

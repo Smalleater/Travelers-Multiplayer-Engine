@@ -1,11 +1,6 @@
 #include "TME/client/client.hpp"
 
 #include "TME/debugUtils.hpp"
-#include "TME/core/socketUtils.hpp"
-
-#ifdef _WIN32
-#include "TME/core/wsaInitializer.hpp"
-#endif
 
 namespace tme::client
 {
@@ -47,10 +42,18 @@ namespace tme::client
 			return ErrorCode::NetworkEngineNotInitialized;
 		}
 
-		ErrorCode ec = m_networkEngine->startTcpConnectToAddress(_address, _port, false);
+		ErrorCode ec;
+
+		ec = m_networkEngine->startTcpConnectToAddress(_address, _port, false);
 		if (ec != ErrorCode::Success)
 		{
-			TME_ERROR_LOG("Client: Failed to connect to server at %s:%d. ErrorCode: %d", _address.c_str(), _port, static_cast<int>(ec));
+			return ec;
+		}
+
+		ec = m_networkEngine->startUdpOnPort(0, false);
+		if (ec != ErrorCode::Success)
+		{
+			m_networkEngine->stopTcpConnect();
 			return ec;
 		}
 
@@ -71,19 +74,24 @@ namespace tme::client
 		if (!m_networkEngine)
 		{
 			TME_ERROR_LOG("Client: Network engine is not initialized.");
+			m_isConnected = false;
 			return ErrorCode::NetworkEngineNotInitialized;
 		}
 
-		ErrorCode ec = m_networkEngine->stopTcpConnect();
-		if (ec != ErrorCode::Success)
-		{
-			TME_ERROR_LOG("Client: Failed to disconnect from server. ErrorCode: %d", static_cast<int>(ec));
-			return ec;
-		}
+		ErrorCode ecTcp = m_networkEngine->stopTcpConnect();
+		ErrorCode ecUdp = m_networkEngine->stopUdp();
 
 		m_isConnected = false;
 
-		TME_INFO_LOG("Client: Disconnected successfully.");
-		return ErrorCode::Success;
+		if (ecTcp != ErrorCode::Success || ecUdp != ErrorCode::Success)
+		{
+			TME_ERROR_LOG("Client: Disconnection encountered errors. TCP ErrorCode: %d, UDP ErrorCode: %d", static_cast<int>(ecTcp), static_cast<int>(ecUdp));
+			return ErrorCode::DisconnectWithErrors;
+		}
+		else
+		{
+			TME_INFO_LOG("Client: Disconnected successfully.");
+			return ErrorCode::Success;
+		}
 	}
 }

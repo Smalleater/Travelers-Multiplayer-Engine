@@ -12,7 +12,6 @@ namespace tme::core
 	{
 		TME_API bool isValidIpV4Address(const std::string& _address);
 		TME_API bool isValidPort(uint16_t _port);
-		TME_API bool isLocalAddress(const std::string& _address);
 	}
 }
 

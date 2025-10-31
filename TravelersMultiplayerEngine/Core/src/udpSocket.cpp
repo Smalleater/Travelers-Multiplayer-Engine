@@ -83,6 +83,17 @@ namespace tme::core
             if (iResult == 0)
             {
                 freeaddrinfo(result);
+
+                std::pair<ErrorCode, uint16_t> portResult = SocketUtils::getSocketPort(m_socket);
+                if (portResult.first != ErrorCode::Success)
+                {
+                    CLOSE_SOCKET(m_socket);
+                    m_socket = INVALID_SOCKET_FD;
+                    return portResult;
+                }
+
+                m_port = portResult.second;
+
                 return { ErrorCode::Success, 0 };
             }
 
@@ -91,17 +102,6 @@ namespace tme::core
         }
 
         freeaddrinfo(result);
-
-        std::pair<ErrorCode, uint16_t> portResult = SocketUtils::getSocketPort(m_socket);
-        if (portResult.first != ErrorCode::Success)
-        {
-            CLOSE_SOCKET(m_socket);
-            m_socket = INVALID_SOCKET_FD;
-            return portResult;
-        }
-
-        m_port = portResult.second;
-
         return { ErrorCode::SocketBindFailed, 0 };
     }
 

@@ -178,6 +178,20 @@ namespace tme::engine
 			return intPairResult.first;
 		}
 
+		if (_port == 0)
+		{
+			std::pair<ErrorCode, uint16_t> portResult = m_udpSocket->getPort();
+
+			if (portResult.first != ErrorCode::Success)
+			{
+				TME_ERROR_LOG("NetworkEngine: Failed to get assigned UDP port number. ErrorCode: %d", static_cast<int>(portResult.first));
+				stopUdp();
+				return portResult.first;
+			}
+
+			_port = portResult.second;
+		}
+
 		TME_DEBUG_LOG("NetworkEngine: UDP socket started on port %d.", _port);
 		return ErrorCode::Success;
 	}
