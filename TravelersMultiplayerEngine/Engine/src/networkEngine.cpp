@@ -1,6 +1,7 @@
 #include "TME/engine/networkEngine.hpp"
 
 #include "TME/debugUtils.hpp"
+#include "TME/core/netUtils.hpp"
 
 #ifdef _WIN32
 #include "TME/core/wsaInitializer.hpp"
@@ -30,6 +31,12 @@ namespace tme::engine
 			return ErrorCode::SocketAlreadyOpen;
 		}
 
+		if (!core::NetUtils::isValidPort(_port))
+		{
+			TME_ERROR_LOG("NetworkEngine: Invalid port number %d for TCP listen socket.", _port);
+			return ErrorCode::InvalidPortNumber;
+		}
+
 #ifdef _WIN32
 		ErrorCode errorCode = core::WSAInitializer::Get()->Init();
 		if (errorCode != ErrorCode::Success)
@@ -47,8 +54,7 @@ namespace tme::engine
 		if (intPairResult.first != ErrorCode::Success)
 		{
 			TME_ERROR_LOG("NetworkEngine: Failed to bind TCP listen socket on port %d. ErrorCode: %d", _port, static_cast<int>(intPairResult.first));
-			delete m_tcpLisentSocket;
-			m_tcpLisentSocket = nullptr;
+			stopTcpListen();
 			return intPairResult.first;
 		}
 
@@ -56,8 +62,7 @@ namespace tme::engine
 		if (intPairResult.first != ErrorCode::Success)
 		{
 			TME_ERROR_LOG("NetworkEngine: Failed to listen on TCP socket. ErrorCode: %d", static_cast<int>(intPairResult.first));
-			delete m_tcpLisentSocket;
-			m_tcpLisentSocket = nullptr;
+			stopTcpListen();
 			return intPairResult.first;
 		}
 
@@ -65,8 +70,7 @@ namespace tme::engine
 		if (intPairResult.first != ErrorCode::Success)
 		{
 			TME_ERROR_LOG("NetworkEngine: Failed to set TCP listen socket blocking mode. ErrorCode: %d", static_cast<int>(intPairResult.first));
-			delete m_tcpLisentSocket;
-			m_tcpLisentSocket = nullptr;
+			stopTcpListen();
 			return intPairResult.first;
 		}
 
@@ -76,10 +80,24 @@ namespace tme::engine
 
 	ErrorCode NetworkEngine::startTcpConnectToAddress(const std::string& _address, uint16_t _port, bool _blocking)
 	{
+		TME_ASSERT_REF_PTR_OR_COPIABLE(_address);
+
 		if (m_tcpConnectSocket)
 		{
 			TME_ERROR_LOG("NetworkEngine: start TCP connect to address called but TCP connect socket is already open.");
 			return ErrorCode::SocketAlreadyOpen;
+		}
+
+		if (!core::NetUtils::isValidIpV4Address(_address))
+		{
+			TME_ERROR_LOG("NetworkEngine: Invalid IP address %s for TCP connect socket.", _address.c_str());
+			return ErrorCode::InvalidIpAddress;
+		}
+
+		if (!core::NetUtils::isValidPort(_port))
+		{
+			TME_ERROR_LOG("NetworkEngine: Invalid port number %d for TCP listen socket.", _port);
+			return ErrorCode::InvalidPortNumber;
 		}
 
 #ifdef _WIN32
@@ -100,8 +118,7 @@ namespace tme::engine
 		if (intPairResult.first != ErrorCode::Success)
 		{
 			TME_ERROR_LOG("NetworkEngine: Failed to connect TCP socket to %s:%d. ErrorCode: %d", _address.c_str(), _port, static_cast<int>(intPairResult.first));
-			delete m_tcpConnectSocket;
-			m_tcpConnectSocket = nullptr;
+			stopTcpConnect();
 			return intPairResult.first;
 		}
 
@@ -109,8 +126,7 @@ namespace tme::engine
 		if (intPairResult.first != ErrorCode::Success)
 		{
 			TME_ERROR_LOG("NetworkEngine: Failed to set TCP connect socket blocking mode. ErrorCode: %d", static_cast<int>(intPairResult.first));
-			delete m_tcpConnectSocket;
-			m_tcpConnectSocket = nullptr;
+			stopTcpConnect();
 			return intPairResult.first;
 		}
 
@@ -124,6 +140,12 @@ namespace tme::engine
 		{
 			TME_ERROR_LOG("NetworkEngine: start UDP on port called but UDP socket is already open.");
 			return ErrorCode::SocketAlreadyOpen;
+		}
+
+		if (!core::NetUtils::isValidPort(_port))
+		{
+			TME_ERROR_LOG("NetworkEngine: Invalid port number %d for UDP socket.", _port);
+			return ErrorCode::InvalidPortNumber;
 		}
 
 #ifdef _WIN32
@@ -144,8 +166,7 @@ namespace tme::engine
 		if (intPairResult.first != ErrorCode::Success)
 		{
 			TME_ERROR_LOG("NetworkEngine: Failed to bind UDP socket on port %d. ErrorCode: %d", _port, static_cast<int>(intPairResult.first));
-			delete m_udpSocket;
-			m_udpSocket = nullptr;
+			stopUdp();
 			return intPairResult.first;
 		}
 
@@ -153,8 +174,7 @@ namespace tme::engine
 		if (intPairResult.first != ErrorCode::Success)
 		{
 			TME_ERROR_LOG("NetworkEngine: Failed to set UDP socket blocking mode. ErrorCode: %d", static_cast<int>(intPairResult.first));
-			delete m_udpSocket;
-			m_udpSocket = nullptr;
+			stopUdp();
 			return intPairResult.first;
 		}
 

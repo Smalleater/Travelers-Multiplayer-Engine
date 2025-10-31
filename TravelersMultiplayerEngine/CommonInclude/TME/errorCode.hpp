@@ -7,6 +7,8 @@ namespace tme
 	{
 		Success = 0,
 
+
+
 		//Server Error
 		ServerAlreadyStarted,
 
@@ -15,6 +17,8 @@ namespace tme
 
 		//Engine Error
 		NetworkEngineNotInitialized,
+		InvalidIpAddress,
+		InvalidPortNumber,
 
 		// Socket Error
 		SocketAlreadyOpen,
