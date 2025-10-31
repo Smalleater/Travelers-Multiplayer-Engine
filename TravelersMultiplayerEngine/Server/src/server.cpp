@@ -45,10 +45,20 @@ namespace tme::server
 			return ErrorCode::NetworkEngineNotInitialized;
 		}
 
-		ErrorCode ec = m_networkEngine->startTcpListenOnPort(_port, false);
+		ErrorCode ec;
+
+		ec = m_networkEngine->startTcpListenOnPort(_port, false);
 		if (ec != ErrorCode::Success)
 		{
 			TME_ERROR_LOG("Server: Failed to start TCP listen on port %d. ErrorCode: %d", _port, static_cast<int>(ec));
+			return ec;
+		}
+
+		ec = m_networkEngine->startUdpOnPort(_port, false);
+		if (ec != ErrorCode::Success)
+		{
+			TME_ERROR_LOG("Server: Failed to start UDP on port %d. ErrorCode: %d", _port, static_cast<int>(ec));
+			m_networkEngine->stopTcpListen();
 			return ec;
 		}
 

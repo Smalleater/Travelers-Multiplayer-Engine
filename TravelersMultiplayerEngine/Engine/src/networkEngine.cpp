@@ -26,7 +26,7 @@ namespace tme::engine
 	{
 		if (m_tcpLisentSocket)
 		{
-			TME_ERROR_LOG("NetworkEngine: TCP listen socket is already open.");
+			TME_ERROR_LOG("NetworkEngine: Start TCP listen on port callrd but TCP listen socket is already open.");
 			return ErrorCode::SocketAlreadyOpen;
 		}
 
@@ -78,7 +78,7 @@ namespace tme::engine
 	{
 		if (m_tcpConnectSocket)
 		{
-			TME_ERROR_LOG("NetworkEngine: TCP connect socket is already open.");
+			TME_ERROR_LOG("NetworkEngine: start TCP connect to address called but TCP connect socket is already open.");
 			return ErrorCode::SocketAlreadyOpen;
 		}
 
@@ -118,11 +118,55 @@ namespace tme::engine
 		return ErrorCode::Success;
 	}
 
+	ErrorCode NetworkEngine::startUdpOnPort(uint16_t _port, bool _blocking)
+	{
+		if (m_udpSocket)
+		{
+			TME_ERROR_LOG("NetworkEngine: start UDP on port called but UDP socket is already open.");
+			return ErrorCode::SocketAlreadyOpen;
+		}
+
+#ifdef _WIN32
+		ErrorCode errorCode = core::WSAInitializer::Get()->Init();
+		if (errorCode != ErrorCode::Success)
+		{
+			return errorCode;
+		}
+
+		TME_DEBUG_LOG("NetworkEngine: WSA initialized successfully.");
+#endif
+
+		m_udpSocket = new core::UdpSocket();
+
+		std::pair<ErrorCode, int> intPairResult;
+
+		intPairResult = m_udpSocket->bindSocket(_port);
+		if (intPairResult.first != ErrorCode::Success)
+		{
+			TME_ERROR_LOG("NetworkEngine: Failed to bind UDP socket on port %d. ErrorCode: %d", _port, static_cast<int>(intPairResult.first));
+			delete m_udpSocket;
+			m_udpSocket = nullptr;
+			return intPairResult.first;
+		}
+
+		intPairResult = m_udpSocket->setBlocking(_blocking);
+		if (intPairResult.first != ErrorCode::Success)
+		{
+			TME_ERROR_LOG("NetworkEngine: Failed to set UDP socket blocking mode. ErrorCode: %d", static_cast<int>(intPairResult.first));
+			delete m_udpSocket;
+			m_udpSocket = nullptr;
+			return intPairResult.first;
+		}
+
+		TME_DEBUG_LOG("NetworkEngine: UDP socket started on port %d.", _port);
+		return ErrorCode::Success;
+	}
+
 	ErrorCode NetworkEngine::stopTcpListen()
 	{
 		if (!m_tcpLisentSocket)
 		{
-			TME_DEBUG_LOG("NetworkEngine: TCP listen socket is not open.");
+			TME_DEBUG_LOG("NetworkEngine: Stop TCP listen called but TCP listen socket is not open.");
 			return ErrorCode::Success;
 		}
 
@@ -143,7 +187,7 @@ namespace tme::engine
 	{
 		if (!m_tcpConnectSocket)
 		{
-			TME_DEBUG_LOG("NetworkEngine: TCP connect socket is not open.");
+			TME_DEBUG_LOG("NetworkEngine: Stop TCP connect called but TCP connect socket is not open.");
 			return ErrorCode::Success;
 		}
 
@@ -157,6 +201,27 @@ namespace tme::engine
 #endif
 
 		TME_DEBUG_LOG("NetworkEngine: TCP connect socket stopped.");
+		return ErrorCode::Success;
+	}
+
+	ErrorCode NetworkEngine::stopUdp()
+	{
+		if (!m_udpSocket)
+		{
+			TME_DEBUG_LOG("NetworkEngine: Stop UDP called but UDP socket is not open.");
+			return ErrorCode::Success;
+		}
+
+		m_udpSocket->closeSocket();
+		delete m_udpSocket;
+		m_udpSocket = nullptr;
+
+#ifdef _WIN32
+		core::WSAInitializer::Get()->CleanUp();
+		TME_DEBUG_LOG("NetworkEngine: WSA cleaned up successfully.");
+#endif
+
+		TME_DEBUG_LOG("NetworkEngine: UDP socket stopped.");
 		return ErrorCode::Success;
 	}
 }
