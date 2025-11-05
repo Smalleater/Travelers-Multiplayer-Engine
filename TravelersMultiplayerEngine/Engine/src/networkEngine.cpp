@@ -258,4 +258,9 @@ namespace tme::engine
 		TME_DEBUG_LOG("NetworkEngine: UDP socket stopped.");
 		return ErrorCode::Success;
 	}
+
+	EntityId NetworkEngine::createEntity()
+	{
+		return m_networkEcs.createEntity();
+	}
 }
