@@ -4,6 +4,9 @@
 #include "TME/debugUtils.hpp"
 
 #include "TME/engine/networkEngine.hpp"
+#include "TME/engine/iNetworkComponent.hpp"
+
+#define ENTITY_COUNT 1000000
 
 using namespace tme;
 using namespace tme::engine;
@@ -14,28 +17,71 @@ struct ComponentTest : INetworkComponent
 };
 
 int main() {
+	srand(static_cast<unsigned int>(time(0)));
+
 	ErrorCode ec;
 
 	std::unique_ptr<NetworkEngine> networkEngine = std::make_unique<NetworkEngine>();
 
-	EntityId entityTest = networkEngine->createEntity();
-	TME_INFO_LOG("Created entity with ID: %llu", entityTest);
+	std::vector<EntityId> entityCreated;
+	std::vector<EntityId> entityToDestroy;
 
-	std::shared_ptr component = std::make_shared<ComponentTest>();
-	component->value = 333;
+	std::shared_ptr<ComponentTest> component;
 
-	ec = networkEngine->addComponentToEntity(entityTest, component);
-	if (ec == ErrorCode::Success)
+	for (size_t i = 0; i < ENTITY_COUNT; i++)
 	{
-		TME_INFO_LOG("Added ComponentTest to entity %llu with value %d", entityTest, component->value);
+		entityCreated.push_back(networkEngine->createEntity());
+
+		component = std::make_shared<ComponentTest>();
+		component->value = rand();
+
+		ec = networkEngine->addComponentToEntity(entityCreated[i], component);
+		if (ec == ErrorCode::EntityAlreadyHasComponent)
+		{
+			TME_ERROR_LOG("Entity %llu already has ComponentTest", entityCreated[i]);
+		}
+		else if (ec != ErrorCode::Success)
+		{
+			TME_ERROR_LOG("Failed to add ComponentTest to entity %llu. ErrorCode: %d", entityCreated[i], static_cast<int>(ec));
+		}
 	}
-	else if (ec == ErrorCode::EntityAlreadyHasComponent)
+
+	entityToDestroy = entityCreated;
+	entityCreated.clear();
+
+	while (true)
 	{
-		TME_ERROR_LOG("Entity %llu already has ComponentTest", entityTest);
-	}
-	else
-	{
-		TME_ERROR_LOG("Failed to add ComponentTest to entity %llu. ErrorCode: %d", entityTest, static_cast<int>(ec));
+		networkEngine->beginUpdate();
+
+		for (size_t i = 0; i < ENTITY_COUNT; i++)
+		{
+			networkEngine->destroyEntity(entityToDestroy[i]);
+		}
+
+		entityToDestroy.clear();
+
+		for (size_t i = 0; i < ENTITY_COUNT; i++)
+		{
+			entityCreated.push_back(networkEngine->createEntity());
+
+			component = std::make_shared<ComponentTest>();
+			component->value = rand();
+
+			ec = networkEngine->addComponentToEntity(entityCreated[i], component);
+			if (ec == ErrorCode::EntityAlreadyHasComponent)
+			{
+				TME_ERROR_LOG("Entity %llu already has ComponentTest", entityCreated[i]);
+			}
+			else if (ec != ErrorCode::Success)
+			{
+				TME_ERROR_LOG("Failed to add ComponentTest to entity %llu. ErrorCode: %d", entityCreated[i], static_cast<int>(ec));
+			}
+		}
+
+		entityToDestroy = entityCreated;
+		entityCreated.clear();
+
+		networkEngine->endUpdate();
 	}
 
 	return 0;

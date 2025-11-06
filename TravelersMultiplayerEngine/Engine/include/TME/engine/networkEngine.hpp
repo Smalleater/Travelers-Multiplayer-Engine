@@ -27,13 +27,19 @@ namespace tme::engine
 		TME_API ErrorCode stopTcpConnect();
 		TME_API ErrorCode stopUdp();
 
+		TME_API void beginUpdate();
+		TME_API void endUpdate();
+
 		TME_API EntityId createEntity();
+		TME_API ErrorCode destroyEntity(EntityId _entityId);
 
 		template<typename ComponentType>
 		ErrorCode addComponentToEntity(EntityId _entityId, std::shared_ptr<ComponentType> _component)
 		{
 			return m_networkEcs.addComponentToEntity(_entityId, _component);
 		}
+
+
 
 	private:
 		core::TcpSocket* m_tcpLisentSocket;

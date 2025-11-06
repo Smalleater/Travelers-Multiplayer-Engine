@@ -259,8 +259,23 @@ namespace tme::engine
 		return ErrorCode::Success;
 	}
 
+	void NetworkEngine::beginUpdate()
+	{
+		m_networkEcs.beginUpdate();
+	}
+
+	void NetworkEngine::endUpdate()
+	{
+		m_networkEcs.endUpdate();
+	}
+
 	EntityId NetworkEngine::createEntity()
 	{
 		return m_networkEcs.createEntity();
+	}
+
+	ErrorCode NetworkEngine::destroyEntity(EntityId _entityId)
+	{
+		return m_networkEcs.destroyEntity(_entityId);
 	}
 }

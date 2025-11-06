@@ -12,42 +12,54 @@
 #include <utility>
 
 #include "TME/errorCode.hpp"
-#include "TME/engine/INetworkComponent.hpp"
+#include "TME/debugUtils.hpp"
 
 namespace tme::engine
 {
 	using EntityId = uint64_t;
 
+	struct INetworkComponent;
+
 	template<typename ComponentType>
 	struct SparseSet
 	{
-		std::vector<std::shared_ptr<ComponentType>> dense;
-		std::unordered_map<EntityId, size_t> sparse;
+		std::vector<std::shared_ptr<ComponentType>> m_dense;
+		std::unordered_map<EntityId, size_t> m_sparse;
 
 		void insert(EntityId _entityId, std::shared_ptr<ComponentType> _component)
 		{
-			sparse[_entityId] = dense.size();
-			dense.push_back(_component);
+			m_sparse[_entityId] = m_dense.size();
+			m_dense.push_back(_component);
 		}
 
 		void remove(EntityId _entityId)
 		{
-			auto it = sparse.find(_entityId);
-			if (it != sparse.end())
+			auto it = m_sparse.find(_entityId);
+			if (it != m_sparse.end())
 			{
 				size_t index = it->second;
-				dense[index] = dense.back();
-				dense.pop_back();
-				sparse.erase(it);
+				size_t last = m_dense.size() - 1;
+				if (index != last) {
+					m_dense[index] = m_dense[last];
+					for (auto& pair : m_sparse) {
+						if (pair.second == last) {
+							pair.second = index;
+							break;
+						}
+					}
+				}
+
+				m_dense.pop_back();
+				m_sparse.erase(it);
 			}
 		}
 
 		std::pair<ErrorCode, std::weak_ptr<ComponentType>> get(EntityId _entityId)
 		{
-			auto it = sparse.find(_entityId);
-			if (it != sparse.end())
+			auto it = m_sparse.find(_entityId);
+			if (it != m_sparse.end())
 			{
-				return { ErrorCode::Success, dense[it->second] };
+				return { ErrorCode::Success, m_dense[it->second] };
 			}
 
 			return { ErrorCode::EntityDoesNotHaveComponent , std::weak_ptr<ComponentType>() };
@@ -55,7 +67,7 @@ namespace tme::engine
 
 		bool hasComponent(EntityId _entityId)
 		{
-			return sparse.find(_entityId) != sparse.end();
+			return m_sparse.find(_entityId) != m_sparse.end();
 		}
 	};
 
@@ -73,11 +85,14 @@ namespace tme::engine
 		~NetworkEcs() = default;
 
 		EntityId createEntity();
-		bool isEntityValid(EntityId _entityId) const;
-		void destroyEntity(EntityId _entityId);
+		bool isEntityValid(EntityId _entityId);
+		ErrorCode destroyEntity(EntityId _entityId);
 
 		void registerBeginUpdateSystem(std::shared_ptr<INetworkSystem> _system);
 		void registerEndUpdateSystem(std::shared_ptr<INetworkSystem> _system);
+
+		void beginUpdate();
+		void endUpdate();
 
 		template<typename ComponentType>
 		ErrorCode addComponentToEntity(EntityId _entityId, std::shared_ptr<ComponentType> _component)
@@ -99,9 +114,15 @@ namespace tme::engine
 		}
 
 		template<typename ComponentType>
-		bool hasComponent(EntityId _entityId) const
+		bool hasComponent(EntityId _entityId)
 		{
-			std::weak_ptr<SparseSet<ComponentType>> store = getOrCreateComponentStore<ComponentType>();
+			auto store = getOrCreateComponentStore<ComponentType>().lock();
+			if (!store)
+			{
+				TME_ERROR_LOG("Component store unavailable for hasComponent check.");
+				return false;
+			}
+
 			return store->hasComponent(_entityId);
 		}
 
@@ -118,17 +139,20 @@ namespace tme::engine
 		}
 
 		template<typename ComponentType>
-		std::vector<EntityId> queryEntitiesWithComponent() const
+		std::vector<EntityId> queryEntitiesWithComponent()
 		{
-			std::weak_ptr<SparseSet<ComponentType>> store = getOrCreateComponentStore<ComponentType>();
+			auto store = getOrCreateComponentStore<ComponentType>().lock();
+			if (!store)
+			{
+				TME_ERROR_LOG("Component store unavailable for queryEntitiesWithComponent.");
+				return std::vector<EntityId>();
+			}
+
 			std::vector<EntityId> entityIds;
 
-			for (const auto& [entityId, index] : store->sparse)
+			for (const auto& [entityId, index] : store->m_sparse)
 			{
-				if (!isEntityScheduledForCreation(_entityId))
-				{
-					entityIds.push_back(entityId);
-				}
+				entityIds.push_back(entityId);
 			}
 
 			return entityIds;
@@ -137,22 +161,20 @@ namespace tme::engine
 		template<typename ComponentType>
 		ErrorCode removeComponentFromEntity(EntityId _entityId)
 		{
-			if (isEntityScheduledForCreation(_entityId))
+			auto store = getOrCreateComponentStore<ComponentType>().lock();
+			if (!store)
 			{
-				return ErrorCode::EntityScheduledForCreation;
+				return ErrorCode::ComponentStoreUnavailable;
 			}
 
-			std::weak_ptr<SparseSet<ComponentType>> store = getOrCreateComponentStore<ComponentType>();
 			store->remove(_entityId);
 
 			return ErrorCode::Success;
 		}
 
 	private:
-		EntityId m_nextEntityId = 0;
+		EntityId m_nextEntityId = 1;
 		std::unordered_set<EntityId> m_entities;
-		std::unordered_set<EntityId> m_entitiesToCreate;
-		std::unordered_set<EntityId> m_entitiesToDestroy;
 
 		std::unordered_map<size_t, std::shared_ptr<void>> m_componentStores;
 
@@ -160,9 +182,6 @@ namespace tme::engine
 		std::unordered_set<std::shared_ptr<INetworkSystem>> m_registerEndUpdateSystem;
 		std::vector<std::shared_ptr<INetworkSystem>> m_beginUpdateSystems;
 		std::vector<std::shared_ptr<INetworkSystem>> m_endUpdateSystems;
-
-		bool isEntityScheduledForCreation(EntityId _entityId) const;
-		bool isEntityScheduledForDestruction(EntityId _entityId) const;
 
 		template<typename ComponentType>
 		std::weak_ptr<SparseSet<ComponentType>> getOrCreateComponentStore()

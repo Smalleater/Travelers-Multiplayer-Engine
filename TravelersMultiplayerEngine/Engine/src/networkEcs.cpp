@@ -1,29 +1,36 @@
 #include "TME/engine/networkEcs.hpp"
 
-#include "TME/debugUtils.hpp" 
+#include "destroyComponentTag.hpp"
 
 namespace tme::engine
 {
 	EntityId NetworkEcs::createEntity()
 	{
 		EntityId newEntityId = m_nextEntityId++;
-		m_entitiesToCreate.insert(newEntityId);
+		m_entities.insert(newEntityId);
+
 		return newEntityId;
 	}
 
-	bool NetworkEcs::isEntityValid(EntityId _entityId) const
+	bool NetworkEcs::isEntityValid(EntityId _entityId)
 	{
-		return m_entities.find(_entityId) == m_entities.end() || isEntityScheduledForDestruction(_entityId);
+		return m_entities.find(_entityId) == m_entities.end() && hasComponent<DestroyComponentTag>(_entityId);
 	}
 
-	void NetworkEcs::destroyEntity(EntityId _entityId)
+	ErrorCode NetworkEcs::destroyEntity(EntityId _entityId)
 	{
 		if (m_entities.find(_entityId) == m_entities.end())
 		{
-			return;
+			return ErrorCode::EntityDoesNotExist;
 		}
 
-		m_entities.erase(_entityId);
+		ErrorCode errorCode = addComponentToEntity(_entityId, std::make_shared<DestroyComponentTag>());
+		if (errorCode != ErrorCode::Success && errorCode != ErrorCode::EntityAlreadyHasComponent)
+		{
+			return errorCode;
+		}
+
+		return ErrorCode::Success;
 	}
 
 	void NetworkEcs::registerBeginUpdateSystem(std::shared_ptr<INetworkSystem> _system)
@@ -54,13 +61,29 @@ namespace tme::engine
 		return;
 	}
 
-	bool NetworkEcs::isEntityScheduledForCreation(EntityId _entityId) const
+	void NetworkEcs::beginUpdate()
 	{
-		return m_entitiesToCreate.find(_entityId) != m_entitiesToCreate.end();
+		for (size_t i = 0; i < m_beginUpdateSystems.size(); i++)
+		{
+			m_beginUpdateSystems[i]->update(*this);
+		}
 	}
 
-	bool NetworkEcs::isEntityScheduledForDestruction(EntityId _entityId) const
+	void NetworkEcs::endUpdate()
 	{
-		return m_entitiesToDestroy.find(_entityId) != m_entitiesToDestroy.end();
+		for (size_t i = 0; i < m_endUpdateSystems.size(); i++)
+		{
+			m_endUpdateSystems[i]->update(*this);
+		}
+
+		for (auto entityId : queryEntitiesWithComponent<DestroyComponentTag>())
+		{
+			for (auto store : m_componentStores)
+			{
+				std::static_pointer_cast<SparseSet<INetworkComponent>>(store.second)->remove(entityId);
+			}
+
+			m_entities.erase(entityId);
+		}
 	}
 }

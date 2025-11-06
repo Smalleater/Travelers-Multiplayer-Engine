@@ -22,10 +22,11 @@ namespace tme
 		InvalidPortNumber,
 
 		// Network ECS Error
-		EntityScheduledForCreation,
 		EntityDoesNotHaveComponent,
 		EntityAlreadyHasComponent,
 		ComponentStoreUnavailable,
+		InvalidEntity,
+		EntityDoesNotExist,
 
 		// Socket Error
 		SocketAlreadyOpen,
