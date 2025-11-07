@@ -295,12 +295,13 @@ namespace tme::engine
 	{
 		uint8_t acceptedConnections = 0;
 
+		core::TcpSocket* clientSocket = nullptr;
 		EntityId newEntityId = 0;
 		ErrorCode errorCode = ErrorCode::Success;
 		std::shared_ptr<TcpSocketComponent> tcpSocketComponent = nullptr;
 		while (acceptedConnections < MAX_ACCEPTED_CONNECTIONS_PAR_TICK)
 		{
-			core::TcpSocket* clientSocket = nullptr;
+			clientSocket = nullptr;
 			std::pair<ErrorCode, int> intPairResult = m_tcpLisentSocket->acceptSocket(&clientSocket);
 			if (intPairResult.first == ErrorCode::SocketWouldBlock)
 			{
@@ -310,9 +311,6 @@ namespace tme::engine
 			{
 				return intPairResult.first;
 			}
-
-			acceptedConnections++;
-			TME_DEBUG_LOG("NetworkEngine: Accepted new TCP connection.");
 
 			newEntityId = createEntity();
 			tcpSocketComponent = std::make_shared<TcpSocketComponent>();
@@ -327,6 +325,9 @@ namespace tme::engine
 			}
 
 			tcpSocketComponent.reset();
+
+			acceptedConnections++;
+			TME_DEBUG_LOG("NetworkEngine: Accepted new TCP connection.");
 		}
 
 		return ErrorCode::Success;

@@ -1,5 +1,6 @@
 #include "TME/engine/networkEcs.hpp"
 
+#include "iNetworkSystem.hpp"
 #include "destroyComponentTag.hpp"
 
 namespace tme::engine

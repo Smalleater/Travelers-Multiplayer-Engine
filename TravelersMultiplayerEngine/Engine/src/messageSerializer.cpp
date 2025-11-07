@@ -27,7 +27,6 @@ namespace tme::engine
 
 		MessageHeader header;
 		header.size = static_cast<uint32_t>(_payload.size());
-		header.typeFlag = _internal ? INTERNAL_MESSAGE : USER_MESSAGE;
 
 		std::vector<uint8_t> data(sizeof(MessageHeader));
 		std::memcpy(data.data(), &header, sizeof(header));
@@ -36,19 +35,32 @@ namespace tme::engine
 		return data;
 	}
 
-	std::pair<MessageHeader, std::vector<uint8_t>> MessageSerializer::deserializeFromNetwork(const std::vector<uint8_t>& _data)
+	bool MessageSerializer::getPayloadFromNetworkBuffer(const std::vector<uint8_t>& _buffer, 
+		std::vector<uint8_t>& _outPayload, size_t& _outConsumedBytes)
 	{
-		TME_ASSERT_REF_PTR_OR_COPIABLE(_data);
+		TME_ASSERT_REF_PTR_OR_COPIABLE(_buffer);
+		TME_ASSERT_REF_PTR_OR_COPIABLE(_outPayload);
 
-		if (_data.size() < sizeof(MessageHeader))
+		_outConsumedBytes = 0;
+		_outPayload.clear();
+
+		if (_buffer.size() < sizeof(MessageHeader))
 		{
-			throw std::runtime_error("Data too small");
+			return false;
 		}
 
 		MessageHeader header;
-		std::memcpy(&header, _data.data(), sizeof(header));
-		std::vector<uint8_t> payload(_data.begin() + sizeof(MessageHeader), _data.end());
+		std::memcpy(&header, _buffer.data(), sizeof(MessageHeader));
+		if (_buffer.size() < sizeof(MessageHeader) + header.size)
+		{
+			return false;
+		}
 
-		return { header, payload };
+		_outPayload.resize(header.size);
+		std::memcpy(_outPayload.data(), _buffer.data() + sizeof(MessageHeader), header.size);
+
+		_outConsumedBytes = sizeof(MessageHeader) + header.size;
+
+		return true;
 	}
 }

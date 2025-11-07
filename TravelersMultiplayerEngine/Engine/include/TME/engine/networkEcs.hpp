@@ -19,6 +19,7 @@ namespace tme::engine
 	using EntityId = uint64_t;
 
 	struct INetworkComponent;
+	struct INetworkSystem;
 
 	template<typename ComponentType>
 	struct SparseSet
@@ -69,13 +70,6 @@ namespace tme::engine
 		{
 			return m_sparse.find(_entityId) != m_sparse.end();
 		}
-	};
-
-	class NetworkEcs;
-	struct INetworkSystem
-	{
-		virtual ~INetworkSystem() = default;
-		virtual void update(NetworkEcs& _ecs) = 0;
 	};
 
 	class NetworkEcs
