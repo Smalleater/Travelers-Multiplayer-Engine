@@ -11,10 +11,6 @@
 
 namespace tme::server
 {
-	struct Client;
-
-	using ClientMap = std::unordered_map<uint32_t, Client*>;
-
 	class Server
 	{
 	public:
@@ -28,20 +24,18 @@ namespace tme::server
 
 		TME_API bool isRunning() const;
 
+		TME_API void beginUpdate();
+		TME_API void endUpdate();
+
 	private:
 		static Server* m_singleton;
 
 		engine::NetworkEngine* m_networkEngine;
 
-		ClientMap clients;
-
 		bool m_isRunning;
 
 		Server();
 		~Server();
-
-		ErrorCode startTcpSocket();
-		ErrorCode startUdpSocket();
 	};
 
 	

@@ -11,6 +11,8 @@
 
 #include "TME/engine/networkEcs.hpp"
 
+#define MAX_ACCEPTED_CONNECTIONS_PAR_TICK 32
+
 namespace tme::engine
 {
 	class NetworkEngine
@@ -39,14 +41,14 @@ namespace tme::engine
 			return m_networkEcs.addComponentToEntity(_entityId, _component);
 		}
 
-
-
 	private:
 		core::TcpSocket* m_tcpLisentSocket;
 		core::TcpSocket* m_tcpConnectSocket;
 		core::UdpSocket* m_udpSocket;
 
 		NetworkEcs m_networkEcs;
+
+		ErrorCode acceptConnection();
 	};
 }
 

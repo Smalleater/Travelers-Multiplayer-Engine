@@ -7,6 +7,10 @@
 #include "TME/core/wsaInitializer.hpp"
 #endif
 
+#include "networkSystemRegistrar.hpp"
+
+#include "tcpSocketComponent.hpp"
+
 namespace tme::engine
 {
 	NetworkEngine::NetworkEngine()
@@ -14,6 +18,8 @@ namespace tme::engine
 		m_tcpLisentSocket = nullptr;
 		m_tcpConnectSocket = nullptr;
 		m_udpSocket = nullptr;
+
+		NetworkSystemRegistrar::registerNetworkSystems(&m_networkEcs);
 	}
 
 	NetworkEngine::~NetworkEngine()
@@ -261,6 +267,12 @@ namespace tme::engine
 
 	void NetworkEngine::beginUpdate()
 	{
+		ErrorCode errorCode = acceptConnection();
+		if (errorCode != ErrorCode::Success)
+		{
+			TME_ERROR_LOG("NetworkEngine: Failed to accept new TCP connections. ErrorCode: %d", static_cast<int>(errorCode));
+		}
+
 		m_networkEcs.beginUpdate();
 	}
 
@@ -277,5 +289,46 @@ namespace tme::engine
 	ErrorCode NetworkEngine::destroyEntity(EntityId _entityId)
 	{
 		return m_networkEcs.destroyEntity(_entityId);
+	}
+
+	ErrorCode NetworkEngine::acceptConnection()
+	{
+		uint8_t acceptedConnections = 0;
+
+		EntityId newEntityId = 0;
+		ErrorCode errorCode = ErrorCode::Success;
+		std::shared_ptr<TcpSocketComponent> tcpSocketComponent = nullptr;
+		while (acceptedConnections < MAX_ACCEPTED_CONNECTIONS_PAR_TICK)
+		{
+			core::TcpSocket* clientSocket = nullptr;
+			std::pair<ErrorCode, int> intPairResult = m_tcpLisentSocket->acceptSocket(&clientSocket);
+			if (intPairResult.first == ErrorCode::SocketWouldBlock)
+			{
+				break;
+			}
+			else if (intPairResult.first != ErrorCode::Success)
+			{
+				return intPairResult.first;
+			}
+
+			acceptedConnections++;
+			TME_DEBUG_LOG("NetworkEngine: Accepted new TCP connection.");
+
+			newEntityId = createEntity();
+			tcpSocketComponent = std::make_shared<TcpSocketComponent>();
+			tcpSocketComponent->tcpSocket = clientSocket;
+			errorCode = addComponentToEntity(newEntityId, tcpSocketComponent);
+			if (errorCode != ErrorCode::Success)
+			{
+				TME_ERROR_LOG("NetworkEngine: Failed to add TcpSocketComponent to new entity. ErrorCode: %d", static_cast<int>(errorCode));
+				clientSocket->closeSocket();
+				delete clientSocket;
+				continue;
+			}
+
+			tcpSocketComponent.reset();
+		}
+
+		return ErrorCode::Success;
 	}
 }

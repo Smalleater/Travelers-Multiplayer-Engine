@@ -98,4 +98,14 @@ namespace tme::server
 	{
 		return m_isRunning;
 	}
+
+	void Server::beginUpdate()
+	{
+		m_networkEngine->beginUpdate();
+	}
+
+	void Server::endUpdate()
+	{
+		m_networkEngine->endUpdate();
+	}
 }
