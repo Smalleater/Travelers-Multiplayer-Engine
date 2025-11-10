@@ -18,4 +18,4 @@ namespace tme::engine
 	};
 }
 
-#endif // TME_ENGINE_PING_COMPONENT_HPP
+#endif
