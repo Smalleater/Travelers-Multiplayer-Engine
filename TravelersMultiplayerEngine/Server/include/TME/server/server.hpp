@@ -11,6 +11,8 @@
 
 namespace tme::server
 {
+	using EntityId = uint64_t;
+
 	class Server
 	{
 	public:
@@ -26,6 +28,14 @@ namespace tme::server
 
 		TME_API void beginUpdate();
 		TME_API void endUpdate();
+
+		TME_API ErrorCode sendTcpMessage(engine::EntityId _entityId, std::shared_ptr<engine::Message> _message);
+
+		template<typename ...ComponentType>
+		std::vector<EntityId> queryEntitiesWithComponent()
+		{
+			return m_networkEngine->queryEntitiesWithComponent<ComponentType...>();
+		}
 
 	private:
 		static Server* m_singleton;

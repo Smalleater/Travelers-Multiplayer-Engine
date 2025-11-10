@@ -12,6 +12,7 @@ namespace tme
 
 		// Server Error
 		ServerAlreadyStarted,
+		ServerNotRunning,
 
 		// Client Error
 		ClientAlreadyConnected,
@@ -20,6 +21,7 @@ namespace tme
 		NetworkEngineNotInitialized,
 		InvalidIpAddress,
 		InvalidPortNumber,
+		InvalidComponent,
 
 		// Network ECS Error
 		EntityDoesNotHaveComponent,

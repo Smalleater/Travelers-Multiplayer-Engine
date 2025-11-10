@@ -101,11 +101,34 @@ namespace tme::server
 
 	void Server::beginUpdate()
 	{
+		if (!m_isRunning)
+		{
+			TME_ERROR_LOG("Server: Cannot begin update, server is not running.");
+			return;
+		}
+
 		m_networkEngine->beginUpdate();
 	}
 
 	void Server::endUpdate()
 	{
+		if (!m_isRunning)
+		{
+			TME_ERROR_LOG("Server: Cannot end update, server is not running.");
+			return;
+		}
+
 		m_networkEngine->endUpdate();
+	}
+
+	ErrorCode Server::sendTcpMessage(engine::EntityId _entityId, std::shared_ptr<engine::Message> _message)
+	{
+		if (!m_isRunning)
+		{
+			TME_ERROR_LOG("Server: Cannot send TCP message, server is not running.");
+			return ErrorCode::ServerNotRunning;
+		}
+
+		return m_networkEngine->sendTcpMessage(_entityId, _message);
 	}
 }

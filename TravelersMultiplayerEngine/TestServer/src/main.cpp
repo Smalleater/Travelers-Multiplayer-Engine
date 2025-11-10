@@ -1,9 +1,8 @@
-#include <thread>
-#include <chrono>
+#include "TME/server/server.hpp"
 
 #include "TME/debugUtils.hpp"
 
-#include "TME/server/server.hpp"
+#include "TME/engine/networkRootComponentTag.hpp"
 
 using namespace tme;
 using namespace tme::server;
@@ -17,6 +16,13 @@ int main() {
 	while (Server::Get()->isRunning())
 	{
 		Server::Get()->beginUpdate();
+
+		std::vector<EntityId> entityNetworkRoot = Server::Get()->queryEntitiesWithComponent<engine::NetworkRootComponentTag>();
+		for (size_t i = 0; i < entityNetworkRoot.size(); i++)
+		{
+			TME_INFO_LOG("Entity with NetworkRootComponentTag: %s", std::to_string(entityNetworkRoot[i]).c_str());
+		}
+
 		Server::Get()->endUpdate();
 	}
 

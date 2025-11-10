@@ -113,7 +113,6 @@ namespace tme::engine
 			auto store = getOrCreateComponentStore<ComponentType>().lock();
 			if (!store)
 			{
-				TME_ERROR_LOG("Component store unavailable for hasComponent check.");
 				return false;
 			}
 
@@ -123,33 +122,30 @@ namespace tme::engine
 		template<typename ComponentType>
 		std::pair<ErrorCode, std::weak_ptr<ComponentType>> getComponentOfEntity(EntityId _entityId)
 		{
-			if (isEntityScheduledForCreation(_entityId))
-			{
-				return { ErrorCode::EntityScheduledForCreation, std::weak_ptr<ComponentType>() };
-			}
-
-			std::weak_ptr<SparseSet<ComponentType>> store = getOrCreateComponentStore<ComponentType>();
-			return store->get(_entityId);
-		}
-
-		template<typename ComponentType>
-		std::vector<EntityId> queryEntitiesWithComponent()
-		{
 			auto store = getOrCreateComponentStore<ComponentType>().lock();
 			if (!store)
 			{
-				TME_ERROR_LOG("Component store unavailable for queryEntitiesWithComponent.");
-				return std::vector<EntityId>();
+				return { ErrorCode::ComponentStoreUnavailable , std::weak_ptr<ComponentType>() };
 			}
 
-			std::vector<EntityId> entityIds;
+			return store->get(_entityId);
+		}
 
-			for (const auto& [entityId, index] : store->m_sparse)
+		template<typename ...ComponentType>
+		std::vector<EntityId> queryEntitiesWithComponent()
+		{
+			std::vector<EntityId> result;
+			for (const auto& entityId : m_entities)
 			{
-				entityIds.push_back(entityId);
+				bool hasAllComponents = true;
+				((hasAllComponents = (hasAllComponents && hasComponent<ComponentType>(entityId))), ...);
+				if (hasAllComponents)
+				{
+					result.push_back(entityId);
+				}
 			}
 
-			return entityIds;
+			return result;
 		}
 
 		template<typename ComponentType>
@@ -167,7 +163,7 @@ namespace tme::engine
 		}
 
 	private:
-		EntityId m_nextEntityId = 1;
+		EntityId m_nextEntityId = 2;
 		std::unordered_set<EntityId> m_entities;
 
 		std::unordered_map<size_t, std::shared_ptr<void>> m_componentStores;

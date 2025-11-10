@@ -15,6 +15,8 @@
 
 namespace tme::engine
 {
+	struct Message;
+
 	class NetworkEngine
 	{
 	public:
@@ -35,10 +37,18 @@ namespace tme::engine
 		TME_API EntityId createEntity();
 		TME_API ErrorCode destroyEntity(EntityId _entityId);
 
+		TME_API ErrorCode sendTcpMessage(EntityId _entityId, std::shared_ptr<Message> _message);
+
 		template<typename ComponentType>
 		ErrorCode addComponentToEntity(EntityId _entityId, std::shared_ptr<ComponentType> _component)
 		{
 			return m_networkEcs.addComponentToEntity(_entityId, _component);
+		}
+
+		template<typename ...ComponentType>
+		std::vector<EntityId> queryEntitiesWithComponent()
+		{
+			return m_networkEcs.queryEntitiesWithComponent<ComponentType...>();
 		}
 
 	private:

@@ -2,6 +2,7 @@
 
 #include "TME/debugUtils.hpp"
 #include "TME/core/netUtils.hpp"
+#include "TME/engine/message.hpp"
 
 #ifdef _WIN32
 #include "TME/core/wsaInitializer.hpp"
@@ -9,7 +10,9 @@
 
 #include "networkSystemRegistrar.hpp"
 
+#include "TME/engine/networkRootComponentTag.hpp"
 #include "tcpSocketComponent.hpp"
+#include "messageComponent.hpp"
 
 namespace tme::engine
 {
@@ -291,6 +294,26 @@ namespace tme::engine
 		return m_networkEcs.destroyEntity(_entityId);
 	}
 
+	ErrorCode NetworkEngine::sendTcpMessage(EntityId _entityId, std::shared_ptr<Message> _message)
+	{
+		auto getSendTcpMessageComponentResult = m_networkEcs.getComponentOfEntity<SendTcpMessageComponent>(_entityId);
+		if (getSendTcpMessageComponentResult.first != ErrorCode::Success)
+		{
+			TME_ERROR_LOG("NetworkEngine: Failed to get SendTcpMessageComponent for entity %llu. ErrorCode: %d", _entityId, static_cast<int>(getSendTcpMessageComponentResult.first));
+			return getSendTcpMessageComponentResult.first;
+		}
+
+		std::shared_ptr<SendTcpMessageComponent> sendTcpMessageComponent = getSendTcpMessageComponentResult.second.lock();
+		if (!sendTcpMessageComponent)
+		{
+			TME_ERROR_LOG("NetworkEngine: SendTcpMessageComponent for entity %llu is no longer valid.", _entityId);
+			return ErrorCode::InvalidComponent;
+		}
+
+		sendTcpMessageComponent->m_messagesToSend[_entityId].push_back(_message);
+		return ErrorCode::Success;
+	}
+
 	ErrorCode NetworkEngine::acceptConnection()
 	{
 		uint8_t acceptedConnections = 0;
@@ -298,7 +321,11 @@ namespace tme::engine
 		core::TcpSocket* clientSocket = nullptr;
 		EntityId newEntityId = 0;
 		ErrorCode errorCode = ErrorCode::Success;
+		std::shared_ptr<NetworkRootComponentTag> networkRootComponentTag = nullptr;
 		std::shared_ptr<TcpSocketComponent> tcpSocketComponent = nullptr;
+		std::shared_ptr<SendTcpMessageComponent> sendMessageComponent = nullptr;
+		std::shared_ptr<ReceiveTcpMessageComponent> receiveMessageComponent = nullptr;
+
 		while (acceptedConnections < MAX_ACCEPTED_CONNECTIONS_PAR_TICK)
 		{
 			clientSocket = nullptr;
@@ -313,14 +340,49 @@ namespace tme::engine
 			}
 
 			newEntityId = createEntity();
+
+			networkRootComponentTag = std::shared_ptr<NetworkRootComponentTag>();
+			errorCode = m_networkEcs.addComponentToEntity(newEntityId, networkRootComponentTag);
+			if (errorCode != ErrorCode::Success)
+			{
+				TME_ERROR_LOG("NetworkEngine: Failed to add NetworkRootComponentTag to new entity. ErrorCode: %d", static_cast<int>(errorCode));
+				clientSocket->closeSocket();
+				delete clientSocket;
+				destroyEntity(newEntityId);
+				continue;
+			}
+
 			tcpSocketComponent = std::make_shared<TcpSocketComponent>();
 			tcpSocketComponent->tcpSocket = clientSocket;
-			errorCode = addComponentToEntity(newEntityId, tcpSocketComponent);
+			errorCode = m_networkEcs.addComponentToEntity(newEntityId, tcpSocketComponent);
 			if (errorCode != ErrorCode::Success)
 			{
 				TME_ERROR_LOG("NetworkEngine: Failed to add TcpSocketComponent to new entity. ErrorCode: %d", static_cast<int>(errorCode));
 				clientSocket->closeSocket();
 				delete clientSocket;
+				destroyEntity(newEntityId);
+				continue;
+			}
+
+			receiveMessageComponent = std::make_shared<ReceiveTcpMessageComponent>();
+			errorCode = m_networkEcs.addComponentToEntity(newEntityId, receiveMessageComponent);
+			if (errorCode != ErrorCode::Success)
+			{
+				TME_ERROR_LOG("NetworkEngine: Failed to add ReceiveTcpMessageComponent to new entity. ErrorCode: %d", static_cast<int>(errorCode));
+				clientSocket->closeSocket();
+				delete clientSocket;
+				destroyEntity(newEntityId);
+				continue;
+			}
+
+			sendMessageComponent = std::make_shared<SendTcpMessageComponent>();
+			errorCode = m_networkEcs.addComponentToEntity(newEntityId, sendMessageComponent);
+			if (errorCode != ErrorCode::Success)
+			{
+				TME_ERROR_LOG("NetworkEngine: Failed to add SendTcpMessageComponent to new entity. ErrorCode: %d", static_cast<int>(errorCode));
+				clientSocket->closeSocket();
+				delete clientSocket;
+				destroyEntity(newEntityId);
 				continue;
 			}
 
