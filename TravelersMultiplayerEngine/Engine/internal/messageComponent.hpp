@@ -14,13 +14,14 @@ namespace tme::engine
 
 	struct SendTcpMessageComponent : public INetworkComponent
 	{
-		std::unordered_map<EntityId, std::vector<std::shared_ptr<Message>>> m_messagesToSend;
-		std::unordered_map<EntityId, std::vector<std::vector<uint8_t>>> m_serializedToSend;
+		std::vector<std::shared_ptr<Message>> m_messagesToSend;
+		std::vector<std::vector<uint8_t>> m_serializedToSend;
+		int m_lastMessageByteSent;
 	};
 
 	struct ReceiveTcpMessageComponent : public INetworkComponent
 	{
-		std::unordered_map<EntityId, std::unordered_map<std::string, std::vector<std::shared_ptr<Message>>>> m_receivedMessages;
+		std::unordered_map<std::string, std::vector<std::shared_ptr<Message>>> m_receivedMessages;
 	};
 }
 

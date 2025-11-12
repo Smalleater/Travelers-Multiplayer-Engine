@@ -310,7 +310,7 @@ namespace tme::engine
 			return ErrorCode::InvalidComponent;
 		}
 
-		sendTcpMessageComponent->m_messagesToSend[_entityId].push_back(_message);
+		sendTcpMessageComponent->m_messagesToSend.push_back(_message);
 		return ErrorCode::Success;
 	}
 
@@ -376,6 +376,7 @@ namespace tme::engine
 			}
 
 			sendMessageComponent = std::make_shared<SendTcpMessageComponent>();
+			sendMessageComponent->m_lastMessageByteSent = 0;
 			errorCode = m_networkEcs.addComponentToEntity(newEntityId, sendMessageComponent);
 			if (errorCode != ErrorCode::Success)
 			{

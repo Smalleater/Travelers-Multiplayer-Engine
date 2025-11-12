@@ -2,6 +2,8 @@
 
 #include "TME/debugUtils.hpp"
 
+#include "TME/core/tcpSocket.hpp"
+
 #include "TME/engine/networkEcs.hpp"
 #include "TME/engine/message.hpp"
 
@@ -14,7 +16,7 @@ namespace tme::engine
 {
 	void SendTcpMessageSystem::update(NetworkEcs& _ecs)
 	{
-		std::vector<EntityId> entityIds = _ecs.queryEntitiesWithComponent<SendTcpMessageComponent>();
+		std::vector<EntityId> entityIds = _ecs.queryEntitiesWithComponent<TcpSocketComponent, SendTcpMessageComponent>();
 
 		// Prepared for multi threading in the future
 		for (EntityId entityId : entityIds)
@@ -34,16 +36,15 @@ namespace tme::engine
 			}
 
 			std::vector<uint8_t> serializedMessage;
-			for (auto messages : sendTcpMessageComponent->m_messagesToSend)
+			for (auto message : sendTcpMessageComponent->m_messagesToSend)
 			{
-				for (auto message : messages.second)
-				{
-					serializedMessage.clear();
-					serializedMessage = MessageSerializer::serializePayload(*message.get());
-					serializedMessage = MessageSerializer::serializeForNetwork(serializedMessage);
-					sendTcpMessageComponent->m_serializedToSend[messages.first].push_back(serializedMessage);
-				}
+				serializedMessage.clear();
+				serializedMessage = MessageSerializer::serializePayload(*message.get());
+				serializedMessage = MessageSerializer::serializeForNetwork(serializedMessage);
+				sendTcpMessageComponent->m_serializedToSend.push_back(serializedMessage);
 			}
+
+			sendTcpMessageComponent->m_messagesToSend.clear();
 		}
 
 		for (EntityId entityId : entityIds)
@@ -62,13 +63,46 @@ namespace tme::engine
 				continue;
 			}
 
-			for (auto messages : sendTcpMessageComponent->m_serializedToSend)
+			auto getTcpSocketComponent = _ecs.getComponentOfEntity<TcpSocketComponent>(entityId);
+			if (getTcpSocketComponent.first != ErrorCode::Success)
 			{
-				auto getTcpSocketComponent = _ecs.getComponentOfEntity<TcpSocketComponent>(messages.first);
-				if (getTcpSocketComponent.first != ErrorCode::Success)
-				{
+				TME_ERROR_LOG("SendTcpMessageSystem::update: Failed to get TcpSocketComponent for entity %llu", static_cast<unsigned long long>(entityId));
+				continue;
+			}
 
+			auto tcpSocketComponent = getTcpSocketComponent.second.lock();
+			if (!tcpSocketComponent)
+			{
+				TME_ERROR_LOG("SendTcpMessageSystem::update: TcpSocketComponent is expired for entity %llu", static_cast<unsigned long long>(entityId));
+				continue;
+			}
+
+			for (auto messageIt = sendTcpMessageComponent->m_serializedToSend.begin(); messageIt != sendTcpMessageComponent->m_serializedToSend.end();)
+			{
+				int byteSent = 0;
+				auto sendDataResult = tcpSocketComponent->tcpSocket->sendData(messageIt->data() + sendTcpMessageComponent->m_lastMessageByteSent,
+					messageIt->size() - sendTcpMessageComponent->m_lastMessageByteSent, byteSent);
+
+				if (sendDataResult.first != ErrorCode::Success)
+				{
+					if (sendDataResult.first == ErrorCode::SocketSendPartial)
+					{
+						TME_DEBUG_LOG("SendTcpMessageSystem::update: Partial data sent for entity %llu, BytesSent: %d/%llu",
+							static_cast<unsigned long long>(entityId), byteSent, static_cast<unsigned long long>(messageIt->size()));
+					}
+					else
+					{
+						TME_ERROR_LOG("SendTcpMessageSystem::update: Failed to send data for entity %llu, ErrorCode: %d, Last socket error: %d",
+							static_cast<unsigned long long>(entityId), static_cast<int>(sendDataResult.first), static_cast<int>(sendDataResult.second));
+					}
+
+					break;
 				}
+
+				TME_DEBUG_LOG("SendTcpMessageSystem::update: Sent data for entity %llu, BytesSent: %d/%llu",
+					static_cast<unsigned long long>(entityId), byteSent, static_cast<unsigned long long>(messageIt->size()));
+
+				messageIt = sendTcpMessageComponent->m_serializedToSend.erase(messageIt);
 			}
 		}
 	}

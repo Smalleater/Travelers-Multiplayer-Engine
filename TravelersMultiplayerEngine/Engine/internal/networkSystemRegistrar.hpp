@@ -6,7 +6,7 @@ namespace tme::engine
 	class NetworkEcs;
 	namespace NetworkSystemRegistrar
 	{
-		void registerNetworkSystems(const NetworkEcs* _networkEcs);
+		void registerNetworkSystems(NetworkEcs* _networkEcs);
 	}
 }
 

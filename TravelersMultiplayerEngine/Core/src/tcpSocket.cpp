@@ -210,7 +210,7 @@ namespace tme::core
 		return { ErrorCode::Success, 0 };
 	}
 
-	std::pair<ErrorCode, int> TcpSocket::sendData(const void* _data, size_t _size)
+	std::pair<ErrorCode, int> TcpSocket::sendData(const void* _data, size_t _size, int& _byteSent)
 	{
 		std::lock_guard<std::mutex> lock(m_mutex);
 
@@ -224,15 +224,19 @@ namespace tme::core
 			return { ErrorCode::SocketSendSizeTooLarge, 0 };
 		}
 
-		int iResult = send(m_socket, static_cast<const char*>(_data), static_cast<int>(_size), 0);
+		_byteSent = send(m_socket, static_cast<const char*>(_data), static_cast<int>(_size), 0);
 		int lastSocketError = SocketUtils::getLastSocketError();
-		if (iResult == 0)
+		if (_byteSent == 0)
 		{
 			return { ErrorCode::SocketConnectionClosed, 0 };
 		}
-		else if (iResult < 0)
+		else if (_byteSent < 0)
 		{
 			return { ErrorCode::SocketSendFailed, lastSocketError };
+		}
+		else if (_byteSent < _size)
+		{
+			return { ErrorCode::SocketSendPartial, 0 };
 		}
 
 		return { ErrorCode::Success, 0 };

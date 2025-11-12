@@ -69,12 +69,12 @@ namespace tme::engine
 }
 
 #define DECLARE_MESSAGE_BEGIN(MessageType) \
-namespace tme { \
+namespace tme::engine { \
     struct MessageType : public Message \
     { \
     public: \
         static constexpr const char* MESSAGE_TYPE_NAME = #MessageType; \
-        inline static uint32_t MESSAGE_TYPE_ID = tme::internal::hashTypeName(MESSAGE_TYPE_NAME); \
+        inline static uint32_t MESSAGE_TYPE_ID = internal::hashTypeName(MESSAGE_TYPE_NAME); \
         using CurrentMessageType = MessageType;
 
 #define FIELD(type, name) \
@@ -85,8 +85,8 @@ namespace tme { \
             name##_Registrar() \
             { \
                 const auto offset = reinterpret_cast<size_t>(&(static_cast<CurrentMessageType*>(nullptr)->name)); \
-                tme::internal::registerSerializer<type>(MESSAGE_TYPE_ID, #name, offset); \
-                tme::internal::registerDeserializer<type>(MESSAGE_TYPE_ID, #name, offset); \
+                internal::registerSerializer<type>(MESSAGE_TYPE_ID, #name, offset); \
+                internal::registerDeserializer<type>(MESSAGE_TYPE_ID, #name, offset); \
             } \
         }; \
         inline static name##_Registrar name##_reg; \
@@ -130,7 +130,7 @@ namespace tme { \
     private: \
         struct Register \
         { \
-            Register() { tme::internal::registerMessageType(MESSAGE_TYPE_ID, CurrentMessageType::createFromBytes); } \
+            Register() { internal::registerMessageType(MESSAGE_TYPE_ID, CurrentMessageType::createFromBytes); } \
         }; \
         inline static Register _register{}; \
     }; \

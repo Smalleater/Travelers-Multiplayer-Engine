@@ -50,7 +50,7 @@ namespace tme::engine
 
 	void NetworkEcs::registerEndUpdateSystem(std::shared_ptr<INetworkSystem> _system)
 	{
-		if (m_registerEndUpdateSystem.find(_system) == m_registerEndUpdateSystem.end())
+		if (m_registerEndUpdateSystem.find(_system) != m_registerEndUpdateSystem.end())
 		{
 			TME_DEBUG_LOG("System already registered in end update systems.");
 			return;

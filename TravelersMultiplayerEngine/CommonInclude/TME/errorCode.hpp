@@ -43,6 +43,7 @@ namespace tme
 		SocketAcceptFailed,
 		SocketSendSizeTooLarge,
 		SocketSendFailed,
+		SocketSendPartial,
 		SocketReceiveSizeTooLarge,
 		SocketReceiveFailed,
 		SocketSetBlockingFailed,
