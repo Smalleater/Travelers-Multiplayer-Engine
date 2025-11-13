@@ -42,7 +42,7 @@ namespace tme::engine
 		template<typename ComponentType>
 		ErrorCode addComponentToEntity(EntityId _entityId, std::shared_ptr<ComponentType> _component)
 		{
-			return m_networkEcs.addComponentToEntity(_entityId, _component);
+			return m_networkEcs->addComponentToEntity(_entityId, _component);
 		}
 
 		template<typename ...ComponentType>
@@ -56,7 +56,7 @@ namespace tme::engine
 		core::TcpSocket* m_tcpConnectSocket;
 		core::UdpSocket* m_udpSocket;
 
-		NetworkEcs m_networkEcs;
+		NetworkEcs* m_networkEcs;
 
 		ErrorCode acceptConnection();
 	};

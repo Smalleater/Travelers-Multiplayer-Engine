@@ -5,7 +5,6 @@
 #include "TME/core/tcpSocket.hpp"
 
 #include "TME/engine/networkEcs.hpp"
-#include "TME/engine/message.hpp"
 
 #include "messageSerializer.hpp"
 

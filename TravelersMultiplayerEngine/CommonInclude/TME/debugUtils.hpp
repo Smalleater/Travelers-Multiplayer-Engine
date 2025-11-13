@@ -7,9 +7,6 @@
 #include <mutex>
 #include <sstream>
 
-namespace tme
-{
-
 #ifdef NDEBUG
 #define TME_ASSERT_REF_PTR_OR_COPIABLE(obj) ((void)0)
 #define TME_DEBUG_LOG(fmt, ...) ((void)0)
@@ -50,6 +47,5 @@ namespace tme
 	{
 		bool m_value = std::is_reference_v<T> || std::is_pointer_v<T> || std::is_trivially_copyable_v<T>;
 	};
-}
 
 #endif

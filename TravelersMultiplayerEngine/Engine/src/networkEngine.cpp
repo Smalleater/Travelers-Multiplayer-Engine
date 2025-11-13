@@ -3,6 +3,7 @@
 #include "TME/debugUtils.hpp"
 #include "TME/core/netUtils.hpp"
 #include "TME/engine/message.hpp"
+#include "TME/engine/networkEcsUtils.hpp"
 
 #ifdef _WIN32
 #include "TME/core/wsaInitializer.hpp"
@@ -22,7 +23,8 @@ namespace tme::engine
 		m_tcpConnectSocket = nullptr;
 		m_udpSocket = nullptr;
 
-		NetworkSystemRegistrar::registerNetworkSystems(&m_networkEcs);
+		m_networkEcs = new NetworkEcs();
+		NetworkSystemRegistrar::registerNetworkSystems(m_networkEcs);
 	}
 
 	NetworkEngine::~NetworkEngine()
@@ -30,6 +32,8 @@ namespace tme::engine
 		delete m_tcpLisentSocket;
 		delete m_tcpConnectSocket;
 		delete m_udpSocket;
+
+		delete m_networkEcs;
 	}
 
 	ErrorCode NetworkEngine::startTcpListenOnPort(uint16_t _port, bool _blocking)
@@ -277,27 +281,27 @@ namespace tme::engine
 			TME_ERROR_LOG("NetworkEngine: Failed to accept new TCP connections. ErrorCode: %d", static_cast<int>(errorCode));
 		}
 
-		m_networkEcs.beginUpdate();
+		m_networkEcs->beginUpdate();
 	}
 
 	void NetworkEngine::endUpdate()
 	{
-		m_networkEcs.endUpdate();
+		m_networkEcs->endUpdate();
 	}
 
 	EntityId NetworkEngine::createEntity()
 	{
-		return m_networkEcs.createEntity();
+		return m_networkEcs->createEntity();
 	}
 
 	ErrorCode NetworkEngine::destroyEntity(EntityId _entityId)
 	{
-		return m_networkEcs.destroyEntity(_entityId);
+		return m_networkEcs->destroyEntity(_entityId);
 	}
 
 	ErrorCode NetworkEngine::sendTcpMessage(EntityId _entityId, std::shared_ptr<Message> _message)
 	{
-		auto getSendTcpMessageComponentResult = m_networkEcs.getComponentOfEntity<SendTcpMessageComponent>(_entityId);
+		auto getSendTcpMessageComponentResult = m_networkEcs->getComponentOfEntity<SendTcpMessageComponent>(_entityId);
 		if (getSendTcpMessageComponentResult.first != ErrorCode::Success)
 		{
 			TME_ERROR_LOG("NetworkEngine: Failed to get SendTcpMessageComponent for entity %llu. ErrorCode: %d", _entityId, static_cast<int>(getSendTcpMessageComponentResult.first));
@@ -342,51 +346,37 @@ namespace tme::engine
 
 			newEntityId = createEntity();
 
-			networkRootComponentTag = std::shared_ptr<NetworkRootComponentTag>();
-			errorCode = m_networkEcs.addComponentToEntity(newEntityId, networkRootComponentTag);
-			if (errorCode != ErrorCode::Success)
-			{
-				TME_ERROR_LOG("NetworkEngine: Failed to add NetworkRootComponentTag to new entity. ErrorCode: %d", static_cast<int>(errorCode));
+			TME_ENTITY_ADD_COMPONENT(m_networkEcs, newEntityId, std::shared_ptr<NetworkRootComponentTag>(), false, {
 				clientSocket->closeSocket();
 				delete clientSocket;
 				destroyEntity(newEntityId);
 				continue;
-			}
+				});
 
 			tcpSocketComponent = std::make_shared<TcpSocketComponent>();
 			tcpSocketComponent->tcpSocket = clientSocket;
-			errorCode = m_networkEcs.addComponentToEntity(newEntityId, tcpSocketComponent);
-			if (errorCode != ErrorCode::Success)
-			{
-				TME_ERROR_LOG("NetworkEngine: Failed to add TcpSocketComponent to new entity. ErrorCode: %d", static_cast<int>(errorCode));
+			TME_ENTITY_ADD_COMPONENT(m_networkEcs, newEntityId, tcpSocketComponent, false, {
 				clientSocket->closeSocket();
 				delete clientSocket;
 				destroyEntity(newEntityId);
 				continue;
-			}
+				});
 
-			receiveMessageComponent = std::make_shared<ReceiveTcpMessageComponent>();
-			errorCode = m_networkEcs.addComponentToEntity(newEntityId, receiveMessageComponent);
-			if (errorCode != ErrorCode::Success)
-			{
-				TME_ERROR_LOG("NetworkEngine: Failed to add ReceiveTcpMessageComponent to new entity. ErrorCode: %d", static_cast<int>(errorCode));
+			TME_ENTITY_ADD_COMPONENT(m_networkEcs, newEntityId, std::make_shared<ReceiveTcpMessageComponent>(), false, {
 				clientSocket->closeSocket();
 				delete clientSocket;
 				destroyEntity(newEntityId);
 				continue;
-			}
+				});
 
 			sendMessageComponent = std::make_shared<SendTcpMessageComponent>();
 			sendMessageComponent->m_lastMessageByteSent = 0;
-			errorCode = m_networkEcs.addComponentToEntity(newEntityId, sendMessageComponent);
-			if (errorCode != ErrorCode::Success)
-			{
-				TME_ERROR_LOG("NetworkEngine: Failed to add SendTcpMessageComponent to new entity. ErrorCode: %d", static_cast<int>(errorCode));
+			TME_ENTITY_ADD_COMPONENT(m_networkEcs, newEntityId, sendMessageComponent, false, {
 				clientSocket->closeSocket();
 				delete clientSocket;
 				destroyEntity(newEntityId);
 				continue;
-			}
+				});
 
 			tcpSocketComponent.reset();
 

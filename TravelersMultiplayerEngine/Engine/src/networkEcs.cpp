@@ -1,5 +1,7 @@
 #include "TME/engine/networkEcs.hpp"
 
+#include "TME/engine/networkEcsUtils.hpp"
+
 #include "iNetworkSystem.hpp"
 #include "destroyComponentTag.hpp"
 
@@ -25,11 +27,7 @@ namespace tme::engine
 			return ErrorCode::EntityDoesNotExist;
 		}
 
-		ErrorCode errorCode = addComponentToEntity(_entityId, std::make_shared<DestroyComponentTag>());
-		if (errorCode != ErrorCode::Success && errorCode != ErrorCode::EntityAlreadyHasComponent)
-		{
-			return errorCode;
-		}
+		TME_ENTITY_ADD_COMPONENT(this, _entityId, std::make_shared<DestroyComponentTag>(), true, {});
 
 		return ErrorCode::Success;
 	}
