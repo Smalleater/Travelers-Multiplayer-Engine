@@ -13,10 +13,7 @@ int main() {
 	ec = Client::Get()->ConnectTo("127.0.0.1", 2025);
 	if (ec != ErrorCode::Success) return -1;
 
-	while (true)
-	{
-
-	}
+	std::this_thread::sleep_for(std::chrono::seconds(3));
 
 	ec = Client::Get()->Disconnect();
 	if (ec != ErrorCode::Success) return -1;

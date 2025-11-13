@@ -19,6 +19,7 @@ namespace tme::core
 
 	TcpSocket::~TcpSocket()
 	{
+		shutdownSocket();
 		closeSocket();
 	}
 
@@ -232,6 +233,11 @@ namespace tme::core
 		}
 		else if (_byteSent < 0)
 		{
+			if (lastSocketError == SOCKET_CONNECTION_RESET)
+			{
+				return { ErrorCode::SocketConnectionClosed, 0 };
+			}
+
 			return { ErrorCode::SocketSendFailed, lastSocketError };
 		}
 		else if (_byteSent < _size)

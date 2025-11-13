@@ -234,6 +234,7 @@ namespace tme::engine
 			return ErrorCode::Success;
 		}
 
+		m_tcpConnectSocket->shutdownSocket();
 		m_tcpConnectSocket->closeSocket();
 		delete m_tcpConnectSocket;
 		m_tcpConnectSocket = nullptr;
@@ -390,7 +391,7 @@ namespace tme::engine
 			tcpSocketComponent.reset();
 
 			acceptedConnections++;
-			TME_DEBUG_LOG("NetworkEngine: Accepted new TCP connection.");
+			TME_INFO_LOG("Engine: Accepted new TCP connection. Entity ID: %llu", newEntityId);
 		}
 
 		return ErrorCode::Success;

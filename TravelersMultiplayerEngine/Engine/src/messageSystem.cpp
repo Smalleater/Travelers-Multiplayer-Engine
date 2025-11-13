@@ -45,23 +45,6 @@ namespace tme::engine
 			}
 
 			sendTcpMessageComponent->m_messagesToSend.clear();
-		}
-
-		for (EntityId entityId : entityIds)
-		{
-			auto getSendTcpMessageComponentResult = _ecs.getComponentOfEntity<SendTcpMessageComponent>(entityId);
-			if (getSendTcpMessageComponentResult.first != ErrorCode::Success)
-			{
-				TME_ERROR_LOG("SendTcpMessageSystem::update: Failed to get SendTcpMessageComponent for entity %llu", static_cast<unsigned long long>(entityId));
-				continue;
-			}
-
-			auto sendTcpMessageComponent = getSendTcpMessageComponentResult.second.lock();
-			if (!sendTcpMessageComponent)
-			{
-				TME_ERROR_LOG("SendTcpMessageSystem::update: SendTcpMessageComponent is expired for entity %llu", static_cast<unsigned long long>(entityId));
-				continue;
-			}
 
 			auto getTcpSocketComponent = _ecs.getComponentOfEntity<TcpSocketComponent>(entityId);
 			if (getTcpSocketComponent.first != ErrorCode::Success)
@@ -87,13 +70,25 @@ namespace tme::engine
 				{
 					if (sendDataResult.first == ErrorCode::SocketSendPartial)
 					{
+						sendTcpMessageComponent->m_lastMessageByteSent = byteSent;
 						TME_DEBUG_LOG("SendTcpMessageSystem::update: Partial data sent for entity %llu, BytesSent: %d/%llu",
 							static_cast<unsigned long long>(entityId), byteSent, static_cast<unsigned long long>(messageIt->size()));
+					}
+					else if (sendDataResult.first == ErrorCode::SocketConnectionClosed)
+					{
+						tcpSocketComponent->tcpSocket->closeSocket();
+						_ecs.destroyEntity(entityId);
+						TME_INFO_LOG("Engine: Connection closed for entity %llu", static_cast<unsigned long long>(entityId));
 					}
 					else
 					{
 						TME_ERROR_LOG("SendTcpMessageSystem::update: Failed to send data for entity %llu, ErrorCode: %d, Last socket error: %d",
 							static_cast<unsigned long long>(entityId), static_cast<int>(sendDataResult.first), static_cast<int>(sendDataResult.second));
+
+						tcpSocketComponent->tcpSocket->shutdownSocket();
+						tcpSocketComponent->tcpSocket->closeSocket();
+						_ecs.destroyEntity(entityId);
+						TME_INFO_LOG("Engine: Connection closed for entity %llu", static_cast<unsigned long long>(entityId));
 					}
 
 					break;
