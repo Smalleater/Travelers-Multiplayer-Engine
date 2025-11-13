@@ -80,7 +80,7 @@ namespace tme::engine
 			m_endUpdateSystems[i]->update(*this);
 		}
 
-		for (auto entityId : queryEntitiesWithComponent<DestroyComponentTag>())
+		for (auto entityId : queryIds<DestroyComponentTag>())
 		{
 			for (auto store : m_componentStores)
 			{

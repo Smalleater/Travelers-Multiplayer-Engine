@@ -132,7 +132,7 @@ namespace tme::engine
 		}
 
 		template<typename ...ComponentType>
-		std::vector<EntityId> queryEntitiesWithComponent()
+		std::vector<EntityId> queryIds()
 		{
 			std::vector<EntityId> result;
 			for (const auto& entityId : m_entities)
@@ -149,7 +149,7 @@ namespace tme::engine
 		}
 
 		template<typename ...ComponentType>
-		std::vector<std::tuple<EntityId, std::shared_ptr<ComponentType>...>> queryEntitiesWithComponentAndData()
+		std::vector<std::tuple<EntityId, std::shared_ptr<ComponentType>...>> query()
 		{
 			std::vector<std::tuple<EntityId, std::shared_ptr<ComponentType>...>> result;
 			for (const auto& entityId : m_entities)

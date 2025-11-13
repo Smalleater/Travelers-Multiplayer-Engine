@@ -15,7 +15,7 @@ namespace tme::engine
 {
 	void SendTcpMessageSystem::update(NetworkEcs& _ecs)
 	{
-		std::vector<EntityId> entityIds = _ecs.queryEntitiesWithComponent<TcpSocketComponent, SendTcpMessageComponent>();
+		std::vector<EntityId> entityIds = _ecs.queryIds<TcpSocketComponent, SendTcpMessageComponent>();
 
 		// Prepared for multi threading in the future
 		for (EntityId entityId : entityIds)
