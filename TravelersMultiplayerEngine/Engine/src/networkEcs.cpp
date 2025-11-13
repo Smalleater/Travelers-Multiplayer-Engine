@@ -27,6 +27,11 @@ namespace tme::engine
 			return ErrorCode::EntityDoesNotExist;
 		}
 
+		if (hasComponent<DestroyComponentTag>(_entityId))
+		{
+			return ErrorCode::Success;
+		}
+
 		TME_ENTITY_ADD_COMPONENT(this, _entityId, std::make_shared<DestroyComponentTag>(), true, {});
 
 		return ErrorCode::Success;

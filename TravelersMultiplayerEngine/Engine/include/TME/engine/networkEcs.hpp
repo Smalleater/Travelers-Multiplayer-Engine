@@ -148,6 +148,23 @@ namespace tme::engine
 			return result;
 		}
 
+		template<typename ...ComponentType>
+		std::vector<std::tuple<EntityId, std::shared_ptr<ComponentType>...>> queryEntitiesWithComponentAndData()
+		{
+			std::vector<std::tuple<EntityId, std::shared_ptr<ComponentType>...>> result;
+			for (const auto& entityId : m_entities)
+			{
+				bool hasAllComponents = true;
+				((hasAllComponents = (hasAllComponents && hasComponent<ComponentType>(entityId))), ...);
+				if (hasAllComponents)
+				{
+					result.emplace_back(entityId, getComponentOfEntity<ComponentType>(entityId).second.lock()...);
+				}
+			}
+
+			return result;
+		}
+
 		template<typename ComponentType>
 		ErrorCode removeComponentFromEntity(EntityId _entityId)
 		{
