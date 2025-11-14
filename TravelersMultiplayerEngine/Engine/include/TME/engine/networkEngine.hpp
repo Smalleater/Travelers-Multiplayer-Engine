@@ -46,9 +46,15 @@ namespace tme::engine
 		}
 
 		template<typename ...ComponentType>
-		std::vector<EntityId> queryEntitiesWithComponent()
+		std::vector<EntityId> queryIds()
 		{
-			return m_networkEcs.queryEntitiesWithComponent<ComponentType...>();
+			return m_networkEcs->queryIds<ComponentType...>();
+		}
+
+		template<typename ...ComponentType>
+		std::vector<std::tuple<EntityId, std::shared_ptr<ComponentType>...>> query()
+		{
+			return m_networkEcs->query<ComponentType...>();
 		}
 
 	private:

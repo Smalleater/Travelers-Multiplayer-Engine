@@ -12,7 +12,6 @@ using namespace tme;
 using namespace tme::engine;
 using namespace tme::server;
 
-
 DECLARE_MESSAGE_BEGIN(HelloWorld)
 FIELD(std::string, string)
 DECLARE_MESSAGE_END()
@@ -29,7 +28,7 @@ int main() {
 	{
 		Server::Get()->beginUpdate();
 
-		std::vector<EntityId> entityNetworkRoot = Server::Get()->queryEntitiesWithComponent<engine::NetworkRootComponentTag>();
+		std::vector<EntityId> entityNetworkRoot = Server::Get()->queryIds<NetworkRootComponentTag>();
 		for (size_t i = 0; i < entityNetworkRoot.size(); i++)
 		{
 			std::shared_ptr<HelloWorld> message = std::make_shared<HelloWorld>();

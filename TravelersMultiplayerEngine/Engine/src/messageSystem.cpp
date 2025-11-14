@@ -15,24 +15,11 @@ namespace tme::engine
 {
 	void SendTcpMessageSystem::update(NetworkEcs& _ecs)
 	{
-		std::vector<EntityId> entityIds = _ecs.queryIds<TcpSocketComponent, SendTcpMessageComponent>();
-
-		// Prepared for multi threading in the future
-		for (EntityId entityId : entityIds)
+		for (auto queryResult : _ecs.query<TcpSocketComponent, SendTcpMessageComponent>())
 		{
-			auto getSendTcpMessageComponentResult = _ecs.getComponentOfEntity<SendTcpMessageComponent>(entityId);
-			if (getSendTcpMessageComponentResult.first != ErrorCode::Success)
-			{
-				TME_ERROR_LOG("SendTcpMessageSystem::update: Failed to get SendTcpMessageComponent for entity %llu", static_cast<unsigned long long>(entityId));
-				continue;
-			}
-
-			auto sendTcpMessageComponent = getSendTcpMessageComponentResult.second.lock();
-			if (!sendTcpMessageComponent)
-			{
-				TME_ERROR_LOG("SendTcpMessageSystem::update: SendTcpMessageComponent is expired for entity %llu", static_cast<unsigned long long>(entityId));
-				continue;
-			}
+			EntityId entityId = std::get<0>(queryResult);
+			std::shared_ptr tcpSocketComponent = std::get<1>(queryResult);
+			std::shared_ptr sendTcpMessageComponent = std::get<2>(queryResult);
 
 			std::vector<uint8_t> serializedMessage;
 			for (auto message : sendTcpMessageComponent->m_messagesToSend)
@@ -44,20 +31,6 @@ namespace tme::engine
 			}
 
 			sendTcpMessageComponent->m_messagesToSend.clear();
-
-			auto getTcpSocketComponent = _ecs.getComponentOfEntity<TcpSocketComponent>(entityId);
-			if (getTcpSocketComponent.first != ErrorCode::Success)
-			{
-				TME_ERROR_LOG("SendTcpMessageSystem::update: Failed to get TcpSocketComponent for entity %llu", static_cast<unsigned long long>(entityId));
-				continue;
-			}
-
-			auto tcpSocketComponent = getTcpSocketComponent.second.lock();
-			if (!tcpSocketComponent)
-			{
-				TME_ERROR_LOG("SendTcpMessageSystem::update: TcpSocketComponent is expired for entity %llu", static_cast<unsigned long long>(entityId));
-				continue;
-			}
 
 			for (auto messageIt = sendTcpMessageComponent->m_serializedToSend.begin(); messageIt != sendTcpMessageComponent->m_serializedToSend.end();)
 			{

@@ -32,9 +32,15 @@ namespace tme::server
 		TME_API ErrorCode sendTcpMessage(engine::EntityId _entityId, std::shared_ptr<engine::Message> _message);
 
 		template<typename ...ComponentType>
-		std::vector<EntityId> queryEntitiesWithComponent()
+		std::vector<EntityId> queryIds()
 		{
-			return m_networkEngine->queryEntitiesWithComponent<ComponentType...>();
+			return m_networkEngine->queryIds<ComponentType...>();
+		}
+
+		template<typename ...ComponentType>
+		std::vector<std::tuple<EntityId, std::shared_ptr<ComponentType>...>> query()
+		{
+			return m_networkEngine->query<ComponentType...>();
 		}
 
 	private:
