@@ -2,9 +2,15 @@
 #include <chrono>
 
 #include "TME/client/client.hpp"
+#include "TME/engine/message.hpp"
 
 using namespace tme;
+using namespace tme::engine;
 using namespace tme::client;
+
+DECLARE_MESSAGE_BEGIN(HelloWorld)
+FIELD(std::string, string)
+DECLARE_MESSAGE_END()
 
 int main() {
 	
@@ -13,7 +19,16 @@ int main() {
 	ec = Client::Get()->ConnectTo("127.0.0.1", 2025);
 	if (ec != ErrorCode::Success) return -1;
 
-	std::this_thread::sleep_for(std::chrono::seconds(3));
+	while (Client::Get()->IsConnected())
+	{
+		Client::Get()->beginUpdate();
+
+		std::shared_ptr<HelloWorld> message = std::make_shared<HelloWorld>();
+		message->string = "Hello World from server!";
+		Client::Get()->sendTcpMessage(message);
+
+		Client::Get()->endUpdate();
+	}
 
 	ec = Client::Get()->Disconnect();
 	if (ec != ErrorCode::Success) return -1;

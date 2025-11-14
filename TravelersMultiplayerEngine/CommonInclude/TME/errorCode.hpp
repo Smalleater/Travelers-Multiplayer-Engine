@@ -17,6 +17,7 @@ namespace tme
 
 		// Client Error
 		ClientAlreadyConnected,
+		ClientNotConnected,
 
 		// Engine Error
 		NetworkEngineNotInitialized,

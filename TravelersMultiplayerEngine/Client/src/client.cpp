@@ -94,4 +94,42 @@ namespace tme::client
 			return ErrorCode::Success;
 		}
 	}
+
+	bool Client::IsConnected() const
+	{
+		return m_isConnected;
+	}
+
+	void Client::beginUpdate()
+	{
+		if (!m_isConnected)
+		{
+			TME_ERROR_LOG("Client: Cannot begin update, client is not connected.");
+			return;
+		}
+
+		m_networkEngine->beginUpdate();
+	}
+
+	void Client::endUpdate()
+	{
+		if (!m_isConnected)
+		{
+			TME_ERROR_LOG("Client: Cannot end update, client is not connected.");
+			return;
+		}
+
+		m_networkEngine->endUpdate();
+	}
+
+	ErrorCode Client::sendTcpMessage(std::shared_ptr<engine::Message> _message)
+	{
+		if (!m_isConnected)
+		{
+			TME_ERROR_LOG("Client: Cannot send TCP message, client is not connected.");
+			return ErrorCode::ClientNotConnected;
+		}
+
+		return m_networkEngine->sendTcpMessage(m_networkEngine->getSelfEntityId(), _message);
+	}
 }

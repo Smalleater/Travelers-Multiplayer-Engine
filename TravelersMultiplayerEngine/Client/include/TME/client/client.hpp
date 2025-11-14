@@ -11,6 +11,8 @@
 
 namespace tme::client
 {
+	using EntityId = uint64_t;
+
 	class Client
 	{
 	public:
@@ -21,6 +23,25 @@ namespace tme::client
 
 		TME_API ErrorCode ConnectTo(const std::string& _address, uint16_t _port);
 		TME_API ErrorCode Disconnect();
+
+		TME_API bool IsConnected() const;
+
+		TME_API void beginUpdate();
+		TME_API void endUpdate();
+
+		TME_API ErrorCode sendTcpMessage(std::shared_ptr<engine::Message> _message);
+
+		template<typename ...ComponentType>
+		std::vector<EntityId> queryIds()
+		{
+			return m_networkEngine->queryIds<ComponentType...>();
+		}
+
+		template<typename ...ComponentType>
+		std::vector<std::tuple<EntityId, std::shared_ptr<ComponentType>...>> query()
+		{
+			return m_networkEngine->query<ComponentType...>();
+		}
 
 	private:
 		static Client* m_singleton;
