@@ -6,6 +6,7 @@ namespace tme
 	enum class ErrorCode
 	{
 		Success = 0,
+		Failure,
 
 		// Client/Server Error
 		DisconnectWithErrors,

@@ -20,21 +20,14 @@ namespace tme::engine
 		return m_entities.find(_entityId) == m_entities.end() && hasComponent<DestroyComponentTag>(_entityId);
 	}
 
-	ErrorCode NetworkEcs::destroyEntity(EntityId _entityId)
+	void NetworkEcs::destroyEntity(EntityId _entityId)
 	{
-		if (m_entities.find(_entityId) == m_entities.end())
+		if (m_entities.find(_entityId) == m_entities.end() || hasComponent<DestroyComponentTag>(_entityId))
 		{
-			return ErrorCode::EntityDoesNotExist;
+			return;
 		}
 
-		if (hasComponent<DestroyComponentTag>(_entityId))
-		{
-			return ErrorCode::Success;
-		}
-
-		TME_ENTITY_ADD_COMPONENT(this, _entityId, std::make_shared<DestroyComponentTag>(), true, {});
-
-		return ErrorCode::Success;
+		TME_ENTITY_ADD_COMPONENT(this, _entityId, std::make_shared<DestroyComponentTag>(), {});
 	}
 
 	void NetworkEcs::registerBeginUpdateSystem(std::shared_ptr<INetworkSystem> _system)

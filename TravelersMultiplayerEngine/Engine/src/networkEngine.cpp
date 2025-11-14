@@ -20,18 +20,21 @@ namespace tme::engine
 	NetworkEngine::NetworkEngine()
 	{
 		m_tcpLisentSocket = nullptr;
-		m_tcpConnectSocket = nullptr;
 		m_udpSocket = nullptr;
 
 		m_networkEcs = new NetworkEcs();
 		NetworkSystemRegistrar::registerNetworkSystems(m_networkEcs);
+
+		m_selfEntityId = m_networkEcs->createEntity();
+		TME_ENTITY_ADD_COMPONENT(m_networkEcs, m_selfEntityId, std::make_shared<NetworkRootComponentTag>(), {});
 	}
 
 	NetworkEngine::~NetworkEngine()
 	{
 		delete m_tcpLisentSocket;
-		delete m_tcpConnectSocket;
 		delete m_udpSocket;
+
+		m_networkEcs->destroyEntity(m_selfEntityId);
 
 		delete m_networkEcs;
 	}
@@ -95,7 +98,7 @@ namespace tme::engine
 	{
 		TME_ASSERT_REF_PTR_OR_COPIABLE(_address);
 
-		if (m_tcpConnectSocket)
+		if (m_networkEcs->hasComponent<TcpSocketComponent>(m_selfEntityId))
 		{
 			TME_ERROR_LOG("NetworkEngine: start TCP connect to address called but TCP connect socket is already open.");
 			return ErrorCode::SocketAlreadyOpen;
@@ -123,25 +126,53 @@ namespace tme::engine
 		TME_DEBUG_LOG("NetworkEngine: WSA initialized successfully.");
 #endif
 
-		m_tcpConnectSocket = new core::TcpSocket();
+		std::shared_ptr<TcpSocketComponent> tcpSocketComponent = std::make_shared<TcpSocketComponent>();
+		tcpSocketComponent->tcpSocket = new core::TcpSocket();
 
 		std::pair<ErrorCode, int> intPairResult;
 
-		intPairResult = m_tcpConnectSocket->connectTo(_address, _port);
+		intPairResult = tcpSocketComponent->tcpSocket->connectTo(_address, _port);
+		if (intPairResult.first != ErrorCode::Success)
+		{
+			TME_ERROR_LOG("NetworkEngine: Failed to connect TCP socket to %s:%d. ErrorCode: %d", _address.c_str(), _port, static_cast<int>(intPairResult.first));
+			TME_INFO_LOG("NetworkEngine: TCP connect socket was not connected on port %d.", _port);
+			return intPairResult.first;
+		}
+
+		intPairResult = tcpSocketComponent->tcpSocket->setBlocking(_blocking);
+		if (intPairResult.first != ErrorCode::Success)
+		{
+			TME_ERROR_LOG("NetworkEngine: Failed to set TCP connect socket blocking mode. ErrorCode: %d", static_cast<int>(intPairResult.first));
+			TME_INFO_LOG("NetworkEngine: TCP connect socket was not connected on port %d.", _port);
+			return intPairResult.first;
+		}
+
+		TME_ENTITY_ADD_COMPONENT(m_networkEcs, m_selfEntityId, tcpSocketComponent, {
+			TME_INFO_LOG("NetworkEngine: TCP connect socket was not connected on port %d.", _port);
+			return ErrorCode::Failure;
+			}
+		);
+
+		///////////
+
+		/*m_tcpConnectSocket = new core::TcpSocket();
+		std::pair<ErrorCode, int> intPairResult;*/
+
+		/*intPairResult = m_tcpConnectSocket->connectTo(_address, _port);
 		if (intPairResult.first != ErrorCode::Success)
 		{
 			TME_ERROR_LOG("NetworkEngine: Failed to connect TCP socket to %s:%d. ErrorCode: %d", _address.c_str(), _port, static_cast<int>(intPairResult.first));
 			stopTcpConnect();
 			return intPairResult.first;
-		}
+		}*/
 
-		intPairResult = m_tcpConnectSocket->setBlocking(_blocking);
+		/*intPairResult = m_tcpConnectSocket->setBlocking(_blocking);
 		if (intPairResult.first != ErrorCode::Success)
 		{
 			TME_ERROR_LOG("NetworkEngine: Failed to set TCP connect socket blocking mode. ErrorCode: %d", static_cast<int>(intPairResult.first));
 			stopTcpConnect();
 			return intPairResult.first;
-		}
+		}*/
 
 		TME_DEBUG_LOG("NetworkEngine: TCP connect socket connected to %s:%d.", _address.c_str(), _port);
 		return ErrorCode::Success;
@@ -232,16 +263,32 @@ namespace tme::engine
 
 	ErrorCode NetworkEngine::stopTcpConnect()
 	{
-		if (!m_tcpConnectSocket)
+		if (!m_networkEcs->hasComponent<TcpSocketComponent>(m_selfEntityId))
 		{
 			TME_DEBUG_LOG("NetworkEngine: Stop TCP connect called but TCP connect socket is not open.");
 			return ErrorCode::Success;
 		}
 
-		m_tcpConnectSocket->shutdownSocket();
-		m_tcpConnectSocket->closeSocket();
-		delete m_tcpConnectSocket;
-		m_tcpConnectSocket = nullptr;
+		auto getComponentResult = m_networkEcs->getComponentOfEntity<TcpSocketComponent>(m_selfEntityId);
+		if (getComponentResult.first != ErrorCode::Success)
+		{
+			TME_ERROR_LOG("NetworkEngine: Failed to get TcpSocketComponent for self entity. ErrorCode: %d", static_cast<int>(getComponentResult.first));
+			return getComponentResult.first;
+		}
+
+		std::shared_ptr<TcpSocketComponent> tcpSocketComponent = getComponentResult.second.lock();
+		if (!tcpSocketComponent)
+		{
+			TME_ERROR_LOG("NetworkEngine: TcpSocketComponent for self entity is no longer valid.");
+			return ErrorCode::InvalidComponent;
+		}
+		
+		ErrorCode removeResult = m_networkEcs->removeComponentFromEntity<TcpSocketComponent>(m_selfEntityId);
+		if (removeResult != ErrorCode::Success)
+		{
+			TME_ERROR_LOG("NetworkEngine: Failed to remove TcpSocketComponent from self entity. ErrorCode: %d", static_cast<int>(removeResult));
+			return removeResult;
+		}
 
 #ifdef _WIN32
 		core::WSAInitializer::Get()->CleanUp();
@@ -294,9 +341,9 @@ namespace tme::engine
 		return m_networkEcs->createEntity();
 	}
 
-	ErrorCode NetworkEngine::destroyEntity(EntityId _entityId)
+	void NetworkEngine::destroyEntity(EntityId _entityId)
 	{
-		return m_networkEcs->destroyEntity(_entityId);
+		m_networkEcs->destroyEntity(_entityId);
 	}
 
 	ErrorCode NetworkEngine::sendTcpMessage(EntityId _entityId, std::shared_ptr<Message> _message)
@@ -317,6 +364,11 @@ namespace tme::engine
 
 		sendTcpMessageComponent->m_messagesToSend.push_back(_message);
 		return ErrorCode::Success;
+	}
+
+	EntityId NetworkEngine::getSelfEntityId()
+	{
+		return m_selfEntityId;
 	}
 
 	ErrorCode NetworkEngine::acceptConnection()
@@ -346,7 +398,7 @@ namespace tme::engine
 
 			newEntityId = createEntity();
 
-			TME_ENTITY_ADD_COMPONENT(m_networkEcs, newEntityId, std::shared_ptr<NetworkRootComponentTag>(), false, {
+			TME_ENTITY_ADD_COMPONENT(m_networkEcs, newEntityId, std::shared_ptr<NetworkRootComponentTag>(), {
 				clientSocket->closeSocket();
 				delete clientSocket;
 				destroyEntity(newEntityId);
@@ -355,14 +407,14 @@ namespace tme::engine
 
 			tcpSocketComponent = std::make_shared<TcpSocketComponent>();
 			tcpSocketComponent->tcpSocket = clientSocket;
-			TME_ENTITY_ADD_COMPONENT(m_networkEcs, newEntityId, tcpSocketComponent, false, {
+			TME_ENTITY_ADD_COMPONENT(m_networkEcs, newEntityId, tcpSocketComponent, {
 				clientSocket->closeSocket();
 				delete clientSocket;
 				destroyEntity(newEntityId);
 				continue;
 				});
 
-			TME_ENTITY_ADD_COMPONENT(m_networkEcs, newEntityId, std::make_shared<ReceiveTcpMessageComponent>(), false, {
+			TME_ENTITY_ADD_COMPONENT(m_networkEcs, newEntityId, std::make_shared<ReceiveTcpMessageComponent>(), {
 				clientSocket->closeSocket();
 				delete clientSocket;
 				destroyEntity(newEntityId);
@@ -371,7 +423,7 @@ namespace tme::engine
 
 			sendMessageComponent = std::make_shared<SendTcpMessageComponent>();
 			sendMessageComponent->m_lastMessageByteSent = 0;
-			TME_ENTITY_ADD_COMPONENT(m_networkEcs, newEntityId, sendMessageComponent, false, {
+			TME_ENTITY_ADD_COMPONENT(m_networkEcs, newEntityId, sendMessageComponent, {
 				clientSocket->closeSocket();
 				delete clientSocket;
 				destroyEntity(newEntityId);

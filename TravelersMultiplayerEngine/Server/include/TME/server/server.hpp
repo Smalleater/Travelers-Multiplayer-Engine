@@ -31,6 +31,8 @@ namespace tme::server
 
 		TME_API ErrorCode sendTcpMessage(engine::EntityId _entityId, std::shared_ptr<engine::Message> _message);
 
+		TME_API EntityId getSelfEntityId();
+
 		template<typename ...ComponentType>
 		std::vector<EntityId> queryIds()
 		{

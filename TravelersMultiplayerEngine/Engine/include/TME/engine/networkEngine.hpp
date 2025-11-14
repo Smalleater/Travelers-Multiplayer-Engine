@@ -35,9 +35,11 @@ namespace tme::engine
 		TME_API void endUpdate();
 
 		TME_API EntityId createEntity();
-		TME_API ErrorCode destroyEntity(EntityId _entityId);
+		TME_API void destroyEntity(EntityId _entityId);
 
 		TME_API ErrorCode sendTcpMessage(EntityId _entityId, std::shared_ptr<Message> _message);
+
+		TME_API EntityId getSelfEntityId();
 
 		template<typename ComponentType>
 		ErrorCode addComponentToEntity(EntityId _entityId, std::shared_ptr<ComponentType> _component)
@@ -59,10 +61,12 @@ namespace tme::engine
 
 	private:
 		core::TcpSocket* m_tcpLisentSocket;
-		core::TcpSocket* m_tcpConnectSocket;
+		//core::TcpSocket* m_tcpConnectSocket;
 		core::UdpSocket* m_udpSocket;
 
 		NetworkEcs* m_networkEcs;
+
+		EntityId m_selfEntityId;
 
 		ErrorCode acceptConnection();
 	};

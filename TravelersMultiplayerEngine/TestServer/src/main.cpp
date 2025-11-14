@@ -24,16 +24,20 @@ int main() {
 	ec = Server::Get()->Start(2025);
 	if (ec != ErrorCode::Success) return -1;
 
+	EntityId selfEntityId = Server::Get()->getSelfEntityId();
+
 	while (Server::Get()->isRunning())
 	{
 		Server::Get()->beginUpdate();
 
-		std::vector<EntityId> entityNetworkRoot = Server::Get()->queryIds<NetworkRootComponentTag>();
-		for (size_t i = 0; i < entityNetworkRoot.size(); i++)
+		std::vector<EntityId> queryIds = Server::Get()->queryIds<NetworkRootComponentTag>();
+		for (size_t i = 0; i < queryIds.size(); i++)
 		{
+			if (queryIds[i] == selfEntityId) continue;
+
 			std::shared_ptr<HelloWorld> message = std::make_shared<HelloWorld>();
 			message->string = "Hello World from server!";
-			Server::Get()->sendTcpMessage(entityNetworkRoot[i], message);
+			Server::Get()->sendTcpMessage(queryIds[i], message);
 		}
 
 		Server::Get()->endUpdate();

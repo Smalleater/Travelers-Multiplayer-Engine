@@ -80,7 +80,7 @@ namespace tme::engine
 
 		EntityId createEntity();
 		bool isEntityValid(EntityId _entityId);
-		ErrorCode destroyEntity(EntityId _entityId);
+		void destroyEntity(EntityId _entityId);
 
 		void registerBeginUpdateSystem(std::shared_ptr<INetworkSystem> _system);
 		void registerEndUpdateSystem(std::shared_ptr<INetworkSystem> _system);
@@ -180,7 +180,7 @@ namespace tme::engine
 		}
 
 	private:
-		EntityId m_nextEntityId = 2;
+		EntityId m_nextEntityId = 1;
 		std::unordered_set<EntityId> m_entities;
 
 		std::unordered_map<size_t, std::shared_ptr<void>> m_componentStores;

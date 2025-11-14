@@ -131,4 +131,9 @@ namespace tme::server
 
 		return m_networkEngine->sendTcpMessage(_entityId, _message);
 	}
+
+	EntityId Server::getSelfEntityId()
+	{
+		return m_networkEngine->getSelfEntityId();
+	}
 }
