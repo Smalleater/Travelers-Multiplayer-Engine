@@ -11,7 +11,7 @@ namespace tme::engine
 	struct INetworkSystem
 	{
 		virtual ~INetworkSystem() = default;
-		virtual void update(NetworkEcs& _ecs) = 0;
+		virtual void update(NetworkEcs* _ecs) = 0;
 	};
 }
 

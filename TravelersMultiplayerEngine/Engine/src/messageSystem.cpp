@@ -8,14 +8,14 @@
 
 #include "messageSerializer.hpp"
 
-#include "tcpSocketComponent.hpp"
+#include "socketComponent.hpp"
 #include "messageComponent.hpp"
 
 namespace tme::engine
 {
-	void SendTcpMessageSystem::update(NetworkEcs& _ecs)
+	void SendTcpMessageSystem::update(NetworkEcs* _ecs)
 	{
-		for (auto queryResult : _ecs.query<TcpSocketComponent, SendTcpMessageComponent>())
+		for (auto queryResult : _ecs->query<TcpConnectSocketComponent, SendTcpMessageComponent>())
 		{
 			EntityId entityId = std::get<0>(queryResult);
 			std::shared_ptr tcpSocketComponent = std::get<1>(queryResult);
@@ -35,7 +35,7 @@ namespace tme::engine
 			for (auto messageIt = sendTcpMessageComponent->m_serializedToSend.begin(); messageIt != sendTcpMessageComponent->m_serializedToSend.end();)
 			{
 				int byteSent = 0;
-				auto sendDataResult = tcpSocketComponent->tcpSocket->sendData(messageIt->data() + sendTcpMessageComponent->m_lastMessageByteSent,
+				auto sendDataResult = tcpSocketComponent->m_tcpSocket->sendData(messageIt->data() + sendTcpMessageComponent->m_lastMessageByteSent,
 					messageIt->size() - sendTcpMessageComponent->m_lastMessageByteSent, byteSent);
 
 				if (sendDataResult.first != ErrorCode::Success)
@@ -48,8 +48,8 @@ namespace tme::engine
 					}
 					else if (sendDataResult.first == ErrorCode::SocketConnectionClosed)
 					{
-						tcpSocketComponent->tcpSocket->closeSocket();
-						_ecs.destroyEntity(entityId);
+						tcpSocketComponent->m_tcpSocket->closeSocket();
+						_ecs->destroyEntity(entityId);
 						TME_INFO_LOG("Engine: Connection closed for entity %llu", static_cast<unsigned long long>(entityId));
 					}
 					else
@@ -57,9 +57,9 @@ namespace tme::engine
 						TME_ERROR_LOG("SendTcpMessageSystem::update: Failed to send data for entity %llu, ErrorCode: %d, Last socket error: %d",
 							static_cast<unsigned long long>(entityId), static_cast<int>(sendDataResult.first), static_cast<int>(sendDataResult.second));
 
-						tcpSocketComponent->tcpSocket->shutdownSocket();
-						tcpSocketComponent->tcpSocket->closeSocket();
-						_ecs.destroyEntity(entityId);
+						tcpSocketComponent->m_tcpSocket->shutdownSocket();
+						tcpSocketComponent->m_tcpSocket->closeSocket();
+						_ecs->destroyEntity(entityId);
 						TME_INFO_LOG("Engine: Connection closed for entity %llu", static_cast<unsigned long long>(entityId));
 					}
 

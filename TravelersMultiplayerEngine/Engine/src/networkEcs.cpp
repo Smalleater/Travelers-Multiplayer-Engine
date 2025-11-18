@@ -62,7 +62,7 @@ namespace tme::engine
 	{
 		for (size_t i = 0; i < m_beginUpdateSystems.size(); i++)
 		{
-			m_beginUpdateSystems[i]->update(*this);
+			m_beginUpdateSystems[i]->update(this);
 		}
 	}
 
@@ -70,7 +70,7 @@ namespace tme::engine
 	{
 		for (size_t i = 0; i < m_endUpdateSystems.size(); i++)
 		{
-			m_endUpdateSystems[i]->update(*this);
+			m_endUpdateSystems[i]->update(this);
 		}
 
 		for (auto entityId : queryIds<DestroyComponentTag>())

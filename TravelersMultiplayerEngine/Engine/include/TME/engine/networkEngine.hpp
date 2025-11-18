@@ -11,8 +11,6 @@
 
 #include "TME/engine/networkEcs.hpp"
 
-#define MAX_ACCEPTED_CONNECTIONS_PAR_TICK 32
-
 namespace tme::engine
 {
 	struct Message;

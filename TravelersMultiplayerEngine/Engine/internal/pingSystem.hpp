@@ -7,7 +7,7 @@ namespace tme::engine
 {
 	struct PingSystem : public INetworkSystem
 	{
-		void update(NetworkEcs& _ecs) override;
+		void update(NetworkEcs* _ecs) override;
 	};
 }
 

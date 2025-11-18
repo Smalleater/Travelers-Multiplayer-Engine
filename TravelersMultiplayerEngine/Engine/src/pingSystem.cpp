@@ -2,7 +2,7 @@
 
 namespace tme::engine
 {
-	void PingSystem::update(NetworkEcs& _ecs)
+	void PingSystem::update(NetworkEcs* _ecs)
 	{
 
 	}
