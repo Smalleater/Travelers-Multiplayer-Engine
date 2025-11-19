@@ -28,6 +28,8 @@ int main() {
 		Client::Get()->sendTcpMessage(message);
 
 		Client::Get()->endUpdate();
+
+		std::this_thread::sleep_for(std::chrono::seconds(1));
 	}
 
 	ec = Client::Get()->Disconnect();

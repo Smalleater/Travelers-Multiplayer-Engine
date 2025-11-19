@@ -32,7 +32,7 @@ namespace tme::engine
 
 	void NetworkEcs::registerBeginUpdateSystem(std::shared_ptr<INetworkSystem> _system)
 	{
-		if (m_registerBeginUpdateSystem.find(_system) == m_registerBeginUpdateSystem.end())
+		if (m_registerBeginUpdateSystem.find(_system) != m_registerBeginUpdateSystem.end())
 		{
 			TME_DEBUG_LOG("System already registered in begin update systems.");
 			return;

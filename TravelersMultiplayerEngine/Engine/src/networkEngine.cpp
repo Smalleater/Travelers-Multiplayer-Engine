@@ -26,7 +26,6 @@ namespace tme::engine
 		NetworkSystemRegistrar::registerNetworkSystems(m_networkEcs);
 
 		m_selfEntityId = m_networkEcs->createEntity();
-		TME_ENTITY_ADD_COMPONENT(m_networkEcs, m_selfEntityId, std::make_shared<NetworkRootComponentTag>(), {});
 	}
 
 	NetworkEngine::~NetworkEngine()
@@ -92,6 +91,13 @@ namespace tme::engine
 			return intPairResult.first;
 		}
 
+		TME_ENTITY_ADD_COMPONENT(m_networkEcs, m_selfEntityId, tcpListenSocketComponent, {
+			TME_INFO_LOG("NetworkEngine: TCP listen socket was not listening on port %d.", _port);
+			stopTcpListen();
+			return ErrorCode::Failure;
+			}
+		);
+
 		TME_DEBUG_LOG("NetworkEngine: TCP listen socket started on port %d.", _port);
 		return ErrorCode::Success;
 	}
@@ -151,6 +157,26 @@ namespace tme::engine
 
 		TME_ENTITY_ADD_COMPONENT(m_networkEcs, m_selfEntityId, tcpSocketComponent, {
 			TME_INFO_LOG("NetworkEngine: TCP connect socket was not connected on port %d.", _port);
+			return ErrorCode::Failure;
+			}
+		);
+
+		TME_ENTITY_ADD_COMPONENT(m_networkEcs, m_selfEntityId, std::make_shared<NetworkRootComponentTag>(), {
+			stopTcpListen();
+			return ErrorCode::Failure;
+			}
+		);
+
+		std::shared_ptr<SendTcpMessageComponent> sendMessageComponent = std::make_shared<SendTcpMessageComponent>();
+		sendMessageComponent->m_lastMessageByteSent = 0;
+		TME_ENTITY_ADD_COMPONENT(m_networkEcs, m_selfEntityId, sendMessageComponent, {
+			stopTcpListen();
+			return ErrorCode::Failure;
+			}
+		);
+
+		TME_ENTITY_ADD_COMPONENT(m_networkEcs, m_selfEntityId, std::make_shared<ReceiveTcpMessageComponent>(), {
+			stopTcpListen();
 			return ErrorCode::Failure;
 			}
 		);
@@ -290,7 +316,7 @@ namespace tme::engine
 		tcpSocketComponent->m_tcpSocket->closeSocket();
 		delete tcpSocketComponent->m_tcpSocket;
 		tcpSocketComponent->m_tcpSocket = nullptr;
-		
+
 		ErrorCode removeResult = m_networkEcs->removeComponentFromEntity<TcpConnectSocketComponent>(m_selfEntityId);
 		if (removeResult != ErrorCode::Success)
 		{
@@ -330,11 +356,11 @@ namespace tme::engine
 
 	void NetworkEngine::beginUpdate()
 	{
-		ErrorCode errorCode = acceptConnection();
+		/*ErrorCode errorCode = acceptConnection();
 		if (errorCode != ErrorCode::Success)
 		{
 			TME_ERROR_LOG("NetworkEngine: Failed to accept new TCP connections. ErrorCode: %d", static_cast<int>(errorCode));
-		}
+		}*/
 
 		m_networkEcs->beginUpdate();
 	}

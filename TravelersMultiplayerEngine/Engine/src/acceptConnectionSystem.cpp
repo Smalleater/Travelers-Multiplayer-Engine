@@ -53,7 +53,7 @@ namespace tme::engine
 
 				newEntityId = _ecs->createEntity();
 
-				TME_ENTITY_ADD_COMPONENT(_ecs, newEntityId, std::shared_ptr<NetworkRootComponentTag>(), {
+				TME_ENTITY_ADD_COMPONENT(_ecs, newEntityId, std::make_shared<NetworkRootComponentTag>(), {
 					clientSocket->closeSocket();
 					delete clientSocket;
 					_ecs->destroyEntity(newEntityId);
