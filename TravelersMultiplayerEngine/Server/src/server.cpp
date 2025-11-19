@@ -1,6 +1,7 @@
 #include "TME/server/server.hpp"
 
 #include "TME/debugUtils.hpp"
+#include "TME/engine/connectionStatusComponent.hpp"
 
 namespace tme::server
 {
@@ -9,7 +10,6 @@ namespace tme::server
 	Server::Server()
 	{
 		m_networkEngine = new engine::NetworkEngine();
-		m_isRunning = false;
 	}
 
 	Server::~Server()
@@ -29,7 +29,7 @@ namespace tme::server
 
 	ErrorCode Server::Start(uint16_t _port)
 	{
-		if (m_isRunning)
+		if (isRunning())
 		{
 			TME_DEBUG_LOG("Server: Start called but server is already running.");
 			return ErrorCode::ServerAlreadyStarted;
@@ -49,14 +49,12 @@ namespace tme::server
 			return ec;
 		}
 
-		ec = m_networkEngine->startUdpOnPort(_port, false);
+		/*ec = m_networkEngine->startUdpOnPort(_port, false);
 		if (ec != ErrorCode::Success)
 		{
 			m_networkEngine->stopTcpListen();
 			return ec;
-		}
-
-		m_isRunning = true;
+		}*/
 
 		TME_INFO_LOG("Server: Started successfully on port %d.", _port);
 		return ErrorCode::Success;
@@ -64,7 +62,7 @@ namespace tme::server
 
 	ErrorCode Server::Stop()
 	{
-		if (!m_isRunning)
+		if (!isRunning())
 		{
 			TME_DEBUG_LOG("Server: Stop called but server is not running.");
 			return ErrorCode::Success;
@@ -73,18 +71,15 @@ namespace tme::server
 		if (!m_networkEngine)
 		{
 			TME_ERROR_LOG("Server: Network engine is not initialized.");
-			m_isRunning = false;
 			return ErrorCode::NetworkEngineNotInitialized;
 		}
 
 		ErrorCode ecTcp = m_networkEngine->stopTcpListen();
-		ErrorCode ecUdp = m_networkEngine->stopUdp();
+		//ErrorCode ecUdp = m_networkEngine->stopUdp();
 
-		m_isRunning = false;
-
-		if (ecTcp != ErrorCode::Success || ecUdp != ErrorCode::Success)
+		if (ecTcp != ErrorCode::Success /*|| ecUdp != ErrorCode::Success*/)
 		{
-			TME_ERROR_LOG("Server: Failed to stop server sockets properly. TCP ErrorCode: %d, UDP ErrorCode: %d", static_cast<int>(ecTcp), static_cast<int>(ecUdp));
+			TME_ERROR_LOG("Server: Failed to stop server sockets properly. TCP ErrorCode: %d", static_cast<int>(ecTcp));
 			return ErrorCode::DisconnectWithErrors;
 		}
 		else
@@ -96,12 +91,12 @@ namespace tme::server
 
 	bool Server::isRunning() const
 	{
-		return m_isRunning;
+		return m_networkEngine->entityHasComponent<engine::ListeningComponentTag>(m_networkEngine->getSelfEntityId());
 	}
 
 	void Server::beginUpdate()
 	{
-		if (!m_isRunning)
+		if (!isRunning())
 		{
 			TME_ERROR_LOG("Server: Cannot begin update, server is not running.");
 			return;
@@ -112,7 +107,7 @@ namespace tme::server
 
 	void Server::endUpdate()
 	{
-		if (!m_isRunning)
+		if (!isRunning())
 		{
 			TME_ERROR_LOG("Server: Cannot end update, server is not running.");
 			return;
@@ -123,7 +118,7 @@ namespace tme::server
 
 	ErrorCode Server::sendTcpMessage(engine::EntityId _entityId, std::shared_ptr<engine::Message> _message)
 	{
-		if (!m_isRunning)
+		if (!isRunning())
 		{
 			TME_ERROR_LOG("Server: Cannot send TCP message, server is not running.");
 			return ErrorCode::ServerNotRunning;

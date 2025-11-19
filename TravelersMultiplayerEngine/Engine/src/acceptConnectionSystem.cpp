@@ -46,9 +46,19 @@ namespace tme::engine
 				}
 				else if (intPairResult.first != ErrorCode::Success)
 				{
-					TME_ERROR_LOG("AcceptConnectionSystem::update: Failed to accept new connection on entity %llu, ErrorCode: %d, Last socket error: %d",
-						static_cast<unsigned long long>(querryEntityid), static_cast<int>(intPairResult.first), static_cast<int>(intPairResult.second));
+					TME_ERROR_LOG("AcceptConnectionSystem::update: Failed to accept new connection on entity %I32u, ErrorCode: %d, Last socket error: %d",
+						querryEntityid, static_cast<int>(intPairResult.first), static_cast<int>(intPairResult.second));
 					break;
+				}
+
+				auto setblockingResult = clientSocket->setBlocking(false);
+				if (setblockingResult.first != ErrorCode::Success)
+				{
+					TME_ERROR_LOG("AcceptConnectionSystem::update: Failed to set non-blocking mode on accepted socket. ErrorCode: %d, Last socket error: %d",
+						static_cast<int>(setblockingResult.first), static_cast<int>(setblockingResult.second));
+					clientSocket->closeSocket();
+					delete clientSocket;
+					continue;
 				}
 
 				newEntityId = _ecs->createEntity();
@@ -88,7 +98,7 @@ namespace tme::engine
 				tcpSocketComponent.reset();
 
 				acceptedConnections++;
-				TME_INFO_LOG("AcceptConnectionSystem::update: Accepted new TCP connection. Entity ID: %llu", newEntityId);
+				TME_INFO_LOG("AcceptConnectionSystem::update: Accepted new TCP connection. Entity ID: %I32u", newEntityId);
 			}
 		}
 	}

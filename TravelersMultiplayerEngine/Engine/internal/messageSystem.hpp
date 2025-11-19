@@ -9,6 +9,11 @@ namespace tme::engine
 	{
 		void update(NetworkEcs* _ecs) override;
 	};
+
+	struct ReceiveTcpMessageSystem : public INetworkSystem
+	{
+		void update(NetworkEcs* _ecs) override;
+	};
 }
 
 #endif

@@ -11,6 +11,7 @@ namespace tme::engine
 	{
 		// BeginUpdate
 		_networkEcs->registerBeginUpdateSystem(std::make_unique<AcceptConnectionSystem>());
+		_networkEcs->registerBeginUpdateSystem(std::make_unique<ReceiveTcpMessageSystem>());
 
 		// EndUpdate
 		_networkEcs->registerEndUpdateSystem(std::make_shared<SendTcpMessageSystem>());

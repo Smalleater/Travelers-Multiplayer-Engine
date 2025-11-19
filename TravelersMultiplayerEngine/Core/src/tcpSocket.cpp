@@ -248,7 +248,7 @@ namespace tme::core
 		return { ErrorCode::Success, 0 };
 	}
 
-	std::pair<ErrorCode, int> TcpSocket::receiveData(void* _buffer, size_t _size)
+	std::pair<ErrorCode, int> TcpSocket::receiveData(std::vector<uint8_t>& _buffer)
 	{
 		std::lock_guard<std::mutex> lock(m_mutex);
 
@@ -257,32 +257,37 @@ namespace tme::core
 			return { ErrorCode::SocketNotOpen, 0 };
 		}
 
-		if (_size > static_cast<size_t>(std::numeric_limits<int>::max()))
-		{
-			return { ErrorCode::SocketReceiveSizeTooLarge, 0 };
-		}
+		_buffer.clear();
+		char buffer[4096];
 
-		int iResult = recv(m_socket, static_cast<char*>(_buffer), static_cast<int>(_size), 0);
-		int lastSocketError = SocketUtils::getLastSocketError();
-		if (iResult == 0)
+		while (true)
 		{
-			return { ErrorCode::SocketConnectionClosed, lastSocketError };
-		}
-		else if (iResult < 0)
-		{
-			if (SocketUtils::isWouldBlockError(lastSocketError))
+			int bytes = recv(m_socket, buffer, sizeof(buffer), 0);
+			int lastSocketError = SocketUtils::getLastSocketError();
+
+			if (bytes > 0)
 			{
-				return { ErrorCode::SocketWouldBlock, 0 };
+				_buffer.insert(_buffer.end(), buffer, buffer + bytes);
 			}
-			else if (lastSocketError == SOCKET_CONNECTION_RESET)
+			else if (bytes == 0)
 			{
-				return { ErrorCode::SocketConnectionClosed, 0 };
+				return { ErrorCode::SocketConnectionClosed, lastSocketError };
 			}
+			else
+			{
+				if (SocketUtils::isWouldBlockError(lastSocketError))
+				{
+					return { ErrorCode::Success, 0 };
+				}
 
-			return { ErrorCode::SocketReceiveFailed, lastSocketError };
+				if (lastSocketError == SOCKET_CONNECTION_RESET)
+				{
+					return { ErrorCode::SocketConnectionClosed, 0 };
+				}
+
+				return { ErrorCode::SocketReceiveFailed, lastSocketError };
+			}
 		}
-
-		return { ErrorCode::Success, 0 };
 	}
 
 	std::pair<ErrorCode, int> TcpSocket::setBlocking(bool _blocking)

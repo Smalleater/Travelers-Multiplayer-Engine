@@ -11,7 +11,7 @@
 
 namespace tme::server
 {
-	using EntityId = uint64_t;
+	using EntityId = uint32_t;
 
 	class Server
 	{
@@ -33,24 +33,28 @@ namespace tme::server
 
 		TME_API EntityId getSelfEntityId();
 
-		template<typename ...ComponentType>
-		std::vector<EntityId> queryIds()
+		template<typename ComponentType>
+		bool entityHasComponent(EntityId _entityId)
 		{
-			return m_networkEngine->queryIds<ComponentType...>();
+			return m_networkEngine->entityHasComponent<ComponentType>(_entityId);
 		}
 
 		template<typename ...ComponentType>
-		std::vector<std::tuple<EntityId, std::shared_ptr<ComponentType>...>> query()
+		std::vector<EntityId> queryEntityIds()
 		{
-			return m_networkEngine->query<ComponentType...>();
+			return m_networkEngine->queryEntityIds<ComponentType...>();
+		}
+
+		template<typename ...ComponentType>
+		std::vector<std::tuple<EntityId, std::shared_ptr<ComponentType>...>> queryEntity()
+		{
+			return m_networkEngine->queryEntity<ComponentType...>();
 		}
 
 	private:
 		static Server* m_singleton;
 
 		engine::NetworkEngine* m_networkEngine;
-
-		bool m_isRunning;
 
 		Server();
 		~Server();

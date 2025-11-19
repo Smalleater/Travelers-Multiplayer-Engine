@@ -1,5 +1,7 @@
 #include "messageSystem.hpp"
 
+#define TME_MAX_TCP_MESSAGES_TO_RECEIVE_PAR_TICK 32
+
 #include "TME/debugUtils.hpp"
 
 #include "TME/core/tcpSocket.hpp"
@@ -10,18 +12,30 @@
 
 #include "socketComponent.hpp"
 #include "messageComponent.hpp"
+#include "destroyComponentTag.hpp"
 
 namespace tme::engine
 {
 	void SendTcpMessageSystem::update(NetworkEcs* _ecs)
 	{
+		EntityId entityId = 0;
+
+		std::shared_ptr<TcpConnectSocketComponent> tcpSocketComponent = nullptr;
+		std::shared_ptr<SendTcpMessageComponent> sendTcpMessageComponent = nullptr;
+
+		std::vector<uint8_t> serializedMessage;
+
 		for (auto queryResult : _ecs->query<TcpConnectSocketComponent, SendTcpMessageComponent>())
 		{
-			EntityId entityId = std::get<0>(queryResult);
-			std::shared_ptr tcpSocketComponent = std::get<1>(queryResult);
-			std::shared_ptr sendTcpMessageComponent = std::get<2>(queryResult);
+			entityId = std::get<0>(queryResult);
+			if (_ecs->hasComponent<DestroyComponentTag>(entityId))
+			{
+				continue;
+			}
 
-			std::vector<uint8_t> serializedMessage;
+			tcpSocketComponent = std::get<1>(queryResult);
+			sendTcpMessageComponent = std::get<2>(queryResult);
+
 			for (auto message : sendTcpMessageComponent->m_messagesToSend)
 			{
 				serializedMessage.clear();
@@ -70,6 +84,85 @@ namespace tme::engine
 					static_cast<unsigned long long>(entityId), byteSent, static_cast<unsigned long long>(messageIt->size()));
 
 				messageIt = sendTcpMessageComponent->m_serializedToSend.erase(messageIt);
+			}
+		}
+	}
+
+	void ReceiveTcpMessageSystem::update(NetworkEcs* _ecs)
+	{
+		uint8_t messagesReceived = 0;
+
+		EntityId entityId = 0;
+		std::shared_ptr<TcpConnectSocketComponent> tcpSocketComponent = nullptr;
+		std::shared_ptr<ReceiveTcpMessageComponent> receiveTcpMessageComponent = nullptr;
+
+		std::vector<uint8_t> newReceivedBuffer;
+		std::vector<uint8_t> payload;
+
+		size_t consumedBytes = 0;
+
+		for (auto queryResult : _ecs->query<TcpConnectSocketComponent, ReceiveTcpMessageComponent>())
+		{
+			entityId = std::get<0>(queryResult);
+			if (_ecs->hasComponent<DestroyComponentTag>(entityId))
+			{
+				continue;
+			}
+
+			tcpSocketComponent = std::get<1>(queryResult);
+			receiveTcpMessageComponent = std::get<2>(queryResult);
+
+			receiveTcpMessageComponent->m_receivedMessages.clear();
+
+			auto receiveDataResult = tcpSocketComponent->m_tcpSocket->receiveData(newReceivedBuffer);
+			if (receiveDataResult.first != ErrorCode::Success && receiveDataResult.first != ErrorCode::SocketWouldBlock)
+			{
+				if (receiveDataResult.first == ErrorCode::SocketConnectionClosed)
+				{
+					tcpSocketComponent->m_tcpSocket->closeSocket();
+					_ecs->destroyEntity(entityId);
+					TME_INFO_LOG("Engine: Connection closed for entity %llu", static_cast<unsigned long long>(entityId));
+					continue;
+				}
+				else
+				{
+					TME_ERROR_LOG("ReceiveTcpMessageSystem::update: Failed to receive data for entity %llu, ErrorCode: %d, Last socket error: %d",
+						static_cast<unsigned long long>(entityId), static_cast<int>(receiveDataResult.first), static_cast<int>(receiveDataResult.second));
+					tcpSocketComponent->m_tcpSocket->shutdownSocket();
+					tcpSocketComponent->m_tcpSocket->closeSocket();
+					_ecs->destroyEntity(entityId);
+					TME_INFO_LOG("Engine: Connection closed for entity %llu", static_cast<unsigned long long>(entityId));
+					continue;
+				}
+			}
+
+			receiveTcpMessageComponent->m_receivedBuffer.insert(receiveTcpMessageComponent->m_receivedBuffer.end(),
+				newReceivedBuffer.begin(), newReceivedBuffer.end());
+
+			messagesReceived = 0;
+			while (messagesReceived < TME_MAX_TCP_MESSAGES_TO_RECEIVE_PAR_TICK)
+			{
+				if (!MessageSerializer::getPayloadFromNetworkBuffer(receiveTcpMessageComponent->m_receivedBuffer, payload, consumedBytes))
+				{
+					break;
+				}
+
+				receiveTcpMessageComponent->m_receivedBuffer.erase(receiveTcpMessageComponent->m_receivedBuffer.begin(), 
+					receiveTcpMessageComponent->m_receivedBuffer.begin() + static_cast<std::vector<uint8_t>::difference_type>(consumedBytes));
+
+				std::shared_ptr<Message> newMessage = MessageSerializer::deserializePayload(payload);
+				if (!newMessage)
+				{
+					TME_ERROR_LOG("ReceiveTcpMessageSystem::update: Failed to deserialize message for entity %llu",
+						static_cast<unsigned long long>(entityId));
+					continue;
+				}
+
+				receiveTcpMessageComponent->m_receivedMessages[newMessage->getType()].push_back(newMessage);
+				TME_DEBUG_LOG("ReceiveTcpMessageSystem::update: Received message of type '%s' for entity %llu",
+					newMessage->getType().c_str(), static_cast<unsigned long long>(entityId));
+				
+				++messagesReceived;
 			}
 		}
 	}

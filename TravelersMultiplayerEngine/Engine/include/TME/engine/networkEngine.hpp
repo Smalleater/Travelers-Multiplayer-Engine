@@ -45,28 +45,30 @@ namespace tme::engine
 			return m_networkEcs->addComponentToEntity(_entityId, _component);
 		}
 
+		template<typename ComponentType>
+		bool entityHasComponent(EntityId _entityId)
+		{
+			return m_networkEcs->hasComponent<ComponentType>(_entityId);
+		}
+
 		template<typename ...ComponentType>
-		std::vector<EntityId> queryIds()
+		std::vector<EntityId> queryEntityIds()
 		{
 			return m_networkEcs->queryIds<ComponentType...>();
 		}
 
 		template<typename ...ComponentType>
-		std::vector<std::tuple<EntityId, std::shared_ptr<ComponentType>...>> query()
+		std::vector<std::tuple<EntityId, std::shared_ptr<ComponentType>...>> queryEntity()
 		{
 			return m_networkEcs->query<ComponentType...>();
 		}
 
 	private:
-		core::TcpSocket* m_tcpLisentSocket;
-		//core::TcpSocket* m_tcpConnectSocket;
 		core::UdpSocket* m_udpSocket;
 
 		NetworkEcs* m_networkEcs;
 
 		EntityId m_selfEntityId;
-
-		ErrorCode acceptConnection();
 	};
 }
 

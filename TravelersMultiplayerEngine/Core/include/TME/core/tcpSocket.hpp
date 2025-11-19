@@ -8,6 +8,7 @@
 #include <cstdint>
 #include <mutex>
 #include <string>
+#include <vector>
 
 #include "TME/errorCode.hpp"
 #include "networkInclude.hpp"
@@ -27,7 +28,7 @@ namespace tme::core
         TME_API std::pair<ErrorCode, int> listenSocket(int _backlog = SOMAXCONN);
         TME_API std::pair<ErrorCode, int> acceptSocket(TcpSocket** _outClient);
         TME_API std::pair<ErrorCode, int> sendData(const void* _data, size_t _size, int& _byteSent);
-        TME_API std::pair<ErrorCode, int> receiveData(void* _buffer, size_t _size);
+        TME_API std::pair<ErrorCode, int> receiveData(std::vector<uint8_t>& _buffer);
         TME_API std::pair<ErrorCode, int> setBlocking(bool _blocking);
         TME_API std::pair<ErrorCode, uint16_t> getPort();
         TME_API bool isBlocking() const;

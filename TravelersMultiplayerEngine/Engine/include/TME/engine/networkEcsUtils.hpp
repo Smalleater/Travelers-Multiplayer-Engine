@@ -8,7 +8,7 @@
 	{ \
 		tme::ErrorCode errorCode = _ecs->addComponentToEntity(_entityId, _component); \
 		if (errorCode != tme::ErrorCode::Success) { \
-			TME_ERROR_LOG("Failed to add component to entity %llu. ErrorCode: %d", _entityId, static_cast<int>(errorCode)); \
+			TME_ERROR_LOG("Failed to add component to entity %I32u. ErrorCode: %d", _entityId, static_cast<int>(errorCode)); \
 			_onError \
 		} \
 	} \

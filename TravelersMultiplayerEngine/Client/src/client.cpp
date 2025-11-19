@@ -1,6 +1,7 @@
 #include "TME/client/client.hpp"
 
 #include "TME/debugUtils.hpp"
+#include "TME/engine/connectionStatusComponent.hpp"
 
 namespace tme::client
 {
@@ -9,7 +10,6 @@ namespace tme::client
 	Client::Client()
 	{
 		m_networkEngine = new engine::NetworkEngine;
-		m_isConnected = false;
 	}
 
 	Client::~Client()
@@ -30,7 +30,7 @@ namespace tme::client
 	{
 		TME_ASSERT_REF_PTR_OR_COPIABLE(_address);
 
-		if (m_isConnected)
+		if (IsConnected())
 		{
 			TME_DEBUG_LOG("Client: ConnectTo called but client is already connected.");
 			return ErrorCode::ClientAlreadyConnected;
@@ -50,14 +50,12 @@ namespace tme::client
 			return ec;
 		}
 
-		ec = m_networkEngine->startUdpOnPort(0, false);
+		/*ec = m_networkEngine->startUdpOnPort(0, false);
 		if (ec != ErrorCode::Success)
 		{
 			m_networkEngine->stopTcpConnect();
 			return ec;
-		}
-
-		m_isConnected = true;
+		}*/
 
 		TME_INFO_LOG("Client: Successfully connected to server at %s:%d.", _address.c_str(), _port);
 		return ErrorCode::Success;
@@ -65,7 +63,7 @@ namespace tme::client
 
 	ErrorCode Client::Disconnect()
 	{
-		if (!m_isConnected)
+		if (!IsConnected())
 		{
 			TME_DEBUG_LOG("Client: Disconnect called but client is not connected.");
 			return ErrorCode::Success;
@@ -74,18 +72,15 @@ namespace tme::client
 		if (!m_networkEngine)
 		{
 			TME_ERROR_LOG("Client: Network engine is not initialized.");
-			m_isConnected = false;
 			return ErrorCode::NetworkEngineNotInitialized;
 		}
 
 		ErrorCode ecTcp = m_networkEngine->stopTcpConnect();
-		ErrorCode ecUdp = m_networkEngine->stopUdp();
+		//ErrorCode ecUdp = m_networkEngine->stopUdp();
 
-		m_isConnected = false;
-
-		if (ecTcp != ErrorCode::Success || ecUdp != ErrorCode::Success)
+		if (ecTcp != ErrorCode::Success /*|| ecUdp != ErrorCode::Success*/)
 		{
-			TME_ERROR_LOG("Client: Disconnection encountered errors. TCP ErrorCode: %d, UDP ErrorCode: %d", static_cast<int>(ecTcp), static_cast<int>(ecUdp));
+			TME_ERROR_LOG("Client: Disconnection encountered errors. TCP ErrorCode: %d", static_cast<int>(ecTcp));
 			return ErrorCode::DisconnectWithErrors;
 		}
 		else
@@ -97,12 +92,12 @@ namespace tme::client
 
 	bool Client::IsConnected() const
 	{
-		return m_isConnected;
+		return m_networkEngine->entityHasComponent<engine::ConnectedComponentTag>(m_networkEngine->getSelfEntityId());
 	}
 
 	void Client::beginUpdate()
 	{
-		if (!m_isConnected)
+		if (!IsConnected())
 		{
 			TME_ERROR_LOG("Client: Cannot begin update, client is not connected.");
 			return;
@@ -113,7 +108,7 @@ namespace tme::client
 
 	void Client::endUpdate()
 	{
-		if (!m_isConnected)
+		if (!IsConnected())
 		{
 			TME_ERROR_LOG("Client: Cannot end update, client is not connected.");
 			return;
@@ -124,7 +119,7 @@ namespace tme::client
 
 	ErrorCode Client::sendTcpMessage(std::shared_ptr<engine::Message> _message)
 	{
-		if (!m_isConnected)
+		if (!IsConnected())
 		{
 			TME_ERROR_LOG("Client: Cannot send TCP message, client is not connected.");
 			return ErrorCode::ClientNotConnected;

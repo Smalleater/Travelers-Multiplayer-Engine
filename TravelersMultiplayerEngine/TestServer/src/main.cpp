@@ -30,7 +30,7 @@ int main() {
 	{
 		Server::Get()->beginUpdate();
 
-		std::vector<EntityId> queryIds = Server::Get()->queryIds<NetworkRootComponentTag>();
+		std::vector<EntityId> queryIds = Server::Get()->queryEntityIds<NetworkRootComponentTag>();
 		for (size_t i = 0; i < queryIds.size(); i++)
 		{
 			if (queryIds[i] == selfEntityId) continue;
@@ -45,8 +45,8 @@ int main() {
 		std::this_thread::sleep_for(std::chrono::seconds(1));
 	}
 
-	ec = Server::Get()->Stop();
-	if (ec != ErrorCode::Success) return -1;
+	/*ec = Server::Get()->Stop();
+	if (ec != ErrorCode::Success) return -1;*/
 
 	return 0;
 }

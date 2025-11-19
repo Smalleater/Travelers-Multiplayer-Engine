@@ -9,7 +9,7 @@
 
 namespace tme::engine
 {
-	using EntityId = uint64_t;
+	using EntityId = uint32_t;
 	struct Message;
 
 	struct SendTcpMessageComponent : public INetworkComponent
@@ -22,6 +22,7 @@ namespace tme::engine
 	struct ReceiveTcpMessageComponent : public INetworkComponent
 	{
 		std::unordered_map<std::string, std::vector<std::shared_ptr<Message>>> m_receivedMessages;
+		std::vector<uint8_t> m_receivedBuffer;
 	};
 }
 

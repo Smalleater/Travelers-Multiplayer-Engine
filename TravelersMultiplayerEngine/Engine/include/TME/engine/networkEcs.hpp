@@ -16,7 +16,7 @@
 
 namespace tme::engine
 {
-	using EntityId = uint64_t;
+	using EntityId = uint32_t;
 
 	struct INetworkComponent;
 	struct INetworkSystem;

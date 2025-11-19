@@ -37,7 +37,6 @@ namespace tme::engine
             throw std::runtime_error("Unknown message type: " + std::to_string(typeId));
         }
 
-        std::vector<uint8_t> data(_payload.begin() + sizeof(uint32_t), _payload.end());
-        return it->second(data);
+        return it->second(_payload);
     }
 }
