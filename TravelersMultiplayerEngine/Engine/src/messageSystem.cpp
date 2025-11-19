@@ -80,9 +80,6 @@ namespace tme::engine
 					break;
 				}
 
-				TME_DEBUG_LOG("SendTcpMessageSystem::update: Sent data for entity %llu, BytesSent: %d/%llu",
-					static_cast<unsigned long long>(entityId), byteSent, static_cast<unsigned long long>(messageIt->size()));
-
 				messageIt = sendTcpMessageComponent->m_serializedToSend.erase(messageIt);
 			}
 		}
@@ -159,9 +156,6 @@ namespace tme::engine
 				}
 
 				receiveTcpMessageComponent->m_receivedMessages[newMessage->getType()].push_back(newMessage);
-				TME_DEBUG_LOG("ReceiveTcpMessageSystem::update: Received message of type '%s' for entity %llu",
-					newMessage->getType().c_str(), static_cast<unsigned long long>(entityId));
-				
 				++messagesReceived;
 			}
 		}

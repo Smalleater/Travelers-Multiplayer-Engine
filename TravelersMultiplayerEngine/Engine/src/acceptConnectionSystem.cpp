@@ -9,6 +9,7 @@
 #include "TME/engine/networkEcs.hpp"
 #include "TME/engine/networkEcsUtils.hpp"
 #include "TME/engine/networkRootComponentTag.hpp"
+#include "TME/engine/newConnectionComponent.hpp"
 
 #include "socketComponent.hpp"
 #include "messageComponent.hpp"
@@ -20,6 +21,21 @@ namespace tme::engine
 		uint8_t acceptedConnections = 0;
 
 		EntityId querryEntityid = 0;
+		std::shared_ptr<NewConnectionComponentTag> newConnectionComponent = nullptr;
+
+		for (auto queryResult : _ecs->query<NewConnectionComponentTag>())
+		{
+			querryEntityid = std::get<0>(queryResult);
+			newConnectionComponent = std::get<1>(queryResult);
+
+			ErrorCode removeResult = _ecs->removeComponentFromEntity<NewConnectionComponentTag>(querryEntityid);
+			if (removeResult != ErrorCode::Success)
+			{
+				TME_ERROR_LOG("AcceptConnectionSystem::update: Failed to remove NewConnectionComponentTag from entity %I32u. ErrorCode: %d",
+					querryEntityid, static_cast<int>(removeResult));
+			}
+		}
+
 		std::shared_ptr<TcpListenSocketComponent> tcpListenSocketComponent = nullptr;
 
 		core::TcpSocket* clientSocket = nullptr;
@@ -89,6 +105,13 @@ namespace tme::engine
 				sendMessageComponent = std::make_shared<SendTcpMessageComponent>();
 				sendMessageComponent->m_lastMessageByteSent = 0;
 				TME_ENTITY_ADD_COMPONENT(_ecs, newEntityId, sendMessageComponent, {
+					clientSocket->closeSocket();
+					delete clientSocket;
+					_ecs->destroyEntity(newEntityId);
+					continue;
+					});
+
+				TME_ENTITY_ADD_COMPONENT(_ecs, newEntityId, std::make_shared<NewConnectionComponentTag>(), {
 					clientSocket->closeSocket();
 					delete clientSocket;
 					_ecs->destroyEntity(newEntityId);
