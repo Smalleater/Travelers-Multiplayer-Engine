@@ -3,6 +3,8 @@
 
 #include "TME/engine/iNetworkComponent.hpp"
 
+#include "TME/core/tcpSocket.hpp"
+
 namespace tme::engine
 {
 	struct TcpListenSocketComponent : public INetworkComponent

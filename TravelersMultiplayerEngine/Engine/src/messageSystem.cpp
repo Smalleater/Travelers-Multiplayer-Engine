@@ -7,12 +7,13 @@
 #include "TME/core/tcpSocket.hpp"
 
 #include "TME/engine/networkEcs.hpp"
+#include "TME/engine/networkEcsUtils.hpp"
 
 #include "messageSerializer.hpp"
 
 #include "socketComponent.hpp"
 #include "messageComponent.hpp"
-#include "destroyComponentTag.hpp"
+#include "pendingDisconnectComponent.hpp"
 
 namespace tme::engine
 {
@@ -28,7 +29,7 @@ namespace tme::engine
 		for (auto queryResult : _ecs->query<TcpConnectSocketComponent, SendTcpMessageComponent>())
 		{
 			entityId = std::get<0>(queryResult);
-			if (_ecs->hasComponent<DestroyComponentTag>(entityId))
+			if (_ecs->hasComponent<PendingDisconnectComponentTag>(entityId))
 			{
 				continue;
 			}
@@ -62,19 +63,14 @@ namespace tme::engine
 					}
 					else if (sendDataResult.first == ErrorCode::SocketConnectionClosed)
 					{
-						tcpSocketComponent->m_tcpSocket->closeSocket();
-						_ecs->destroyEntity(entityId);
-						TME_INFO_LOG("Engine: Connection closed for entity %llu", static_cast<unsigned long long>(entityId));
+						TME_ENTITY_ADD_COMPONENT(_ecs, entityId, std::make_shared<PendingDisconnectComponentTag>(), {});
 					}
 					else
 					{
 						TME_ERROR_LOG("SendTcpMessageSystem::update: Failed to send data for entity %llu, ErrorCode: %d, Last socket error: %d",
 							static_cast<unsigned long long>(entityId), static_cast<int>(sendDataResult.first), static_cast<int>(sendDataResult.second));
 
-						tcpSocketComponent->m_tcpSocket->shutdownSocket();
-						tcpSocketComponent->m_tcpSocket->closeSocket();
-						_ecs->destroyEntity(entityId);
-						TME_INFO_LOG("Engine: Connection closed for entity %llu", static_cast<unsigned long long>(entityId));
+						TME_ENTITY_ADD_COMPONENT(_ecs, entityId, std::make_shared<PendingDisconnectComponentTag>(), {});
 					}
 
 					break;
@@ -101,7 +97,7 @@ namespace tme::engine
 		for (auto queryResult : _ecs->query<TcpConnectSocketComponent, ReceiveTcpMessageComponent>())
 		{
 			entityId = std::get<0>(queryResult);
-			if (_ecs->hasComponent<DestroyComponentTag>(entityId))
+			if (_ecs->hasComponent<PendingDisconnectComponentTag>(entityId))
 			{
 				continue;
 			}
@@ -116,19 +112,15 @@ namespace tme::engine
 			{
 				if (receiveDataResult.first == ErrorCode::SocketConnectionClosed)
 				{
-					tcpSocketComponent->m_tcpSocket->closeSocket();
-					_ecs->destroyEntity(entityId);
-					TME_INFO_LOG("Engine: Connection closed for entity %llu", static_cast<unsigned long long>(entityId));
+					TME_ENTITY_ADD_COMPONENT(_ecs, entityId, std::make_shared<PendingDisconnectComponentTag>(), {});
 					continue;
 				}
 				else
 				{
 					TME_ERROR_LOG("ReceiveTcpMessageSystem::update: Failed to receive data for entity %llu, ErrorCode: %d, Last socket error: %d",
 						static_cast<unsigned long long>(entityId), static_cast<int>(receiveDataResult.first), static_cast<int>(receiveDataResult.second));
-					tcpSocketComponent->m_tcpSocket->shutdownSocket();
-					tcpSocketComponent->m_tcpSocket->closeSocket();
-					_ecs->destroyEntity(entityId);
-					TME_INFO_LOG("Engine: Connection closed for entity %llu", static_cast<unsigned long long>(entityId));
+					
+					TME_ENTITY_ADD_COMPONENT(_ecs, entityId, std::make_shared<PendingDisconnectComponentTag>(), {});
 					continue;
 				}
 			}

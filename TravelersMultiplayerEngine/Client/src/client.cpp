@@ -99,7 +99,6 @@ namespace tme::client
 	{
 		if (!IsConnected())
 		{
-			TME_ERROR_LOG("Client: Cannot begin update, client is not connected.");
 			return;
 		}
 
@@ -110,7 +109,6 @@ namespace tme::client
 	{
 		if (!IsConnected())
 		{
-			TME_ERROR_LOG("Client: Cannot end update, client is not connected.");
 			return;
 		}
 
@@ -121,7 +119,6 @@ namespace tme::client
 	{
 		if (!IsConnected())
 		{
-			TME_ERROR_LOG("Client: Cannot send TCP message, client is not connected.");
 			return ErrorCode::ClientNotConnected;
 		}
 

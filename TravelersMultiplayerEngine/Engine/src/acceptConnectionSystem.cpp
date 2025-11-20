@@ -8,8 +8,10 @@
 
 #include "TME/engine/networkEcs.hpp"
 #include "TME/engine/networkEcsUtils.hpp"
+
 #include "TME/engine/networkRootComponentTag.hpp"
 #include "TME/engine/newConnectionComponent.hpp"
+#include "TME/engine/connectionStatusComponent.hpp"
 
 #include "socketComponent.hpp"
 #include "messageComponent.hpp"
@@ -118,10 +120,17 @@ namespace tme::engine
 					continue;
 					});
 
+				TME_ENTITY_ADD_COMPONENT(_ecs, newEntityId, std::make_shared<ConnectedComponentTag>(), {
+					clientSocket->closeSocket();
+					delete clientSocket;
+					_ecs->destroyEntity(newEntityId);
+					continue;
+					});
+
 				tcpSocketComponent.reset();
 
 				acceptedConnections++;
-				TME_INFO_LOG("AcceptConnectionSystem::update: Accepted new TCP connection. Entity ID: %I32u", newEntityId);
+				TME_INFO_LOG("NetworkEngine: Accepted new TCP connection. Entity ID: %I32u", newEntityId);
 			}
 		}
 	}

@@ -8,6 +8,7 @@
 #include "TME/engine/networkRootComponentTag.hpp"
 #include "TME/engine/message.hpp"
 #include "TME/engine/newConnectionComponent.hpp"
+#include "TME/engine/connectionStatusComponent.hpp"
 
 using namespace tme;
 using namespace tme::engine;
@@ -31,13 +32,7 @@ int main() {
 	{
 		Server::Get()->beginUpdate();
 
-		std::vector<EntityId> queryIds = Server::Get()->queryEntityIds<NewConnectionComponentTag>();
-		for (size_t i = 0; i < queryIds.size(); i++)
-		{
-			TME_INFO_LOG("New Client connected with entity ID: %I32u", queryIds[i]);
-		}
-
-		queryIds = Server::Get()->queryEntityIds<NetworkRootComponentTag>();
+		std::vector<EntityId> queryIds = Server::Get()->queryEntityIds<NetworkRootComponentTag, ConnectedComponentTag>();
 		for (size_t i = 0; i < queryIds.size(); i++)
 		{
 			if (queryIds[i] == selfEntityId) continue;

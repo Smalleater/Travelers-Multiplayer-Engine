@@ -15,6 +15,7 @@
 #include "TME/engine/connectionStatusComponent.hpp"
 #include "socketComponent.hpp"
 #include "messageComponent.hpp"
+#include "selfComponent.hpp"
 
 namespace tme::engine
 {
@@ -26,6 +27,7 @@ namespace tme::engine
 		NetworkSystemRegistrar::registerNetworkSystems(m_networkEcs);
 
 		m_selfEntityId = m_networkEcs->createEntity();
+		TME_ENTITY_ADD_COMPONENT(m_networkEcs, m_selfEntityId, std::make_shared<SelfComponentTag>(), {});
 	}
 
 	NetworkEngine::~NetworkEngine()
