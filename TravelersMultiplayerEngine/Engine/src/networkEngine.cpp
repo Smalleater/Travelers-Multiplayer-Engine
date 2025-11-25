@@ -451,6 +451,41 @@ namespace tme::engine
 		return ErrorCode::Success;
 	}
 
+	std::pair<ErrorCode, std::vector<std::shared_ptr<Message>>> NetworkEngine::getTcpMessages(EntityId _entityId, const std::string& _messageType)
+	{
+		if (!m_networkEcs->hasComponent<ReceiveTcpMessageComponent>(_entityId))
+		{
+			return { ErrorCode::EntityDoesNotHaveComponent, {} };
+		}
+
+		auto getComponentResult = m_networkEcs->getComponentOfEntity<ReceiveTcpMessageComponent>(_entityId);
+		if (getComponentResult.first != ErrorCode::Success)
+		{
+			return { getComponentResult.first, {} };
+		}
+
+		auto receiveTcpMessageComponent = getComponentResult.second.lock();
+		if (!receiveTcpMessageComponent)
+		{
+			TME_ERROR_LOG("NetworkEngine: ReceiveTcpMessageComponent for entity %I32u is no longer valid.", _entityId);
+			return { ErrorCode::InvalidComponent, {} };
+		}
+
+		auto it = receiveTcpMessageComponent->m_receivedMessages.find(_messageType);
+		if (it == receiveTcpMessageComponent->m_receivedMessages.end())
+		{
+			return { ErrorCode::Success, {} };
+		}
+
+		std::vector<std::shared_ptr<Message>> messages;
+		for (const auto& messagePtr : it->second)
+		{
+			messages.push_back(messagePtr);
+		}
+
+		return { ErrorCode::Success, messages };
+	}
+
 	EntityId NetworkEngine::getSelfEntityId()
 	{
 		return m_selfEntityId;

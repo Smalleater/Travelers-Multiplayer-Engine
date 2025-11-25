@@ -9,6 +9,11 @@
 #include "TME/errorCode.hpp"
 #include "TME/engine/networkEngine.hpp"
 
+namespace tme::engine
+{
+	struct Message;
+}
+
 namespace tme::server
 {
 	using EntityId = uint32_t;
@@ -30,6 +35,7 @@ namespace tme::server
 		TME_API void endUpdate();
 
 		TME_API ErrorCode sendTcpMessage(engine::EntityId _entityId, std::shared_ptr<engine::Message> _message);
+		TME_API std::pair<ErrorCode, std::vector<std::shared_ptr<engine::Message>>> getTcpMessages(EntityId _entityId, const std::string& _messageType);
 
 		TME_API EntityId getSelfEntityId();
 

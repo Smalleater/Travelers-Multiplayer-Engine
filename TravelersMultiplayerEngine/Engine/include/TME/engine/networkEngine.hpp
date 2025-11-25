@@ -36,6 +36,7 @@ namespace tme::engine
 		TME_API void destroyEntity(EntityId _entityId);
 
 		TME_API ErrorCode sendTcpMessage(EntityId _entityId, std::shared_ptr<Message> _message);
+		TME_API std::pair<ErrorCode, std::vector<std::shared_ptr<Message>>> getTcpMessages(EntityId _entityId, const std::string& _messageType);
 
 		TME_API EntityId getSelfEntityId();
 

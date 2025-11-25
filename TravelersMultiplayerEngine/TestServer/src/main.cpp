@@ -37,6 +37,13 @@ int main() {
 		{
 			if (queryIds[i] == selfEntityId) continue;
 
+			auto getMessageResult = Server::Get()->getTcpMessages(queryIds[i], "HelloWorld");
+			for (auto message : getMessageResult.second)
+			{
+				HelloWorld* helloMessage = static_cast<HelloWorld*>(message.get());
+				std::cout << "Received from client " << queryIds[i] << ": " << helloMessage->string << std::endl;
+			}
+
 			std::shared_ptr<HelloWorld> message = std::make_shared<HelloWorld>();
 			message->string = "Hello World from server!";
 			Server::Get()->sendTcpMessage(queryIds[i], message);
