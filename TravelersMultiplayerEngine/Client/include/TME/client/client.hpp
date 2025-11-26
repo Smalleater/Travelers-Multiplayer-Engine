@@ -30,6 +30,7 @@ namespace tme::client
 		TME_API void endUpdate();
 
 		TME_API ErrorCode sendTcpMessage(std::shared_ptr<engine::Message> _message);
+		TME_API std::pair<ErrorCode, std::vector<std::shared_ptr<engine::Message>>> getTcpMessages(const std::string& _messageType);
 
 		template<typename ComponentType>
 		bool entityHasComponent(EntityId _entityId)

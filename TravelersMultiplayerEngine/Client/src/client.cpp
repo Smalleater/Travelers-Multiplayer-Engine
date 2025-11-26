@@ -124,4 +124,15 @@ namespace tme::client
 
 		return m_networkEngine->sendTcpMessage(m_networkEngine->getSelfEntityId(), _message);
 	}
+
+	std::pair<ErrorCode, std::vector<std::shared_ptr<engine::Message>>> Client::getTcpMessages(const std::string& _messageType)
+	{
+		if (!IsConnected())
+		{
+			TME_ERROR_LOG("Client: Cannot send TCP message, client is not connected.");
+			return { ErrorCode::ClientNotConnected, {} };
+		}
+
+		return m_networkEngine->getTcpMessages(m_networkEngine->getSelfEntityId(), _messageType);
+	}
 }

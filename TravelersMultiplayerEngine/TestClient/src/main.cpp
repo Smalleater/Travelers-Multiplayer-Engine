@@ -23,8 +23,15 @@ int main() {
 	{
 		Client::Get()->beginUpdate();
 
+		auto getMessageResult = Client::Get()->getTcpMessages("HelloWorld");
+		for (auto message : getMessageResult.second)
+		{
+			HelloWorld* helloMessage = static_cast<HelloWorld*>(message.get());
+			std::cout << "Received from server: " << helloMessage->string << std::endl;
+		}
+
 		std::shared_ptr<HelloWorld> message = std::make_shared<HelloWorld>();
-		message->string = "Hello World from server!";
+		message->string = "Hello World from client!";
 		Client::Get()->sendTcpMessage(message);
 
 		Client::Get()->endUpdate();
