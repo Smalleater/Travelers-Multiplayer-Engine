@@ -1,5 +1,4 @@
-/tests/Client/build
-/TravelersMultiplayerEngine/build
-/TravelersMultiplayerEngine/ExportDLL
-/TravelersMultiplayerEngine/.vs
-/TravelersMultiplayerEngine/.vscode
+build
+ExportDLL
+.vs
+.vscode
