@@ -1,13 +1,13 @@
-#ifndef TME_CORE_SOCKET_UTILS_HPP
-#define TME_CORE_SOCKET_UTILS_HPP
+#ifndef TRA_CORE_SOCKET_UTILS_HPP
+#define TRA_CORE_SOCKET_UTILS_HPP
 
 #include <utility>
 #include <string>
 
-#include "TME/errorCode.hpp"
-#include "TME/core/networkInclude.hpp"
+#include "TRA/errorCode.hpp"
+#include "TRA/core/networkInclude.hpp"
 
-namespace tme::core
+namespace tra::core
 {
     namespace SocketUtils
     {

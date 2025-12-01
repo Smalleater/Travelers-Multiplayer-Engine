@@ -1,8 +1,8 @@
 #include "socketUtils.hpp"
 
-#include "TME/debugUtils.hpp"
+#include "TRA/debugUtils.hpp"
 
-namespace tme::core
+namespace tra::core
 {
 	int SocketUtils::getLastSocketError()
 	{

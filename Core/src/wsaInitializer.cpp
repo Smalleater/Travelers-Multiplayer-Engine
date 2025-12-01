@@ -1,8 +1,8 @@
-#include "TME/core/wsaInitializer.hpp"
+#include "TRA/core/wsaInitializer.hpp"
 
 #ifdef _WIN32
 
-namespace tme::core
+namespace tra::core
 {
 	WSAInitializer* WSAInitializer::m_singleton = nullptr;
 

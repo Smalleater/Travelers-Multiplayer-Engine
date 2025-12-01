@@ -1,15 +1,15 @@
-#include "TME/core/netUtils.hpp"
+#include "TRA/core/netUtils.hpp"
 
-#include "TME/debugUtils.hpp"
-#include "TME/core/networkInclude.hpp"
+#include "TRA/debugUtils.hpp"
+#include "TRA/core/networkInclude.hpp"
 
-namespace tme::core
+namespace tra::core
 {
 	namespace NetUtils
 	{
 		bool isValidIpV4Address(const std::string& _address)
 		{
-			TME_ASSERT_REF_PTR_OR_COPIABLE(_address);
+			TRA_ASSERT_REF_PTR_OR_COPIABLE(_address);
 
 			sockaddr_in sa;
 			int result = inet_pton(AF_INET, _address.c_str(), &(sa.sin_addr));

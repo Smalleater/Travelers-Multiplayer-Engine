@@ -1,14 +1,14 @@
-#include "TME/core/tcpSocket.hpp"
+#include "TRA/core/tcpSocket.hpp"
 
 #include <limits>
 #include <cstdio>
 
-#include "TME/debugUtils.hpp"
+#include "TRA/debugUtils.hpp"
 #include "socketUtils.hpp"
 
 #undef max
 
-namespace tme::core
+namespace tra::core
 {
 	TcpSocket::TcpSocket()
 	{
@@ -55,7 +55,7 @@ namespace tme::core
 
 	std::pair<ErrorCode, int> TcpSocket::connectTo(const std::string& _address, uint16_t _port)
 	{
-		TME_ASSERT_REF_PTR_OR_COPIABLE(_address);
+		TRA_ASSERT_REF_PTR_OR_COPIABLE(_address);
 
 		std::lock_guard<std::mutex> lock(m_mutex);
 
@@ -184,7 +184,7 @@ namespace tme::core
 
 	std::pair<ErrorCode, int> TcpSocket::acceptSocket(TcpSocket** _outClient)
 	{
-		TME_ASSERT_REF_PTR_OR_COPIABLE(_outClient);
+		TRA_ASSERT_REF_PTR_OR_COPIABLE(_outClient);
 
 		std::lock_guard<std::mutex> lock(m_mutex);
 

@@ -1,14 +1,14 @@
-#ifndef TME_CORE_WSA_INITIALIZER_HPP
-#define TME_CORE_WSA_INITIALIZER_HPP
+#ifndef TRA_CORE_WSA_INITIALIZER_HPP
+#define TRA_CORE_WSA_INITIALIZER_HPP
 
 #ifdef _WIN32
 
-#include "TME/export.hpp"
-#include "TME/errorCode.hpp"
+#include "TRA/export.hpp"
+#include "TRA/errorCode.hpp"
 
 #include <WinSock2.h>
 
-namespace tme::core
+namespace tra::core
 {
 	class WSAInitializer
 	{
@@ -16,10 +16,10 @@ namespace tme::core
 		WSAInitializer(WSAInitializer& other) = delete;
 		void operator=(const WSAInitializer&) = delete;
 
-		TME_API static WSAInitializer* Get();
+		TRA_API static WSAInitializer* Get();
 
-		TME_API ErrorCode Init();
-		TME_API void CleanUp();
+		TRA_API ErrorCode Init();
+		TRA_API void CleanUp();
 
 	private:
 		static WSAInitializer* m_singleton;

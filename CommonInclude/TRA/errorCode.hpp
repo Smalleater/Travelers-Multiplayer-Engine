@@ -1,7 +1,7 @@
-#ifndef TME_API_ERRORCODE_HPP
-#define TME_API_ERRORCODE_HPP
+#ifndef TRA_API_ERRORCODE_HPP
+#define TRA_API_ERRORCODE_HPP
 
-namespace tme
+namespace tra
 {
 	enum class ErrorCode
 	{

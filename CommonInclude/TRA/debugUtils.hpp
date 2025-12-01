@@ -1,5 +1,5 @@
-#ifndef TME_DEBUG_UTILS_HPP
-#define TME_DEBUG_UTILS_HPP
+#ifndef TRA_DEBUG_UTILS_HPP
+#define TRA_DEBUG_UTILS_HPP
 
 #include <cassert>
 #include <type_traits>
@@ -8,13 +8,13 @@
 #include <sstream>
 
 #ifdef NDEBUG
-#define TME_ASSERT_REF_PTR_OR_COPIABLE(obj) ((void)0)
-#define TME_DEBUG_LOG(fmt, ...) ((void)0)
+#define TRA_ASSERT_REF_PTR_OR_COPIABLE(obj) ((void)0)
+#define TRA_DEBUG_LOG(fmt, ...) ((void)0)
 
 #else
-#define TME_ASSERT_REF_PTR_OR_COPIABLE(obj) \
+#define TRA_ASSERT_REF_PTR_OR_COPIABLE(obj) \
 	static_assert(RefPtrOrTriviallyCopiable<decltype(obj)>().m_value && #obj " is not a reference, a pointer, or copyable")
-#define TME_DEBUG_LOG(fmt, ...) \
+#define TRA_DEBUG_LOG(fmt, ...) \
 	{ \
 		char buffer[512]; \
 		snprintf(buffer, sizeof(buffer), fmt, ##__VA_ARGS__); \
@@ -24,7 +24,7 @@
 	}
 #endif
 
-#define TME_INFO_LOG(fmt, ...) \
+#define TRA_INFO_LOG(fmt, ...) \
 	{ \
 		char buffer[512]; \
 		snprintf(buffer, sizeof(buffer), fmt, ##__VA_ARGS__); \
@@ -33,7 +33,7 @@
 		std::cerr << ss.str(); \
 	}
 
-#define TME_ERROR_LOG(fmt, ...) \
+#define TRA_ERROR_LOG(fmt, ...) \
 	{ \
 		char buffer[512]; \
 		snprintf(buffer, sizeof(buffer), fmt, ##__VA_ARGS__); \

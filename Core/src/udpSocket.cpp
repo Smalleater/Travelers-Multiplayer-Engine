@@ -1,13 +1,13 @@
-#include "TME/core/udpSocket.hpp"
+#include "TRA/core/udpSocket.hpp"
 
 #include <cstdio>
 
-#include "TME/debugUtils.hpp"
+#include "TRA/debugUtils.hpp"
 #include "socketUtils.hpp"
 
 #undef max
 
-namespace tme::core
+namespace tra::core
 {
     UdpSocket::UdpSocket()
     {
@@ -23,7 +23,7 @@ namespace tme::core
 
     sockaddr* UdpSocket::createSockAddr(const std::string& _address, uint16_t _port)
     {
-        TME_ASSERT_REF_PTR_OR_COPIABLE(_address);
+        TRA_ASSERT_REF_PTR_OR_COPIABLE(_address);
 
         sockaddr_in* addr = new sockaddr_in;
         addr->sin_family = AF_INET;
