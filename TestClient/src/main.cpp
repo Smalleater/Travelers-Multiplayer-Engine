@@ -1,12 +1,12 @@
 #include <thread>
 #include <chrono>
 
-#include "TME/client/client.hpp"
-#include "TME/engine/message.hpp"
+#include "TRA/client/client.hpp"
+#include "TRA/engine/message.hpp"
 
-using namespace tme;
-using namespace tme::engine;
-using namespace tme::client;
+using namespace tra;
+using namespace tra::engine;
+using namespace tra::client;
 
 DECLARE_MESSAGE_BEGIN(HelloWorld)
 FIELD(std::string, string)

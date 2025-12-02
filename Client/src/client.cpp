@@ -1,9 +1,9 @@
-#include "TME/client/client.hpp"
+#include "TRA/client/client.hpp"
 
-#include "TME/debugUtils.hpp"
-#include "TME/engine/connectionStatusComponent.hpp"
+#include "TRA/debugUtils.hpp"
+#include "TRA/engine/connectionStatusComponent.hpp"
 
-namespace tme::client
+namespace tra::client
 {
 	Client* Client::m_singleton = nullptr;
 
@@ -28,17 +28,17 @@ namespace tme::client
 
 	ErrorCode Client::ConnectTo(const std::string& _address, uint16_t _port)
 	{
-		TME_ASSERT_REF_PTR_OR_COPIABLE(_address);
+		TRA_ASSERT_REF_PTR_OR_COPIABLE(_address);
 
 		if (IsConnected())
 		{
-			TME_DEBUG_LOG("Client: ConnectTo called but client is already connected.");
+			TRA_DEBUG_LOG("Client: ConnectTo called but client is already connected.");
 			return ErrorCode::ClientAlreadyConnected;
 		}
 
 		if (!m_networkEngine)
 		{
-			TME_ERROR_LOG("Client: Network engine is not initialized.");
+			TRA_ERROR_LOG("Client: Network engine is not initialized.");
 			return ErrorCode::NetworkEngineNotInitialized;
 		}
 
@@ -57,7 +57,7 @@ namespace tme::client
 			return ec;
 		}*/
 
-		TME_INFO_LOG("Client: Successfully connected to server at %s:%d.", _address.c_str(), _port);
+		TRA_INFO_LOG("Client: Successfully connected to server at %s:%d.", _address.c_str(), _port);
 		return ErrorCode::Success;
 	}
 
@@ -65,13 +65,13 @@ namespace tme::client
 	{
 		if (!IsConnected())
 		{
-			TME_DEBUG_LOG("Client: Disconnect called but client is not connected.");
+			TRA_DEBUG_LOG("Client: Disconnect called but client is not connected.");
 			return ErrorCode::Success;
 		}
 
 		if (!m_networkEngine)
 		{
-			TME_ERROR_LOG("Client: Network engine is not initialized.");
+			TRA_ERROR_LOG("Client: Network engine is not initialized.");
 			return ErrorCode::NetworkEngineNotInitialized;
 		}
 
@@ -80,12 +80,12 @@ namespace tme::client
 
 		if (ecTcp != ErrorCode::Success /*|| ecUdp != ErrorCode::Success*/)
 		{
-			TME_ERROR_LOG("Client: Disconnection encountered errors. TCP ErrorCode: %d", static_cast<int>(ecTcp));
+			TRA_ERROR_LOG("Client: Disconnection encountered errors. TCP ErrorCode: %d", static_cast<int>(ecTcp));
 			return ErrorCode::DisconnectWithErrors;
 		}
 		else
 		{
-			TME_INFO_LOG("Client: Disconnected successfully.");
+			TRA_INFO_LOG("Client: Disconnected successfully.");
 			return ErrorCode::Success;
 		}
 	}
@@ -129,7 +129,7 @@ namespace tme::client
 	{
 		if (!IsConnected())
 		{
-			TME_ERROR_LOG("Client: Cannot send TCP message, client is not connected.");
+			TRA_ERROR_LOG("Client: Cannot send TCP message, client is not connected.");
 			return { ErrorCode::ClientNotConnected, {} };
 		}
 

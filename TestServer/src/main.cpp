@@ -1,24 +1,22 @@
-#include "TME/server/server.hpp"
+#include "TRA/server/server.hpp"
 
 #include <thread>
 #include <chrono>
 
-#include "TME/debugUtils.hpp"
+#include "TRA/debugUtils.hpp"
 
-#include "TME/engine/networkRootComponentTag.hpp"
-#include "TME/engine/message.hpp"
-#include "TME/engine/newConnectionComponent.hpp"
-#include "TME/engine/connectionStatusComponent.hpp"
+#include "TRA/engine/networkRootComponentTag.hpp"
+#include "TRA/engine/message.hpp"
+#include "TRA/engine/newConnectionComponent.hpp"
+#include "TRA/engine/connectionStatusComponent.hpp"
 
-using namespace tme;
-using namespace tme::engine;
-using namespace tme::server;
+using namespace tra;
+using namespace tra::engine;
+using namespace tra::server;
 
 DECLARE_MESSAGE_BEGIN(HelloWorld)
 FIELD(std::string, string)
 DECLARE_MESSAGE_END()
-
-#define TME
 
 int main() {
 	ErrorCode ec;

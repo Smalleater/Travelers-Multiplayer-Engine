@@ -1,15 +1,15 @@
-#ifndef TME_CLIENT_CLIENT_HPP
-#define TME_CLIENT_CLIENT_HPP
+#ifndef TRA_CLIENT_CLIENT_HPP
+#define TRA_CLIENT_CLIENT_HPP
 
-#include "TME/export.hpp"
+#include "TRA/export.hpp"
 
 #include <string>
 #include <cstdint>
 
-#include "TME/errorCode.hpp"
-#include "TME/engine/networkEngine.hpp"
+#include "TRA/errorCode.hpp"
+#include "TRA/engine/networkEngine.hpp"
 
-namespace tme::client
+namespace tra::client
 {
 	using EntityId = uint32_t;
 
@@ -19,18 +19,18 @@ namespace tme::client
 		Client(Client& other) = delete;
 		void operator=(const Client&) = delete;
 
-		TME_API static Client* Get();
+		TRA_API static Client* Get();
 
-		TME_API ErrorCode ConnectTo(const std::string& _address, uint16_t _port);
-		TME_API ErrorCode Disconnect();
+		TRA_API ErrorCode ConnectTo(const std::string& _address, uint16_t _port);
+		TRA_API ErrorCode Disconnect();
 
-		TME_API bool IsConnected() const;
+		TRA_API bool IsConnected() const;
 
-		TME_API void beginUpdate();
-		TME_API void endUpdate();
+		TRA_API void beginUpdate();
+		TRA_API void endUpdate();
 
-		TME_API ErrorCode sendTcpMessage(std::shared_ptr<engine::Message> _message);
-		TME_API std::pair<ErrorCode, std::vector<std::shared_ptr<engine::Message>>> getTcpMessages(const std::string& _messageType);
+		TRA_API ErrorCode sendTcpMessage(std::shared_ptr<engine::Message> _message);
+		TRA_API std::pair<ErrorCode, std::vector<std::shared_ptr<engine::Message>>> getTcpMessages(const std::string& _messageType);
 
 		template<typename ComponentType>
 		bool entityHasComponent(EntityId _entityId)
