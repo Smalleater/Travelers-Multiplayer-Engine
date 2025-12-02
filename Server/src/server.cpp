@@ -1,10 +1,10 @@
-#include "TME/server/server.hpp"
+#include "TRA/server/server.hpp"
 
-#include "TME/debugUtils.hpp"
-#include "TME/engine/connectionStatusComponent.hpp"
-#include "TME/engine/message.hpp"
+#include "TRA/debugUtils.hpp"
+#include "TRA/engine/connectionStatusComponent.hpp"
+#include "TRA/engine/message.hpp"
 
-namespace tme::server
+namespace tra::server
 {
 	Server* Server::m_singleton = nullptr;
 
@@ -32,13 +32,13 @@ namespace tme::server
 	{
 		if (isRunning())
 		{
-			TME_DEBUG_LOG("Server: Start called but server is already running.");
+			TRA_DEBUG_LOG("Server: Start called but server is already running.");
 			return ErrorCode::ServerAlreadyStarted;
 		}
 
 		if (!m_networkEngine)
 		{
-			TME_ERROR_LOG("Server: Network engine is not initialized.");
+			TRA_ERROR_LOG("Server: Network engine is not initialized.");
 			return ErrorCode::NetworkEngineNotInitialized;
 		}
 
@@ -57,7 +57,7 @@ namespace tme::server
 			return ec;
 		}*/
 
-		TME_INFO_LOG("Server: Started successfully on port %d.", _port);
+		TRA_INFO_LOG("Server: Started successfully on port %d.", _port);
 		return ErrorCode::Success;
 	}
 
@@ -65,13 +65,13 @@ namespace tme::server
 	{
 		if (!isRunning())
 		{
-			TME_DEBUG_LOG("Server: Stop called but server is not running.");
+			TRA_DEBUG_LOG("Server: Stop called but server is not running.");
 			return ErrorCode::Success;
 		}
 
 		if (!m_networkEngine)
 		{
-			TME_ERROR_LOG("Server: Network engine is not initialized.");
+			TRA_ERROR_LOG("Server: Network engine is not initialized.");
 			return ErrorCode::NetworkEngineNotInitialized;
 		}
 
@@ -80,12 +80,12 @@ namespace tme::server
 
 		if (ecTcp != ErrorCode::Success /*|| ecUdp != ErrorCode::Success*/)
 		{
-			TME_ERROR_LOG("Server: Failed to stop server sockets properly. TCP ErrorCode: %d", static_cast<int>(ecTcp));
+			TRA_ERROR_LOG("Server: Failed to stop server sockets properly. TCP ErrorCode: %d", static_cast<int>(ecTcp));
 			return ErrorCode::DisconnectWithErrors;
 		}
 		else
 		{
-			TME_INFO_LOG("Server: Stopped successfully.");
+			TRA_INFO_LOG("Server: Stopped successfully.");
 			return ErrorCode::Success;
 		}
 	}
@@ -99,7 +99,7 @@ namespace tme::server
 	{
 		if (!isRunning())
 		{
-			TME_ERROR_LOG("Server: Cannot begin update, server is not running.");
+			TRA_ERROR_LOG("Server: Cannot begin update, server is not running.");
 			return;
 		}
 
@@ -110,7 +110,7 @@ namespace tme::server
 	{
 		if (!isRunning())
 		{
-			TME_ERROR_LOG("Server: Cannot end update, server is not running.");
+			TRA_ERROR_LOG("Server: Cannot end update, server is not running.");
 			return;
 		}
 
@@ -121,7 +121,7 @@ namespace tme::server
 	{
 		if (!isRunning())
 		{
-			TME_ERROR_LOG("Server: Cannot send TCP message, server is not running.");
+			TRA_ERROR_LOG("Server: Cannot send TCP message, server is not running.");
 			return ErrorCode::ServerNotRunning;
 		}
 
@@ -132,7 +132,7 @@ namespace tme::server
 	{
 		if (!isRunning())
 		{
-			TME_ERROR_LOG("Server: Cannot send TCP message, server is not running.");
+			TRA_ERROR_LOG("Server: Cannot send TCP message, server is not running.");
 			return { ErrorCode::ServerNotRunning, {} };
 		}
 
