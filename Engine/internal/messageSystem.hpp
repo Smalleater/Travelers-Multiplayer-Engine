@@ -1,9 +1,9 @@
-#ifndef TME_ENGINE_MESSAGE_SYSTEM_HPP
-#define TME_ENGINE_MESSAGE_SYSTEM_HPP
+#ifndef TRA_ENGINE_MESSAGE_SYSTEM_HPP
+#define TRA_ENGINE_MESSAGE_SYSTEM_HPP
 
 #include "iNetworkSystem.hpp"
 
-namespace tme::engine
+namespace tra::engine
 {
 	struct SendTcpMessageSystem : public INetworkSystem
 	{

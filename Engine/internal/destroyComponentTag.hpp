@@ -1,9 +1,9 @@
-#ifndef TME_ENGINE_DESTROY_COMPONENT_TAG_HPP
-#define TME_ENGINE_DESTROY_COMPONENT_TAG_HPP
+#ifndef TRA_ENGINE_DESTROY_COMPONENT_TAG_HPP
+#define TRA_ENGINE_DESTROY_COMPONENT_TAG_HPP
 
-#include "TME/engine/iNetworkComponent.hpp"
+#include "TRA/engine/iNetworkComponent.hpp"
 
-namespace tme::engine
+namespace tra::engine
 {
 	struct DestroyComponentTag : public INetworkComponent
 	{

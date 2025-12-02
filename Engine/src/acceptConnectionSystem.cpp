@@ -2,21 +2,21 @@
 
 #define MAX_ACCEPTED_CONNECTIONS_PAR_TICK 32
 
-#include "TME/debugUtils.hpp"
+#include "TRA/debugUtils.hpp"
 
-#include "TME/core/tcpSocket.hpp"
+#include "TRA/core/tcpSocket.hpp"
 
-#include "TME/engine/networkEcs.hpp"
-#include "TME/engine/networkEcsUtils.hpp"
+#include "TRA/engine/networkEcs.hpp"
+#include "TRA/engine/networkEcsUtils.hpp"
 
-#include "TME/engine/networkRootComponentTag.hpp"
-#include "TME/engine/newConnectionComponent.hpp"
-#include "TME/engine/connectionStatusComponent.hpp"
+#include "TRA/engine/networkRootComponentTag.hpp"
+#include "TRA/engine/newConnectionComponent.hpp"
+#include "TRA/engine/connectionStatusComponent.hpp"
 
 #include "socketComponent.hpp"
 #include "messageComponent.hpp"
 
-namespace tme::engine
+namespace tra::engine
 {
 	void AcceptConnectionSystem::update(NetworkEcs* _ecs)
 	{
@@ -33,7 +33,7 @@ namespace tme::engine
 			ErrorCode removeResult = _ecs->removeComponentFromEntity<NewConnectionComponentTag>(querryEntityid);
 			if (removeResult != ErrorCode::Success)
 			{
-				TME_ERROR_LOG("AcceptConnectionSystem::update: Failed to remove NewConnectionComponentTag from entity %I32u. ErrorCode: %d",
+				TRA_ERROR_LOG("AcceptConnectionSystem::update: Failed to remove NewConnectionComponentTag from entity %I32u. ErrorCode: %d",
 					querryEntityid, static_cast<int>(removeResult));
 			}
 		}
@@ -64,7 +64,7 @@ namespace tme::engine
 				}
 				else if (intPairResult.first != ErrorCode::Success)
 				{
-					TME_ERROR_LOG("AcceptConnectionSystem::update: Failed to accept new connection on entity %I32u, ErrorCode: %d, Last socket error: %d",
+					TRA_ERROR_LOG("AcceptConnectionSystem::update: Failed to accept new connection on entity %I32u, ErrorCode: %d, Last socket error: %d",
 						querryEntityid, static_cast<int>(intPairResult.first), static_cast<int>(intPairResult.second));
 					break;
 				}
@@ -72,7 +72,7 @@ namespace tme::engine
 				auto setblockingResult = clientSocket->setBlocking(false);
 				if (setblockingResult.first != ErrorCode::Success)
 				{
-					TME_ERROR_LOG("AcceptConnectionSystem::update: Failed to set non-blocking mode on accepted socket. ErrorCode: %d, Last socket error: %d",
+					TRA_ERROR_LOG("AcceptConnectionSystem::update: Failed to set non-blocking mode on accepted socket. ErrorCode: %d, Last socket error: %d",
 						static_cast<int>(setblockingResult.first), static_cast<int>(setblockingResult.second));
 					clientSocket->closeSocket();
 					delete clientSocket;
@@ -81,7 +81,7 @@ namespace tme::engine
 
 				newEntityId = _ecs->createEntity();
 
-				TME_ENTITY_ADD_COMPONENT(_ecs, newEntityId, std::make_shared<NetworkRootComponentTag>(), {
+				TRA_ENTITY_ADD_COMPONENT(_ecs, newEntityId, std::make_shared<NetworkRootComponentTag>(), {
 					clientSocket->closeSocket();
 					delete clientSocket;
 					_ecs->destroyEntity(newEntityId);
@@ -90,14 +90,14 @@ namespace tme::engine
 
 				tcpSocketComponent = std::make_shared<TcpConnectSocketComponent>();
 				tcpSocketComponent->m_tcpSocket = clientSocket;
-				TME_ENTITY_ADD_COMPONENT(_ecs, newEntityId, tcpSocketComponent, {
+				TRA_ENTITY_ADD_COMPONENT(_ecs, newEntityId, tcpSocketComponent, {
 					clientSocket->closeSocket();
 					delete clientSocket;
 					_ecs->destroyEntity(newEntityId);
 					continue;
 					});
 
-				TME_ENTITY_ADD_COMPONENT(_ecs, newEntityId, std::make_shared<ReceiveTcpMessageComponent>(), {
+				TRA_ENTITY_ADD_COMPONENT(_ecs, newEntityId, std::make_shared<ReceiveTcpMessageComponent>(), {
 					clientSocket->closeSocket();
 					delete clientSocket;
 					_ecs->destroyEntity(newEntityId);
@@ -106,21 +106,21 @@ namespace tme::engine
 
 				sendMessageComponent = std::make_shared<SendTcpMessageComponent>();
 				sendMessageComponent->m_lastMessageByteSent = 0;
-				TME_ENTITY_ADD_COMPONENT(_ecs, newEntityId, sendMessageComponent, {
+				TRA_ENTITY_ADD_COMPONENT(_ecs, newEntityId, sendMessageComponent, {
 					clientSocket->closeSocket();
 					delete clientSocket;
 					_ecs->destroyEntity(newEntityId);
 					continue;
 					});
 
-				TME_ENTITY_ADD_COMPONENT(_ecs, newEntityId, std::make_shared<NewConnectionComponentTag>(), {
+				TRA_ENTITY_ADD_COMPONENT(_ecs, newEntityId, std::make_shared<NewConnectionComponentTag>(), {
 					clientSocket->closeSocket();
 					delete clientSocket;
 					_ecs->destroyEntity(newEntityId);
 					continue;
 					});
 
-				TME_ENTITY_ADD_COMPONENT(_ecs, newEntityId, std::make_shared<ConnectedComponentTag>(), {
+				TRA_ENTITY_ADD_COMPONENT(_ecs, newEntityId, std::make_shared<ConnectedComponentTag>(), {
 					clientSocket->closeSocket();
 					delete clientSocket;
 					_ecs->destroyEntity(newEntityId);
@@ -130,7 +130,7 @@ namespace tme::engine
 				tcpSocketComponent.reset();
 
 				acceptedConnections++;
-				TME_INFO_LOG("NetworkEngine: Accepted new TCP connection. Entity ID: %I32u", newEntityId);
+				TRA_INFO_LOG("NetworkEngine: Accepted new TCP connection. Entity ID: %I32u", newEntityId);
 			}
 		}
 	}

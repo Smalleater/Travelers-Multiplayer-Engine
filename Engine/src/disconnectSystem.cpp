@@ -1,13 +1,13 @@
 #include "disconnectSystem.hpp"
 
-#include "TME/core/tcpSocket.hpp"
+#include "TRA/core/tcpSocket.hpp"
 
-#include "TME/engine/networkEcs.hpp"
+#include "TRA/engine/networkEcs.hpp"
 
-#include "TME/engine/disconnectedComponent.hpp"
+#include "TRA/engine/disconnectedComponent.hpp"
 #include "selfComponent.hpp"
 
-namespace tme::engine
+namespace tra::engine
 {
 	void DisconnectSystem::update(NetworkEcs* _ecs)
 	{
@@ -21,7 +21,7 @@ namespace tme::engine
 			removeResult = _ecs->removeComponentFromEntity<DisconnectedComponentTag>(entityId);
 			if (removeResult != ErrorCode::Success)
 			{
-				TME_ERROR_LOG("DisconnectSystem::update: Failed to remove DisconnectedComponentTag from entity %llu, ErrorCode: %d",
+				TRA_ERROR_LOG("DisconnectSystem::update: Failed to remove DisconnectedComponentTag from entity %llu, ErrorCode: %d",
 					static_cast<unsigned long long>(entityId), static_cast<int>(removeResult));
 			}
 

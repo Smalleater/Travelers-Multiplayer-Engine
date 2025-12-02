@@ -1,8 +1,8 @@
-#include "TME/engine/message.hpp"
+#include "TRA/engine/message.hpp"
 
 #include "messageFactory.hpp"
 
-namespace tme::engine
+namespace tra::engine
 {
     std::map<uint32_t, std::vector<std::pair<std::string, std::pair<size_t, SerializerFunc>>>>& Message::getSerializers()
     {
@@ -32,14 +32,14 @@ namespace tme::engine
 
         void registerMessageType(const uint32_t _id, std::unique_ptr<Message>(*_creator)(const std::vector<uint8_t>&))
         {
-            TME_ASSERT_REF_PTR_OR_COPIABLE(_creator);
+            TRA_ASSERT_REF_PTR_OR_COPIABLE(_creator);
 
             MessageFactory::registerMessage(_id, _creator);
         }
 
         void serializeField(std::vector<uint8_t>& _data, int _value)
         {
-            TME_ASSERT_REF_PTR_OR_COPIABLE(_data);
+            TRA_ASSERT_REF_PTR_OR_COPIABLE(_data);
 
             _data.insert(_data.end(), reinterpret_cast<const uint8_t*>(&_value),
                 reinterpret_cast<const uint8_t*>(&_value) + sizeof(_value));
@@ -47,7 +47,7 @@ namespace tme::engine
 
         void serializeField(std::vector<uint8_t>& _data, float _value)
         {
-            TME_ASSERT_REF_PTR_OR_COPIABLE(_data);
+            TRA_ASSERT_REF_PTR_OR_COPIABLE(_data);
 
             _data.insert(_data.end(), reinterpret_cast<const uint8_t*>(&_value),
                 reinterpret_cast<const uint8_t*>(&_value) + sizeof(_value));
@@ -55,8 +55,8 @@ namespace tme::engine
 
         void serializeField(std::vector<uint8_t>& _data, const std::string& _value)
         {
-            TME_ASSERT_REF_PTR_OR_COPIABLE(_data);
-            TME_ASSERT_REF_PTR_OR_COPIABLE(_value);
+            TRA_ASSERT_REF_PTR_OR_COPIABLE(_data);
+            TRA_ASSERT_REF_PTR_OR_COPIABLE(_value);
 
             uint32_t size = static_cast<uint32_t>(_value.size());
             _data.insert(_data.end(), reinterpret_cast<const uint8_t*>(&size),
@@ -66,7 +66,7 @@ namespace tme::engine
 
         void deserializeField(const std::vector<uint8_t>& _data, size_t& _offset, int& _value)
         {
-            TME_ASSERT_REF_PTR_OR_COPIABLE(_data);
+            TRA_ASSERT_REF_PTR_OR_COPIABLE(_data);
 
             _value = *reinterpret_cast<const int*>(&_data[_offset]);
             _offset += sizeof(int);
@@ -74,7 +74,7 @@ namespace tme::engine
 
         void deserializeField(const std::vector<uint8_t>& _data, size_t& _offset, float& _value)
         {
-            TME_ASSERT_REF_PTR_OR_COPIABLE(_data);
+            TRA_ASSERT_REF_PTR_OR_COPIABLE(_data);
 
             _value = *reinterpret_cast<const float*>(&_data[_offset]);
             _offset += sizeof(float);
@@ -82,8 +82,8 @@ namespace tme::engine
 
         void deserializeField(const std::vector<uint8_t>& _data, size_t& _offset, std::string& _value)
         {
-            TME_ASSERT_REF_PTR_OR_COPIABLE(_data);
-            TME_ASSERT_REF_PTR_OR_COPIABLE(_value);
+            TRA_ASSERT_REF_PTR_OR_COPIABLE(_data);
+            TRA_ASSERT_REF_PTR_OR_COPIABLE(_value);
 
             uint32_t size = *reinterpret_cast<const uint32_t*>(&_data[_offset]);
             _offset += sizeof(uint32_t);

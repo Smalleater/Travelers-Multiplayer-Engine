@@ -1,8 +1,8 @@
-#ifndef TME_ENGINE_MESSAGE_HPP
-#define TME_ENGINE_MESSAGE_HPP
+#ifndef TRA_ENGINE_MESSAGE_HPP
+#define TRA_ENGINE_MESSAGE_HPP
 
-#include "TME/export.hpp"
-#include "TME/debugUtils.hpp"
+#include "TRA/export.hpp"
+#include "TRA/debugUtils.hpp"
 
 #include <string>
 #include <map>
@@ -13,13 +13,13 @@
 #include <functional>
 #include <algorithm>
 
-namespace tme::engine
+namespace tra::engine
 {
 	using FieldValue = std::variant<int, float, std::string>;
 	using SerializerFunc = std::function<void(const void*, std::vector<uint8_t>&)>;
 	using DeserializerFunc = std::function<void(const void*, const std::vector<uint8_t>&, size_t&)>;
 
-	struct TME_API Message
+	struct TRA_API Message
 	{
 	public:
 		virtual ~Message() = default;
@@ -32,14 +32,14 @@ namespace tme::engine
 
 	namespace internal
 	{
-		TME_API uint32_t hashTypeName(const char* _str);
+        TRA_API uint32_t hashTypeName(const char* _str);
 
-		TME_API void registerMessageType(const uint32_t _id,
+        TRA_API void registerMessageType(const uint32_t _id,
 			std::unique_ptr<Message>(*_creator)(const std::vector<uint8_t>&));
 
-		TME_API void serializeField(std::vector<uint8_t>& _data, int _value);
-		TME_API void serializeField(std::vector<uint8_t>& _data, float _value);
-		TME_API void serializeField(std::vector<uint8_t>& _data, const std::string& _value);
+        TRA_API void serializeField(std::vector<uint8_t>& _data, int _value);
+        TRA_API void serializeField(std::vector<uint8_t>& _data, float _value);
+        TRA_API void serializeField(std::vector<uint8_t>& _data, const std::string& _value);
 
 		template<typename T>
 		void registerSerializer(const uint32_t _messageId, const std::string& _fieldName, size_t _fieldOffset)
@@ -51,9 +51,9 @@ namespace tme::engine
 				}));
 		}
 
-		TME_API void deserializeField(const std::vector<uint8_t>& _data, size_t& _offset, int& _value);
-		TME_API void deserializeField(const std::vector<uint8_t>& _data, size_t& _offset, float& _value);
-		TME_API void deserializeField(const std::vector<uint8_t>& _data, size_t& _offset, std::string& _value);
+        TRA_API void deserializeField(const std::vector<uint8_t>& _data, size_t& _offset, int& _value);
+        TRA_API void deserializeField(const std::vector<uint8_t>& _data, size_t& _offset, float& _value);
+        TRA_API void deserializeField(const std::vector<uint8_t>& _data, size_t& _offset, std::string& _value);
 
 		template<typename T>
 		void registerDeserializer(const uint32_t _messageId, const std::string& _fieldName, size_t _fieldOffset)
@@ -69,7 +69,7 @@ namespace tme::engine
 }
 
 #define DECLARE_MESSAGE_BEGIN(MessageType) \
-namespace tme::engine { \
+namespace tra::engine { \
     struct MessageType : public Message \
     { \
     public: \

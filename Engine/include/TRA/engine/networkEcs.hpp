@@ -1,7 +1,7 @@
-#ifndef TME_ENGINE_NETWORK_ECS_HPP
-#define TME_ENGINE_NETWORK_ECS_HPP
+#ifndef TRA_ENGINE_NETWORK_ECS_HPP
+#define TRA_ENGINE_NETWORK_ECS_HPP
 
-#include "TME/export.hpp"
+#include "TRA/export.hpp"
 
 #include <vector>
 #include <cstdint>
@@ -11,10 +11,10 @@
 #include <memory>
 #include <utility>
 
-#include "TME/errorCode.hpp"
-#include "TME/debugUtils.hpp"
+#include "TRA/errorCode.hpp"
+#include "TRA/debugUtils.hpp"
 
-namespace tme::engine
+namespace tra::engine
 {
 	using EntityId = uint32_t;
 

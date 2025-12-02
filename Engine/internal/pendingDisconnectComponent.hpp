@@ -1,9 +1,9 @@
-#ifndef TME_ENGINE_PENDING_DISCONNECT_COMPONENT_HPP
-#define TME_ENGINE_PENDING_DISCONNECT_COMPONENT_HPP
+#ifndef TRA_ENGINE_PENDING_DISCONNECT_COMPONENT_HPP
+#define TRA_ENGINE_PENDING_DISCONNECT_COMPONENT_HPP
 
-#include "TME/engine/iNetworkComponent.hpp"
+#include "TRA/engine/iNetworkComponent.hpp"
 
-namespace tme::engine
+namespace tra::engine
 {
 	struct PendingDisconnectComponentTag : INetworkComponent
 	{

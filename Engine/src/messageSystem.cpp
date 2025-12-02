@@ -1,13 +1,13 @@
 #include "messageSystem.hpp"
 
-#define TME_MAX_TCP_MESSAGES_TO_RECEIVE_PAR_TICK 32
+#define TRA_MAX_TCP_MESSAGES_TO_RECEIVE_PAR_TICK 32
 
-#include "TME/debugUtils.hpp"
+#include "TRA/debugUtils.hpp"
 
-#include "TME/core/tcpSocket.hpp"
+#include "TRA/core/tcpSocket.hpp"
 
-#include "TME/engine/networkEcs.hpp"
-#include "TME/engine/networkEcsUtils.hpp"
+#include "TRA/engine/networkEcs.hpp"
+#include "TRA/engine/networkEcsUtils.hpp"
 
 #include "messageSerializer.hpp"
 
@@ -15,7 +15,7 @@
 #include "messageComponent.hpp"
 #include "pendingDisconnectComponent.hpp"
 
-namespace tme::engine
+namespace tra::engine
 {
 	void SendTcpMessageSystem::update(NetworkEcs* _ecs)
 	{
@@ -58,19 +58,19 @@ namespace tme::engine
 					if (sendDataResult.first == ErrorCode::SocketSendPartial)
 					{
 						sendTcpMessageComponent->m_lastMessageByteSent = byteSent;
-						TME_DEBUG_LOG("SendTcpMessageSystem::update: Partial data sent for entity %llu, BytesSent: %d/%llu",
+						TRA_DEBUG_LOG("SendTcpMessageSystem::update: Partial data sent for entity %llu, BytesSent: %d/%llu",
 							static_cast<unsigned long long>(entityId), byteSent, static_cast<unsigned long long>(messageIt->size()));
 					}
 					else if (sendDataResult.first == ErrorCode::SocketConnectionClosed)
 					{
-						TME_ENTITY_ADD_COMPONENT(_ecs, entityId, std::make_shared<PendingDisconnectComponentTag>(), {});
+						TRA_ENTITY_ADD_COMPONENT(_ecs, entityId, std::make_shared<PendingDisconnectComponentTag>(), {});
 					}
 					else
 					{
-						TME_ERROR_LOG("SendTcpMessageSystem::update: Failed to send data for entity %llu, ErrorCode: %d, Last socket error: %d",
+						TRA_ERROR_LOG("SendTcpMessageSystem::update: Failed to send data for entity %llu, ErrorCode: %d, Last socket error: %d",
 							static_cast<unsigned long long>(entityId), static_cast<int>(sendDataResult.first), static_cast<int>(sendDataResult.second));
 
-						TME_ENTITY_ADD_COMPONENT(_ecs, entityId, std::make_shared<PendingDisconnectComponentTag>(), {});
+						TRA_ENTITY_ADD_COMPONENT(_ecs, entityId, std::make_shared<PendingDisconnectComponentTag>(), {});
 					}
 
 					break;
@@ -112,15 +112,15 @@ namespace tme::engine
 			{
 				if (receiveDataResult.first == ErrorCode::SocketConnectionClosed)
 				{
-					TME_ENTITY_ADD_COMPONENT(_ecs, entityId, std::make_shared<PendingDisconnectComponentTag>(), {});
+					TRA_ENTITY_ADD_COMPONENT(_ecs, entityId, std::make_shared<PendingDisconnectComponentTag>(), {});
 					continue;
 				}
 				else
 				{
-					TME_ERROR_LOG("ReceiveTcpMessageSystem::update: Failed to receive data for entity %llu, ErrorCode: %d, Last socket error: %d",
+					TRA_ERROR_LOG("ReceiveTcpMessageSystem::update: Failed to receive data for entity %llu, ErrorCode: %d, Last socket error: %d",
 						static_cast<unsigned long long>(entityId), static_cast<int>(receiveDataResult.first), static_cast<int>(receiveDataResult.second));
 					
-					TME_ENTITY_ADD_COMPONENT(_ecs, entityId, std::make_shared<PendingDisconnectComponentTag>(), {});
+					TRA_ENTITY_ADD_COMPONENT(_ecs, entityId, std::make_shared<PendingDisconnectComponentTag>(), {});
 					continue;
 				}
 			}
@@ -129,7 +129,7 @@ namespace tme::engine
 				newReceivedBuffer.begin(), newReceivedBuffer.end());
 
 			messagesReceived = 0;
-			while (messagesReceived < TME_MAX_TCP_MESSAGES_TO_RECEIVE_PAR_TICK)
+			while (messagesReceived < TRA_MAX_TCP_MESSAGES_TO_RECEIVE_PAR_TICK)
 			{
 				if (!MessageSerializer::getPayloadFromNetworkBuffer(receiveTcpMessageComponent->m_receivedBuffer, payload, consumedBytes))
 				{
@@ -142,7 +142,7 @@ namespace tme::engine
 				std::shared_ptr<Message> newMessage = MessageSerializer::deserializePayload(payload);
 				if (!newMessage)
 				{
-					TME_ERROR_LOG("ReceiveTcpMessageSystem::update: Failed to deserialize message for entity %llu",
+					TRA_ERROR_LOG("ReceiveTcpMessageSystem::update: Failed to deserialize message for entity %llu",
 						static_cast<unsigned long long>(entityId));
 					continue;
 				}

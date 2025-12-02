@@ -1,11 +1,11 @@
-#include "TME/engine/networkEcs.hpp"
+#include "TRA/engine/networkEcs.hpp"
 
-#include "TME/engine/networkEcsUtils.hpp"
+#include "TRA/engine/networkEcsUtils.hpp"
 
 #include "iNetworkSystem.hpp"
 #include "destroyComponentTag.hpp"
 
-namespace tme::engine
+namespace tra::engine
 {
 	EntityId NetworkEcs::createEntity()
 	{
@@ -27,14 +27,14 @@ namespace tme::engine
 			return;
 		}
 
-		TME_ENTITY_ADD_COMPONENT(this, _entityId, std::make_shared<DestroyComponentTag>(), {});
+		TRA_ENTITY_ADD_COMPONENT(this, _entityId, std::make_shared<DestroyComponentTag>(), {});
 	}
 
 	void NetworkEcs::registerBeginUpdateSystem(std::shared_ptr<INetworkSystem> _system)
 	{
 		if (m_registerBeginUpdateSystem.find(_system) != m_registerBeginUpdateSystem.end())
 		{
-			TME_DEBUG_LOG("System already registered in begin update systems.");
+			TRA_DEBUG_LOG("System already registered in begin update systems.");
 			return;
 		}
 
@@ -48,7 +48,7 @@ namespace tme::engine
 	{
 		if (m_registerEndUpdateSystem.find(_system) != m_registerEndUpdateSystem.end())
 		{
-			TME_DEBUG_LOG("System already registered in end update systems.");
+			TRA_DEBUG_LOG("System already registered in end update systems.");
 			return;
 		}
 

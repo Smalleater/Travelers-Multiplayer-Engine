@@ -3,27 +3,27 @@
 #include <stdexcept>
 #include <cstring>
 
-#include "TME/debugUtils.hpp"
+#include "TRA/debugUtils.hpp"
 
-namespace tme::engine
+namespace tra::engine
 {
 	std::vector<uint8_t> MessageSerializer::serializePayload(const Message& _message)
 	{
-		TME_ASSERT_REF_PTR_OR_COPIABLE(_message);
+		TRA_ASSERT_REF_PTR_OR_COPIABLE(_message);
 
 		return MessageFactory::serialize(_message);
 	}
 
 	std::unique_ptr<Message> MessageSerializer::deserializePayload(const std::vector<uint8_t>& _payload)
 	{
-		TME_ASSERT_REF_PTR_OR_COPIABLE(_payload);
+		TRA_ASSERT_REF_PTR_OR_COPIABLE(_payload);
 
 		return MessageFactory::deserialize(_payload);
 	}
 
 	std::vector<uint8_t> MessageSerializer::serializeForNetwork(const std::vector<uint8_t>& _payload, bool _internal)
 	{
-		TME_ASSERT_REF_PTR_OR_COPIABLE(_payload);
+		TRA_ASSERT_REF_PTR_OR_COPIABLE(_payload);
 
 		MessageHeader header;
 		header.size = static_cast<uint32_t>(_payload.size());
@@ -38,8 +38,8 @@ namespace tme::engine
 	bool MessageSerializer::getPayloadFromNetworkBuffer(const std::vector<uint8_t>& _buffer, 
 		std::vector<uint8_t>& _outPayload, size_t& _outConsumedBytes)
 	{
-		TME_ASSERT_REF_PTR_OR_COPIABLE(_buffer);
-		TME_ASSERT_REF_PTR_OR_COPIABLE(_outPayload);
+		TRA_ASSERT_REF_PTR_OR_COPIABLE(_buffer);
+		TRA_ASSERT_REF_PTR_OR_COPIABLE(_outPayload);
 
 		_outConsumedBytes = 0;
 		_outPayload.clear();

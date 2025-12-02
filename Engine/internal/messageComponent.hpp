@@ -1,13 +1,13 @@
-#ifndef TME_ENGINE_MESSAGE_COMPONENT_HPP
-#define TME_ENGINE_MESSAGE_COMPONENT_HPP
+#ifndef TRA_ENGINE_MESSAGE_COMPONENT_HPP
+#define TRA_ENGINE_MESSAGE_COMPONENT_HPP
 
 #include <vector>
 #include <cstdint>
 #include <unordered_map>
 
-#include "TME/engine/iNetworkComponent.hpp"
+#include "TRA/engine/iNetworkComponent.hpp"
 
-namespace tme::engine
+namespace tra::engine
 {
 	using EntityId = uint32_t;
 	struct Message;

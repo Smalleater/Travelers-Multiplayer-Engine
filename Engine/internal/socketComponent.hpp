@@ -1,11 +1,11 @@
-#ifndef TME_ENGINE_SOCKET_COMPONENT_HPP
-#define TME_ENGINE_SOCKET_COMPONENT_HPP
+#ifndef TRA_ENGINE_SOCKET_COMPONENT_HPP
+#define TRA_ENGINE_SOCKET_COMPONENT_HPP
 
-#include "TME/engine/iNetworkComponent.hpp"
+#include "TRA/engine/iNetworkComponent.hpp"
 
-#include "TME/core/tcpSocket.hpp"
+#include "TRA/core/tcpSocket.hpp"
 
-namespace tme::engine
+namespace tra::engine
 {
 	struct TcpListenSocketComponent : public INetworkComponent
 	{

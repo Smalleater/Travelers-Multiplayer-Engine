@@ -6,7 +6,7 @@
 #include <string>
 #include <cstdint>
 
-namespace tme::core
+namespace tra::core
 {
 	namespace NetUtils
 	{

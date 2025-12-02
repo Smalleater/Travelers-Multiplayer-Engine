@@ -1,12 +1,12 @@
-#ifndef TME_ENGINE_I_SERIALIZABLE_COMPONENT_HPP
-#define TME_ENGINE_I_SERIALIZABLE_COMPONENT_HPP
+#ifndef TRA_ENGINE_I_SERIALIZABLE_COMPONENT_HPP
+#define TRA_ENGINE_I_SERIALIZABLE_COMPONENT_HPP
 
-#include "TME/engine/INetworkComponent.hpp"
+#include "TRA/engine/INetworkComponent.hpp"
 
 #include <vector>
 #include <cstdint>
 
-namespace tme::engine
+namespace tra::engine
 {
 	struct ISerializableComponent : public INetworkComponent
 	{
