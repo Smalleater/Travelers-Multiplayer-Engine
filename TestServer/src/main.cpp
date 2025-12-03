@@ -24,8 +24,6 @@ int main() {
 	ec = Server::Get()->Start(2025);
 	if (ec != ErrorCode::Success) return -1;
 
-	EntityId selfEntityId = Server::Get()->getSelfEntityId();
-
 	while (Server::Get()->isRunning())
 	{
 		Server::Get()->beginUpdate();
@@ -33,8 +31,6 @@ int main() {
 		std::vector<EntityId> queryIds = Server::Get()->queryEntityIds<NetworkRootComponentTag, ConnectedComponentTag>();
 		for (size_t i = 0; i < queryIds.size(); i++)
 		{
-			if (queryIds[i] == selfEntityId) continue;
-
 			auto getMessageResult = Server::Get()->getTcpMessages(queryIds[i], "HelloWorld");
 			for (auto message : getMessageResult.second)
 			{
@@ -52,8 +48,7 @@ int main() {
 		std::this_thread::sleep_for(std::chrono::seconds(1));
 	}
 
-	/*ec = Server::Get()->Stop();
-	if (ec != ErrorCode::Success) return -1;*/
+	Server::Get()->Stop();
 
 	return 0;
 }
