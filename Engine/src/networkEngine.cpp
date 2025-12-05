@@ -430,30 +430,30 @@ namespace tra::engine
 		return ErrorCode::Success;
 	}
 
-	std::pair<ErrorCode, std::vector<std::shared_ptr<Message>>> NetworkEngine::getTcpMessages(EntityId _entityId, const std::string& _messageType)
+	std::vector<std::shared_ptr<Message>> NetworkEngine::getTcpMessages(EntityId _entityId, const std::string& _messageType)
 	{
 		if (!m_networkEcs->hasComponent<ReceiveTcpMessageComponent>(_entityId))
 		{
-			return { ErrorCode::EntityDoesNotHaveComponent, {} };
+			return {};
 		}
 
 		auto getComponentResult = m_networkEcs->getComponentOfEntity<ReceiveTcpMessageComponent>(_entityId);
 		if (getComponentResult.first != ErrorCode::Success)
 		{
-			return { getComponentResult.first, {} };
+			return {};
 		}
 
 		auto receiveTcpMessageComponent = getComponentResult.second.lock();
 		if (!receiveTcpMessageComponent)
 		{
 			TRA_ERROR_LOG("NetworkEngine: ReceiveTcpMessageComponent for entity %I32u is no longer valid.", _entityId);
-			return { ErrorCode::InvalidComponent, {} };
+			return {};
 		}
 
 		auto it = receiveTcpMessageComponent->m_receivedMessages.find(_messageType);
 		if (it == receiveTcpMessageComponent->m_receivedMessages.end())
 		{
-			return { ErrorCode::Success, {} };
+			return {};
 		}
 
 		std::vector<std::shared_ptr<Message>> messages;
@@ -462,7 +462,7 @@ namespace tra::engine
 			messages.push_back(messagePtr);
 		}
 
-		return { ErrorCode::Success, messages };
+		return messages;
 	}
 
 	EntityId NetworkEngine::getSelfEntityId()

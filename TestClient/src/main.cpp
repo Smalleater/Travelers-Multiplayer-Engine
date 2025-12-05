@@ -24,7 +24,7 @@ int main() {
 		Client::Get()->beginUpdate();
 
 		auto getMessageResult = Client::Get()->getTcpMessages("HelloWorld");
-		for (auto message : getMessageResult.second)
+		for (auto message : getMessageResult)
 		{
 			message::HelloWorld* helloMessage = static_cast<message::HelloWorld*>(message.get());
 			std::cout << "Received from server: " << helloMessage->string << std::endl;

@@ -36,7 +36,7 @@ namespace tra::engine
 		TRA_API void destroyEntity(EntityId _entityId);
 
 		TRA_API ErrorCode sendTcpMessage(EntityId _entityId, std::shared_ptr<Message> _message);
-		TRA_API std::pair<ErrorCode, std::vector<std::shared_ptr<Message>>> getTcpMessages(EntityId _entityId, const std::string& _messageType);
+		TRA_API std::vector<std::shared_ptr<Message>> getTcpMessages(EntityId _entityId, const std::string& _messageType);
 
 		TRA_API EntityId getSelfEntityId();
 

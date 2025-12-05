@@ -128,12 +128,11 @@ namespace tra::server
 		return m_networkEngine->sendTcpMessage(_entityId, _message);
 	}
 
-	std::pair<ErrorCode, std::vector<std::shared_ptr<engine::Message>>> Server::getTcpMessages(EntityId _entityId, const std::string& _messageType)
+	std::vector<std::shared_ptr<engine::Message>> Server::getTcpMessages(EntityId _entityId, const std::string& _messageType)
 	{
 		if (!isRunning())
 		{
-			TRA_ERROR_LOG("Server: Cannot send TCP message, server is not running.");
-			return { ErrorCode::ServerNotRunning, {} };
+			return {};
 		}
 
 		return m_networkEngine->getTcpMessages(_entityId, _messageType);

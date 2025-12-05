@@ -30,7 +30,7 @@ namespace tra::client
 		TRA_API void endUpdate();
 
 		TRA_API ErrorCode sendTcpMessage(std::shared_ptr<engine::Message> _message);
-		TRA_API std::pair<ErrorCode, std::vector<std::shared_ptr<engine::Message>>> getTcpMessages(const std::string& _messageType);
+		TRA_API std::vector<std::shared_ptr<engine::Message>> getTcpMessages(const std::string& _messageType);
 
 		template<typename ComponentType>
 		bool entityHasComponent(EntityId _entityId)

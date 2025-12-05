@@ -35,7 +35,7 @@ namespace tra::server
 		TRA_API void endUpdate();
 
 		TRA_API ErrorCode sendTcpMessage(engine::EntityId _entityId, std::shared_ptr<engine::Message> _message);
-		TRA_API std::pair<ErrorCode, std::vector<std::shared_ptr<engine::Message>>> getTcpMessages(EntityId _entityId, const std::string& _messageType);
+		TRA_API std::vector<std::shared_ptr<engine::Message>> getTcpMessages(EntityId _entityId, const std::string& _messageType);
 
 		TRA_API EntityId getSelfEntityId();
 
