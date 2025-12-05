@@ -69,7 +69,7 @@ namespace tra::engine
 }
 
 #define DECLARE_MESSAGE_BEGIN(MessageType) \
-namespace tra::engine { \
+namespace tra::message { \
     struct MessageType : public Message \
     { \
     public: \
