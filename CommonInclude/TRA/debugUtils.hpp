@@ -33,6 +33,15 @@
 		std::cerr << ss.str(); \
 	}
 
+#define TRA_WARNING_LOG(fmt, ...) \
+	{ \
+		char buffer[512]; \
+		snprintf(buffer, sizeof(buffer), fmt, ##__VA_ARGS__); \
+		std::stringstream ss; \
+		ss << "\033[33m[WARNING]\033[0m " << buffer << "\n"; \
+		std::cerr << ss.str(); \
+	}
+
 #define TRA_ERROR_LOG(fmt, ...) \
 	{ \
 		char buffer[512]; \
