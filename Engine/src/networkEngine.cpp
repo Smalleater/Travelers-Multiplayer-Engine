@@ -334,27 +334,6 @@ namespace tra::engine
 			TRA_DEBUG_LOG("NetworkEngine: Stop TCP listen called but ConnectedComponentTag is not present on self entity.");
 		}
 
-		auto getComponentResult = m_networkEcs->getComponentOfEntity<TcpConnectSocketComponent>(m_selfEntityId);
-		if (getComponentResult.first != ErrorCode::Success)
-		{
-			std::shared_ptr<TcpConnectSocketComponent> tcpSocketComponent = getComponentResult.second.lock();
-			if (tcpSocketComponent)
-			{
-				tcpSocketComponent->m_tcpSocket->shutdownSocket();
-				tcpSocketComponent->m_tcpSocket->closeSocket();
-				delete tcpSocketComponent->m_tcpSocket;
-				tcpSocketComponent->m_tcpSocket = nullptr;
-			}
-			else
-			{
-				TRA_ERROR_LOG("NetworkEngine: TcpConnectSocketComponent for self entity is no longer valid.");
-			}
-		}
-		else
-		{
-			TRA_ERROR_LOG("NetworkEngine: Failed to get TcpConnectSocketComponent for self entity. ErrorCode: %d", static_cast<int>(getComponentResult.first));
-		}
-
 		ErrorCode removeResult;
 
 		removeResult = m_networkEcs->removeComponentFromEntity<TcpConnectSocketComponent>(m_selfEntityId);
